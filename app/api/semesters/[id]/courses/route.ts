@@ -1,12 +1,20 @@
-import { NextResponse } from "next/server"
-import { fetchCoursesBySemester } from "@/lib/supabase"
+import { type NextRequest, NextResponse } from "next/server"
+import { supabase } from "@/lib/supabase"
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const courses = await fetchCoursesBySemester(params.id)
-    return NextResponse.json(courses)
-  } catch (error: any) {
-    console.error("Error fetching courses for semester:", error)
-    return NextResponse.json({ error: "Failed to fetch courses" }, { status: 500 })
+    const { data, error } = await supabase
+      .from("courses")
+      .select("*")
+      .eq("semester_id", params.id)
+      .order("created_at", { ascending: true })
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json(data)
+  } catch (error) {
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

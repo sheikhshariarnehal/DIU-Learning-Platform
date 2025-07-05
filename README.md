@@ -1,9 +1,9 @@
-# videolectureplatform2
+# Modern learning platform
 
 *Automatically synced with your [v0.dev](https://v0.dev) deployments*
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/nesttasks-projects/v0-videolectureplatform2)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/7nPLUlfQWY8)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/ewqr-wqes-projects/v0-fork-of-modern-learning-platform)
+[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/he8ziP54MjT)
 
 ## Overview
 
@@ -14,13 +14,13 @@ Any changes you make to your deployed app will be automatically pushed to this r
 
 Your project is live at:
 
-**[https://vercel.com/nesttasks-projects/v0-videolectureplatform2](https://vercel.com/nesttasks-projects/v0-videolectureplatform2)**
+**[https://vercel.com/ewqr-wqes-projects/v0-fork-of-modern-learning-platform](https://vercel.com/ewqr-wqes-projects/v0-fork-of-modern-learning-platform)**
 
 ## Build your app
 
 Continue building your app on:
 
-**[https://v0.dev/chat/projects/7nPLUlfQWY8](https://v0.dev/chat/projects/7nPLUlfQWY8)**
+**[https://v0.dev/chat/projects/he8ziP54MjT](https://v0.dev/chat/projects/he8ziP54MjT)**
 
 ## How It Works
 
