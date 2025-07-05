@@ -273,26 +273,6 @@ export default function HomePage() {
 
       {/* Main Content */}
       <div className="flex h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)]">
-        {/* Sidebar */}
-        <div
-          className={`
-            ${isMobile ? "fixed inset-y-0 left-0 z-40" : "relative"}
-            ${isMobile && !sidebarOpen ? "-translate-x-full" : "translate-x-0"}
-            transition-transform duration-300 ease-in-out
-            ${isMobile ? "w-80 top-14" : "w-80"}
-            bg-slate-900 border-r border-slate-700 flex-shrink-0
-          `}
-        >
-          {/* Mobile overlay */}
-          {isMobile && sidebarOpen && (
-            <div className="fixed inset-0 bg-black/50 z-30" onClick={() => setSidebarOpen(false)} />
-          )}
-
-          <div className="relative z-40 h-full bg-slate-900">
-            <FunctionalSidebar onContentSelect={handleContentSelect} />
-          </div>
-        </div>
-
         {/* Content Area */}
         <div className="flex-1 flex flex-col bg-slate-800 min-w-0">
           {selectedContent ? (
@@ -382,6 +362,26 @@ export default function HomePage() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Sidebar - Right side for desktop, overlay for mobile */}
+        <div
+          className={`
+            ${isMobile ? "fixed inset-y-0 left-0 z-40" : "relative"}
+            ${isMobile && !sidebarOpen ? "-translate-x-full" : "translate-x-0"}
+            transition-transform duration-300 ease-in-out
+            ${isMobile ? "w-80 top-14" : "w-80"}
+            bg-slate-900 ${isMobile ? "border-r" : "border-l"} border-slate-700 flex-shrink-0
+          `}
+        >
+          {/* Mobile overlay */}
+          {isMobile && sidebarOpen && (
+            <div className="fixed inset-0 bg-black/50 z-30" onClick={() => setSidebarOpen(false)} />
+          )}
+
+          <div className="relative z-40 h-full bg-slate-900">
+            <FunctionalSidebar onContentSelect={handleContentSelect} />
+          </div>
         </div>
       </div>
 
