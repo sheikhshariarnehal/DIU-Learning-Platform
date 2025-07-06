@@ -461,7 +461,10 @@ export default function HomePage() {
           )}
 
           <div className="relative z-40 h-full bg-card">
-            <FunctionalSidebar onContentSelect={handleContentSelect} />
+            <FunctionalSidebar
+            onContentSelect={handleContentSelect}
+            selectedContentId={selectedContent?.id}
+          />
           </div>
         </div>
       </div>

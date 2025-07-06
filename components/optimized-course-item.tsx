@@ -15,9 +15,10 @@ type StudyTool = Database["public"]["Tables"]["study_tools"]["Row"]
 interface OptimizedCourseItemProps {
   course: Course
   onContentSelect: (content: any) => void
+  selectedContentId?: string
 }
 
-export const OptimizedCourseItem = memo(({ course, onContentSelect }: OptimizedCourseItemProps) => {
+export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedContentId }: OptimizedCourseItemProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [courseData, setCourseData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -105,6 +106,7 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect }: OptimizedC
               index={index}
               courseTitle={course.title}
               onContentSelect={onContentSelect}
+              selectedContentId={selectedContentId}
             />
           ))}
         </div>
@@ -122,11 +124,13 @@ const TopicItem = memo(
     index,
     courseTitle,
     onContentSelect,
+    selectedContentId,
   }: {
     topic: any
     index: number
     courseTitle: string
     onContentSelect: (content: any) => void
+    selectedContentId?: string
   }) => {
     const [isExpanded, setIsExpanded] = useState(false)
 
@@ -166,62 +170,106 @@ const TopicItem = memo(
         {isExpanded && (
           <div className="px-3 pb-3 sm:px-4 sm:pb-4 space-y-1 animate-fade-in">
             {/* Videos */}
-            {topic.videos?.map((video: Video, videoIndex: number) => (
-              <Button
-                key={video.id}
-                variant="ghost"
-                className="w-full justify-start text-left p-2 sm:p-3 h-auto hover:bg-slate-800/70 rounded-md group touch-manipulation transition-all duration-200"
-                onClick={() =>
-                  onContentSelect({
-                    type: "video",
-                    title: video.title,
-                    url: video.youtube_url,
-                    id: video.id,
-                    topicTitle: topic.title,
-                    courseTitle,
-                  })
-                }
-              >
-                <div className="flex items-center gap-3 w-full">
-                  <Play className="h-4 w-4 text-red-400 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <span className="text-xs sm:text-sm text-slate-300 group-hover:text-white truncate block">
-                      {videoIndex + 1}. {video.title}
-                    </span>
-                    <span className="text-xs text-slate-500 group-hover:text-slate-400">Video</span>
+            {topic.videos?.map((video: Video, videoIndex: number) => {
+              const isSelected = selectedContentId === video.id
+              return (
+                <Button
+                  key={video.id}
+                  variant="ghost"
+                  className={`w-full justify-start text-left p-2 sm:p-3 h-auto rounded-md group touch-manipulation transition-all duration-200 ${
+                    isSelected
+                      ? "bg-primary/20 border border-primary/30 shadow-md"
+                      : "hover:bg-slate-800/70"
+                  }`}
+                  onClick={() =>
+                    onContentSelect({
+                      type: "video",
+                      title: video.title,
+                      url: video.youtube_url,
+                      id: video.id,
+                      topicTitle: topic.title,
+                      courseTitle,
+                    })
+                  }
+                >
+                  <div className="flex items-center gap-3 w-full">
+                    <Play className={`h-4 w-4 flex-shrink-0 ${
+                      isSelected ? "text-red-300" : "text-red-400"
+                    }`} />
+                    <div className="flex-1 min-w-0">
+                      <span className={`text-xs sm:text-sm truncate block ${
+                        isSelected
+                          ? "text-white font-medium"
+                          : "text-slate-300 group-hover:text-white"
+                      }`}>
+                        {videoIndex + 1}. {video.title}
+                      </span>
+                      <span className={`text-xs ${
+                        isSelected
+                          ? "text-slate-300"
+                          : "text-slate-500 group-hover:text-slate-400"
+                      }`}>
+                        Video
+                      </span>
+                    </div>
+                    {isSelected && (
+                      <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
+                    )}
                   </div>
-                </div>
-              </Button>
-            ))}
+                </Button>
+              )
+            })}
 
             {/* Slides */}
-            {topic.slides?.map((slide: Slide, slideIndex: number) => (
-              <Button
-                key={slide.id}
-                variant="ghost"
-                className="w-full justify-start text-left p-2 sm:p-3 h-auto hover:bg-slate-800/70 rounded-md group touch-manipulation transition-all duration-200"
-                onClick={() =>
-                  onContentSelect({
-                    type: "slide",
-                    title: slide.title,
-                    url: slide.google_drive_url,
-                    id: slide.id,
-                    topicTitle: topic.title,
-                    courseTitle,
-                  })
-                }
-              >
-                <div className="flex items-center gap-3 w-full">
-                  <FileText className="h-4 w-4 text-blue-400 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <span className="text-xs sm:text-sm text-slate-300 group-hover:text-white truncate block">
-                      {(topic.videos?.length || 0) + slideIndex + 1}. {slide.title}
-                    </span>
-                    <span className="text-xs text-slate-500 group-hover:text-slate-400">Slide</span>
+            {topic.slides?.map((slide: Slide, slideIndex: number) => {
+              const isSelected = selectedContentId === slide.id
+              return (
+                <Button
+                  key={slide.id}
+                  variant="ghost"
+                  className={`w-full justify-start text-left p-2 sm:p-3 h-auto rounded-md group touch-manipulation transition-all duration-200 ${
+                    isSelected
+                      ? "bg-primary/20 border border-primary/30 shadow-md"
+                      : "hover:bg-slate-800/70"
+                  }`}
+                  onClick={() =>
+                    onContentSelect({
+                      type: "slide",
+                      title: slide.title,
+                      url: slide.google_drive_url,
+                      id: slide.id,
+                      topicTitle: topic.title,
+                      courseTitle,
+                    })
+                  }
+                >
+                  <div className="flex items-center gap-3 w-full">
+                    <FileText className={`h-4 w-4 flex-shrink-0 ${
+                      isSelected ? "text-blue-300" : "text-blue-400"
+                    }`} />
+                    <div className="flex-1 min-w-0">
+                      <span className={`text-xs sm:text-sm truncate block ${
+                        isSelected
+                          ? "text-white font-medium"
+                          : "text-slate-300 group-hover:text-white"
+                      }`}>
+                        {(topic.videos?.length || 0) + slideIndex + 1}. {slide.title}
+                      </span>
+                      <span className={`text-xs ${
+                        isSelected
+                          ? "text-slate-300"
+                          : "text-slate-500 group-hover:text-slate-400"
+                      }`}>
+                        Slide
+                      </span>
+                    </div>
+                    {isSelected && (
+                      <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
+                    )}
                   </div>
-                </div>
-              </Button>
-            ))}
+                </Button>
+              )
+            })}
           </div>
         )}
       </div>

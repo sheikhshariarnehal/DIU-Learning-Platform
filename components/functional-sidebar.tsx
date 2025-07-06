@@ -29,6 +29,7 @@ interface ContentItem {
 
 interface FunctionalSidebarProps {
   onContentSelect: (content: ContentItem) => void
+  selectedContentId?: string
 }
 
 // Cache for storing fetched data
@@ -47,7 +48,7 @@ const getCachedData = async (key: string, fetchFn: () => Promise<any>): Promise<
   return data
 }
 
-export function FunctionalSidebar({ onContentSelect }: FunctionalSidebarProps) {
+export function FunctionalSidebar({ onContentSelect, selectedContentId }: FunctionalSidebarProps) {
   const [semesters, setSemesters] = useState([])
   const [selectedSemester, setSelectedSemester] = useState("")
   const [courses, setCourses] = useState([])
@@ -375,6 +376,7 @@ export function FunctionalSidebar({ onContentSelect }: FunctionalSidebarProps) {
                 onContentClick={handleContentClick}
                 getStudyToolIcon={getStudyToolIcon}
                 getStudyToolLabel={getStudyToolLabel}
+                selectedContentId={selectedContentId}
               />
             ))
           )}
@@ -400,6 +402,7 @@ const CourseItem = React.memo(
     onContentClick,
     getStudyToolIcon,
     getStudyToolLabel,
+    selectedContentId,
   }: {
     course: Course
     courseData?: any
@@ -421,6 +424,7 @@ const CourseItem = React.memo(
     ) => void
     getStudyToolIcon: (type: string) => React.ReactNode
     getStudyToolLabel: (type: string) => string
+    selectedContentId?: string
   }) => {
     return (
       <div className="space-y-1">
@@ -494,28 +498,42 @@ const CourseItem = React.memo(
 
                 {expandedStudyTools.has(course.id) && (
                   <div className="ml-6 space-y-1">
-                    {courseData.studyTools.map((tool: StudyTool) => (
-                      <Button
-                        key={tool.id}
-                        variant="ghost"
-                        className="w-full justify-start text-left p-2 h-auto hover:bg-accent rounded-md"
-                        onClick={() =>
-                          tool.content_url &&
-                          onContentClick("document", tool.title, tool.content_url, tool.id, undefined, course.title)
-                        }
-                        disabled={!tool.content_url}
-                      >
-                        <div className="flex items-center gap-2">
-                          {getStudyToolIcon(tool.type)}
-                          <span className="text-xs text-foreground">{getStudyToolLabel(tool.type)}</span>
-                          {tool.exam_type !== "both" && (
-                            <Badge variant="outline" className="text-xs border-border text-muted-foreground ml-auto">
-                              {tool.exam_type}
-                            </Badge>
-                          )}
-                        </div>
-                      </Button>
-                    ))}
+                    {courseData.studyTools.map((tool: StudyTool) => {
+                      const isSelected = selectedContentId === tool.id
+                      return (
+                        <Button
+                          key={tool.id}
+                          variant="ghost"
+                          className={`w-full justify-start text-left p-2 h-auto rounded-md transition-all duration-200 ${
+                            isSelected
+                              ? "bg-primary/10 border border-primary/20 shadow-sm"
+                              : "hover:bg-accent"
+                          }`}
+                          onClick={() =>
+                            tool.content_url &&
+                            onContentClick("document", tool.title, tool.content_url, tool.id, undefined, course.title)
+                          }
+                          disabled={!tool.content_url}
+                        >
+                          <div className="flex items-center gap-2">
+                            {getStudyToolIcon(tool.type)}
+                            <span className={`text-xs ${
+                              isSelected ? "text-foreground font-medium" : "text-foreground"
+                            }`}>
+                              {getStudyToolLabel(tool.type)}
+                            </span>
+                            {tool.exam_type !== "both" && (
+                              <Badge variant="outline" className="text-xs border-border text-muted-foreground">
+                                {tool.exam_type}
+                              </Badge>
+                            )}
+                            {isSelected && (
+                              <div className="ml-auto w-2 h-2 bg-primary rounded-full"></div>
+                            )}
+                          </div>
+                        </Button>
+                      )
+                    })}
                   </div>
                 )}
               </div>
@@ -571,56 +589,84 @@ const CourseItem = React.memo(
                           {expandedTopicItems.has(topic.id) && (
                             <div className="ml-6 space-y-1">
                               {/* Videos */}
-                              {topicVideos.map((video: Video, videoIndex: number) => (
-                                <Button
-                                  key={video.id}
-                                  variant="ghost"
-                                  className="w-full justify-start text-left p-2 h-auto hover:bg-accent rounded-md group"
-                                  onClick={() =>
-                                    onContentClick(
-                                      "video",
-                                      video.title,
-                                      video.youtube_url,
-                                      video.id,
-                                      topic.title,
-                                      course.title,
-                                    )
-                                  }
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <Play className="h-3 w-3 text-red-400" />
-                                    <span className="text-xs text-muted-foreground group-hover:text-foreground truncate">
-                                      {videoIndex + 1}. {video.title}
-                                    </span>
-                                  </div>
-                                </Button>
-                              ))}
+                              {topicVideos.map((video: Video, videoIndex: number) => {
+                                const isSelected = selectedContentId === video.id
+                                return (
+                                  <Button
+                                    key={video.id}
+                                    variant="ghost"
+                                    className={`w-full justify-start text-left p-2 h-auto rounded-md group transition-all duration-200 ${
+                                      isSelected
+                                        ? "bg-primary/10 border border-primary/20 shadow-sm"
+                                        : "hover:bg-accent"
+                                    }`}
+                                    onClick={() =>
+                                      onContentClick(
+                                        "video",
+                                        video.title,
+                                        video.youtube_url,
+                                        video.id,
+                                        topic.title,
+                                        course.title,
+                                      )
+                                    }
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <Play className={`h-3 w-3 ${isSelected ? "text-red-500" : "text-red-400"}`} />
+                                      <span className={`text-xs truncate ${
+                                        isSelected
+                                          ? "text-foreground font-medium"
+                                          : "text-muted-foreground group-hover:text-foreground"
+                                      }`}>
+                                        {videoIndex + 1}. {video.title}
+                                      </span>
+                                      {isSelected && (
+                                        <div className="ml-auto w-2 h-2 bg-primary rounded-full"></div>
+                                      )}
+                                    </div>
+                                  </Button>
+                                )
+                              })}
 
                               {/* Slides */}
-                              {topicSlides.map((slide: Slide, slideIndex: number) => (
-                                <Button
-                                  key={slide.id}
-                                  variant="ghost"
-                                  className="w-full justify-start text-left p-2 h-auto hover:bg-accent rounded-md group"
-                                  onClick={() =>
-                                    onContentClick(
-                                      "slide",
-                                      slide.title,
-                                      slide.google_drive_url,
-                                      slide.id,
-                                      topic.title,
-                                      course.title,
-                                    )
-                                  }
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <FileText className="h-3 w-3 text-blue-400" />
-                                    <span className="text-xs text-muted-foreground group-hover:text-foreground truncate">
-                                      {topicVideos.length + slideIndex + 1}. {slide.title}
-                                    </span>
-                                  </div>
-                                </Button>
-                              ))}
+                              {topicSlides.map((slide: Slide, slideIndex: number) => {
+                                const isSelected = selectedContentId === slide.id
+                                return (
+                                  <Button
+                                    key={slide.id}
+                                    variant="ghost"
+                                    className={`w-full justify-start text-left p-2 h-auto rounded-md group transition-all duration-200 ${
+                                      isSelected
+                                        ? "bg-primary/10 border border-primary/20 shadow-sm"
+                                        : "hover:bg-accent"
+                                    }`}
+                                    onClick={() =>
+                                      onContentClick(
+                                        "slide",
+                                        slide.title,
+                                        slide.google_drive_url,
+                                        slide.id,
+                                        topic.title,
+                                        course.title,
+                                      )
+                                    }
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <FileText className={`h-3 w-3 ${isSelected ? "text-blue-500" : "text-blue-400"}`} />
+                                      <span className={`text-xs truncate ${
+                                        isSelected
+                                          ? "text-foreground font-medium"
+                                          : "text-muted-foreground group-hover:text-foreground"
+                                      }`}>
+                                        {topicVideos.length + slideIndex + 1}. {slide.title}
+                                      </span>
+                                      {isSelected && (
+                                        <div className="ml-auto w-2 h-2 bg-primary rounded-full"></div>
+                                      )}
+                                    </div>
+                                  </Button>
+                                )
+                              })}
 
                               {topicSlides.length === 0 && topicVideos.length === 0 && (
                                 <div className="text-xs text-muted-foreground py-2 pl-2">No content available</div>
