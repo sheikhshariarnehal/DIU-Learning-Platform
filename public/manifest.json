@@ -1,7 +1,7 @@
 {
-  "name": "DIU CSE Learning Platform",
+  "name": "DIU Learning Platform",
   "short_name": "DIU Learning",
-  "description": "Modern learning platform for DIU CSE students",
+  "description": "Smart learning platform for DIU CSE students",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

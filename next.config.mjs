@@ -16,7 +16,7 @@ const nextConfig = {
         headers: [
           {
             key: 'X-Generator',
-            value: 'DIU CSE Learning Platform',
+            value: 'DIU Learning Platform',
           },
           {
             key: 'X-Creator',
