@@ -6,7 +6,6 @@ import "./globals.css"
 export const metadata: Metadata = {
   title: "DIU CSE Learning Platform",
   description: "Modern learning platform for DIU CSE students",
-  generator: "v0.dev",
   viewport: "width=device-width, initial-scale=1",
 }
 
