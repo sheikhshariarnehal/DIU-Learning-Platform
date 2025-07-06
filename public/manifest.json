@@ -1,0 +1,21 @@
+{
+  "name": "DIU CSE Learning Platform",
+  "short_name": "DIU Learning",
+  "description": "Modern learning platform for DIU CSE students",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#8b5cf6",
+  "icons": [
+    {
+      "src": "/placeholder-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/placeholder-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
