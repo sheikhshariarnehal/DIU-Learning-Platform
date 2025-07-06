@@ -8,6 +8,7 @@ import { ContentViewer } from "@/components/content-viewer"
 import { useToast } from "@/hooks/use-toast"
 import { Toaster } from "@/components/ui/toaster"
 import { useIsMobile } from "@/components/ui/use-mobile"
+import { useTheme } from "next-themes"
 
 interface ContentItem {
   type: "slide" | "video" | "document"
@@ -20,11 +21,11 @@ interface ContentItem {
 
 export default function HomePage() {
   const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null)
-  const [isDarkMode, setIsDarkMode] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { toast } = useToast()
   const isMobile = useIsMobile()
+  const { theme, setTheme } = useTheme()
 
   // Initialize with default content if available
   useEffect(() => {
@@ -178,32 +179,19 @@ export default function HomePage() {
   }
 
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode)
-    document.documentElement.classList.toggle("dark", !isDarkMode)
-
-    // Save theme preference
-    localStorage.setItem("theme", !isDarkMode ? "dark" : "light")
+    const newTheme = theme === "dark" ? "light" : "dark"
+    setTheme(newTheme)
 
     toast({
       title: "Theme Changed",
-      description: `Switched to ${!isDarkMode ? "dark" : "light"} mode`,
+      description: `Switched to ${newTheme} mode`,
     })
   }
 
-  // Load saved theme preference
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme")
-    if (savedTheme) {
-      const isDark = savedTheme === "dark"
-      setIsDarkMode(isDark)
-      document.documentElement.classList.toggle("dark", isDark)
-    }
-  }, [])
-
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="border-b border-slate-700 bg-slate-900/95 backdrop-blur supports-[backdrop-filter]:bg-slate-900/60 sticky top-0 z-50">
+      <header className="border-b border-border bg-gradient-surface backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 shadow-modern-md">
         <div className="flex h-14 sm:h-16 items-center justify-between px-3 sm:px-6">
           {/* Left Section - Logo and Mobile Menu */}
           <div className="flex items-center gap-2 sm:gap-3">
@@ -213,30 +201,30 @@ export default function HomePage() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="text-slate-300 hover:text-white hover:bg-slate-800 mr-1"
+                className="text-muted-foreground hover:text-foreground hover:bg-accent mr-1"
               >
                 {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </Button>
             )}
 
-            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-teal-500 rounded-lg flex items-center justify-center">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-primary rounded-lg flex items-center justify-center shadow-modern-sm">
               <span className="text-white font-bold text-xs sm:text-sm">DIU</span>
             </div>
-            <span className="font-semibold text-sm sm:text-lg text-white">DIU CSE</span>
+            <span className="font-semibold text-sm sm:text-lg text-foreground">DIU CSE</span>
           </div>
 
           {/* Center Section - Navigation (Hidden on mobile) */}
           <nav className="hidden md:flex items-center gap-4 lg:gap-8">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800 text-sm">
+            <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-accent text-sm transition-modern">
               Home
             </Button>
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800 text-sm">
+            <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-accent text-sm transition-modern">
               People
             </Button>
-            <Button className="bg-teal-600 hover:bg-teal-700 text-white border border-teal-500 rounded-md px-3 py-2 text-sm">
+            <Button className="bg-gradient-primary hover:opacity-90 text-white border-0 rounded-lg px-4 py-2 text-sm shadow-modern-sm transition-modern hover-lift">
               Video Lecture
             </Button>
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800 text-sm">
+            <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-accent text-sm transition-modern">
               Result
             </Button>
           </nav>
@@ -247,25 +235,25 @@ export default function HomePage() {
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
-              className="text-slate-300 hover:text-white hover:bg-slate-800 w-8 h-8 sm:w-10 sm:h-10"
-              title={`Switch to ${isDarkMode ? "light" : "dark"} mode`}
+              className="text-muted-foreground hover:text-foreground hover:bg-accent w-8 h-8 sm:w-10 sm:h-10 transition-modern hover-lift rounded-lg"
+              title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
             >
-              {isDarkMode ? <Sun className="h-3 w-3 sm:h-4 sm:w-4" /> : <Moon className="h-3 w-3 sm:h-4 sm:w-4" />}
+              {theme === "dark" ? <Sun className="h-3 w-3 sm:h-4 sm:w-4" /> : <Moon className="h-3 w-3 sm:h-4 sm:w-4" />}
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="text-slate-300 hover:text-white hover:bg-slate-800 relative w-8 h-8 sm:w-10 sm:h-10"
+              className="text-muted-foreground hover:text-foreground hover:bg-accent relative w-8 h-8 sm:w-10 sm:h-10 transition-modern hover-lift rounded-lg"
               title="Notifications"
             >
               <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+              <span className="absolute -top-1 -right-1 h-2 w-2 bg-gradient-accent rounded-full shadow-modern-sm"></span>
             </Button>
-            <Button className="bg-white text-slate-900 hover:bg-slate-100 font-medium px-2 py-1 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium px-2 py-1 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm">
               Log In
             </Button>
-            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-slate-600 rounded-full flex items-center justify-center">
-              <User className="h-3 w-3 sm:h-4 sm:w-4 text-slate-300" />
+            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-muted rounded-full flex items-center justify-center">
+              <User className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
             </div>
           </div>
         </div>
@@ -274,19 +262,21 @@ export default function HomePage() {
       {/* Main Content */}
       <div className="flex h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)]">
         {/* Content Area */}
-        <div className="flex-1 flex flex-col bg-slate-800 min-w-0">
+        <div className="flex-1 flex flex-col bg-gradient-surface min-w-0">
           {selectedContent ? (
             <>
               {/* Content Viewer */}
               <div className="flex-1 p-2 sm:p-4 lg:p-6">
-                <ContentViewer content={selectedContent} isLoading={isLoading} />
+                <div className="modern-card bg-card rounded-xl p-4 sm:p-6 h-full shadow-modern-lg">
+                  <ContentViewer content={selectedContent} isLoading={isLoading} />
+                </div>
               </div>
 
               {/* Bottom Controls */}
-              <div className="bg-slate-900 px-3 sm:px-6 py-3 sm:py-4 border-t border-slate-700">
+              <div className="bg-gradient-secondary px-3 sm:px-6 py-3 sm:py-4 border-t border-border shadow-modern-md">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 min-w-0 flex-1">
-                    <span className="text-slate-300 text-xs sm:text-sm font-medium">
+                    <span className="text-foreground text-xs sm:text-sm font-medium">
                       {selectedContent.type === "slide"
                         ? "Slide Presentation"
                         : selectedContent.type === "video"
@@ -294,7 +284,7 @@ export default function HomePage() {
                           : "Document"}
                     </span>
                     {selectedContent.courseTitle && (
-                      <span className="text-slate-400 text-xs truncate">
+                      <span className="text-muted-foreground text-xs truncate">
                         {selectedContent.courseTitle}
                         {selectedContent.topicTitle && ` • ${selectedContent.topicTitle}`}
                       </span>
@@ -305,7 +295,7 @@ export default function HomePage() {
                       variant="outline"
                       size="sm"
                       onClick={handleDownload}
-                      className="bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white flex-1 sm:flex-none text-xs sm:text-sm"
+                      className="flex-1 sm:flex-none text-xs sm:text-sm bg-gradient-primary text-white border-0 hover:opacity-90 transition-modern hover-lift shadow-modern-sm"
                       disabled={isLoading}
                     >
                       <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -315,7 +305,7 @@ export default function HomePage() {
                       variant="outline"
                       size="sm"
                       onClick={handleFullscreen}
-                      className="bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white flex-1 sm:flex-none text-xs sm:text-sm"
+                      className="flex-1 sm:flex-none text-xs sm:text-sm bg-gradient-accent text-white border-0 hover:opacity-90 transition-modern hover-lift shadow-modern-sm"
                       disabled={isLoading}
                     >
                       <Maximize className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -326,7 +316,7 @@ export default function HomePage() {
                       variant="outline"
                       size="sm"
                       onClick={() => window.open(selectedContent.url, "_blank")}
-                      className="bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white flex-1 sm:flex-none text-xs sm:text-sm"
+                      className="flex-1 sm:flex-none text-xs sm:text-sm bg-gradient-secondary border border-border hover:bg-gradient-primary hover:text-white transition-modern hover-lift shadow-modern-sm"
                       disabled={isLoading}
                     >
                       <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -337,24 +327,29 @@ export default function HomePage() {
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center h-full p-4">
+            <div className="flex items-center justify-center h-full p-4 bg-gradient-surface">
               <div className="text-center max-w-sm sm:max-w-md">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-teal-400 font-bold text-lg sm:text-2xl">DIU</span>
+                <div className="modern-card bg-gradient-primary w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-modern-lg hover-lift">
+                  <span className="text-white font-bold text-xl sm:text-3xl">DIU</span>
                 </div>
-                <h2 className="text-lg sm:text-2xl font-semibold text-teal-400 mb-2">
+                <h2 className="text-xl sm:text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-4">
                   Welcome to DIU CSE Learning Platform
                 </h2>
-                <p className="text-slate-400 mb-4 text-sm sm:text-base">
-                  Select a course from the sidebar to start viewing slides, videos, and study materials
-                </p>
-                <div className="text-xs sm:text-sm text-slate-500">
-                  Choose from available semesters and explore course content
+                <div className="modern-card bg-card/50 backdrop-blur-sm rounded-xl p-6 mb-6 shadow-modern-md">
+                  <p className="text-muted-foreground mb-4 text-sm sm:text-base">
+                    Select a course from the sidebar to start viewing slides, videos, and study materials
+                  </p>
+                  <div className="text-xs sm:text-sm text-muted-foreground/70">
+                    Choose from available semesters and explore course content
+                  </div>
                 </div>
 
                 {/* Mobile CTA Button */}
                 {isMobile && (
-                  <Button onClick={() => setSidebarOpen(true)} className="mt-6 w-full bg-teal-600 hover:bg-teal-700">
+                  <Button
+                    onClick={() => setSidebarOpen(true)}
+                    className="mt-6 w-full bg-gradient-primary hover:opacity-90 text-white border-0 rounded-xl py-3 transition-modern hover-lift shadow-modern-md"
+                  >
                     <Menu className="h-4 w-4 mr-2" />
                     Browse Courses
                   </Button>
@@ -371,15 +366,15 @@ export default function HomePage() {
             ${isMobile && !sidebarOpen ? "-translate-x-full" : "translate-x-0"}
             transition-transform duration-300 ease-in-out
             ${isMobile ? "w-80 top-14" : "w-80"}
-            bg-slate-900 ${isMobile ? "border-r" : "border-l"} border-slate-700 flex-shrink-0
+            bg-sidebar ${isMobile ? "border-r" : "border-l"} border-sidebar-border flex-shrink-0 shadow-modern-lg
           `}
         >
           {/* Mobile overlay */}
           {isMobile && sidebarOpen && (
-            <div className="fixed inset-0 bg-black/50 z-30" onClick={() => setSidebarOpen(false)} />
+            <div className="fixed inset-0 bg-black/50 z-30 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
           )}
 
-          <div className="relative z-40 h-full bg-slate-900">
+          <div className="relative z-40 h-full bg-gradient-secondary">
             <FunctionalSidebar onContentSelect={handleContentSelect} />
           </div>
         </div>
