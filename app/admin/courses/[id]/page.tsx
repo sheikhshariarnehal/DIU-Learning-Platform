@@ -34,24 +34,33 @@ export default async function CoursePage({ params }: CoursePageProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" asChild>
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+      {/* Navigation */}
+      <div className="flex items-center gap-2 sm:gap-4">
+        <Button variant="ghost" size="sm" asChild className="touch-manipulation">
           <Link href="/admin/courses">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Courses
+            <span className="hidden sm:inline">Back to Courses</span>
+            <span className="sm:hidden">Back</span>
           </Link>
         </Button>
       </div>
 
-      <div className="flex items-start justify-between">
+      {/* Course Header */}
+      <div className="space-y-3 sm:space-y-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{course.title}</h1>
-          <div className="flex items-center gap-4 mt-2">
-            <Badge variant="outline">{course.course_code}</Badge>
-            <span className="text-muted-foreground">by {course.teacher_name}</span>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight leading-tight">
+            {course.title}
+          </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-3">
+            <Badge variant="outline" className="w-fit text-sm">
+              {course.course_code}
+            </Badge>
+            <span className="text-muted-foreground text-sm sm:text-base">
+              by {course.teacher_name}
+            </span>
             {course.semesters && (
-              <Badge variant="secondary">
+              <Badge variant="secondary" className="w-fit">
                 {course.semesters.title} {course.semesters.section && `(${course.semesters.section})`}
               </Badge>
             )}
@@ -59,41 +68,46 @@ export default async function CoursePage({ params }: CoursePageProps) {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div>
-              <CardTitle className="text-lg">Topics</CardTitle>
-              <CardDescription>Course topics and their content</CardDescription>
+      {/* Content Grid */}
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+        {/* Topics Card */}
+        <Card className="card-responsive shadow-modern">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 pb-3 sm:pb-2">
+            <div className="space-y-1">
+              <CardTitle className="text-lg sm:text-xl">Topics</CardTitle>
+              <CardDescription className="text-sm">Course topics and their content</CardDescription>
             </div>
             <CreateTopicDialog courseId={id}>
-              <Button size="sm">
+              <Button size="sm" className="btn-responsive touch-manipulation w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
-                Add Topic
+                <span className="sm:hidden">Add Topic</span>
+                <span className="hidden sm:inline">Add Topic</span>
               </Button>
             </CreateTopicDialog>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 sm:p-6">
             <Suspense fallback={<TopicsSkeleton />}>
               <CourseTopics courseId={id} />
             </Suspense>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div>
-              <CardTitle className="text-lg">Study Tools</CardTitle>
-              <CardDescription>Exam materials and resources</CardDescription>
+        {/* Study Tools Card */}
+        <Card className="card-responsive shadow-modern">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 pb-3 sm:pb-2">
+            <div className="space-y-1">
+              <CardTitle className="text-lg sm:text-xl">Study Tools</CardTitle>
+              <CardDescription className="text-sm">Exam materials and resources</CardDescription>
             </div>
             <CreateStudyToolDialog courseId={id}>
-              <Button size="sm">
+              <Button size="sm" className="btn-responsive touch-manipulation w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
-                Add Tool
+                <span className="sm:hidden">Add Tool</span>
+                <span className="hidden sm:inline">Add Tool</span>
               </Button>
             </CreateStudyToolDialog>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 sm:p-6">
             <Suspense fallback={<StudyToolsSkeleton />}>
               <CourseStudyTools courseId={id} />
             </Suspense>
@@ -108,12 +122,12 @@ function TopicsSkeleton() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
-          <div className="space-y-1">
-            <Skeleton className="h-4 w-32" />
+        <div key={i} className="flex items-center justify-between p-3 sm:p-4 border rounded-lg animate-pulse">
+          <div className="space-y-2 flex-1">
+            <Skeleton className="h-4 w-full max-w-xs" />
             <Skeleton className="h-3 w-20" />
           </div>
-          <Skeleton className="h-8 w-16" />
+          <Skeleton className="h-8 w-16 sm:w-20" />
         </div>
       ))}
     </div>
@@ -124,12 +138,12 @@ function StudyToolsSkeleton() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-4 w-4" />
-            <Skeleton className="h-4 w-24" />
+        <div key={i} className="flex items-center justify-between p-3 sm:p-4 border rounded-lg animate-pulse">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1">
+            <Skeleton className="h-4 w-4 flex-shrink-0" />
+            <Skeleton className="h-4 w-full max-w-xs" />
           </div>
-          <Skeleton className="h-6 w-16" />
+          <Skeleton className="h-6 w-16 sm:w-20" />
         </div>
       ))}
     </div>

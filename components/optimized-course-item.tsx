@@ -51,26 +51,34 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect }: OptimizedC
   return (
     <div className="space-y-1">
       {/* Course Header */}
-      <div className="bg-slate-800 rounded-lg p-3 hover:bg-slate-750 transition-colors">
+      <div className="bg-slate-800/90 backdrop-blur-sm rounded-lg p-3 sm:p-4 hover:bg-slate-750 transition-all duration-200 border border-slate-700/50 shadow-lg">
         <Button
           variant="ghost"
-          className="w-full justify-start text-left p-0 h-auto hover:bg-transparent"
+          className="w-full justify-start text-left p-0 h-auto hover:bg-transparent touch-manipulation"
           onClick={handleToggle}
         >
-          <div className="flex items-center gap-2 w-full">
+          <div className="flex items-center gap-3 w-full">
             {isExpanded ? (
-              <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
+              <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-slate-400 transition-transform duration-200" />
             ) : (
-              <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
+              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-slate-400 transition-transform duration-200" />
             )}
             <div className="flex-1 min-w-0">
-              <div className="font-medium text-sm text-white truncate">{course.title}</div>
-              <div className="text-xs text-slate-400">({course.course_code})</div>
-              <div className="text-xs text-slate-500">{course.teacher_name}</div>
+              <div className="font-semibold text-sm sm:text-base text-white truncate mb-1">
+                {course.title}
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                <div className="text-xs sm:text-sm text-slate-400 font-medium">
+                  {course.course_code}
+                </div>
+                <div className="text-xs text-slate-500">
+                  {course.teacher_name}
+                </div>
+              </div>
 
               {courseData && (
-                <div className="flex gap-2 mt-2">
-                  <Badge variant="secondary" className="text-xs bg-slate-700 text-slate-300">
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <Badge variant="secondary" className="text-xs bg-slate-700/80 text-slate-300 border border-slate-600">
                     {courseData.length} Topics
                   </Badge>
                 </div>
@@ -78,8 +86,8 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect }: OptimizedC
 
               {isLoading && (
                 <div className="flex items-center gap-2 mt-2">
-                  <Loader2 className="h-3 w-3 animate-spin text-slate-400" />
-                  <span className="text-xs text-slate-400">Loading...</span>
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-slate-400" />
+                  <span className="text-xs sm:text-sm text-slate-400">Loading content...</span>
                 </div>
               )}
             </div>
@@ -89,7 +97,7 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect }: OptimizedC
 
       {/* Course Content */}
       {isExpanded && courseData && (
-        <div className="ml-4 space-y-1">
+        <div className="ml-2 sm:ml-4 space-y-2 animate-fade-in">
           {courseData.map((topic: any, index: number) => (
             <TopicItem
               key={topic.id}
@@ -123,32 +131,46 @@ const TopicItem = memo(
     const [isExpanded, setIsExpanded] = useState(false)
 
     return (
-      <div>
+      <div className="bg-slate-900/50 rounded-lg border border-slate-700/30">
         <Button
           variant="ghost"
-          className="w-full justify-start text-left p-2 h-auto hover:bg-slate-800 rounded-md"
+          className="w-full justify-start text-left p-3 sm:p-4 h-auto hover:bg-slate-800/50 rounded-lg touch-manipulation"
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          <div className="flex items-center gap-2 w-full">
+          <div className="flex items-center gap-3 w-full">
             {isExpanded ? (
-              <ChevronDown className="h-3 w-3 text-slate-400" />
+              <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-slate-400 transition-transform duration-200" />
             ) : (
-              <ChevronRight className="h-3 w-3 text-slate-400" />
+              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-slate-400 transition-transform duration-200" />
             )}
-            <span className="text-sm flex-1 text-slate-300 truncate">
-              {index + 1}. {topic.title}
-            </span>
+            <div className="flex-1 min-w-0">
+              <span className="text-sm sm:text-base font-medium text-slate-300 truncate block">
+                {index + 1}. {topic.title}
+              </span>
+              <div className="flex items-center gap-2 mt-1">
+                {topic.videos?.length > 0 && (
+                  <Badge variant="secondary" className="text-xs bg-red-900/30 text-red-300 border-red-800/50">
+                    {topic.videos.length} Videos
+                  </Badge>
+                )}
+                {topic.slides?.length > 0 && (
+                  <Badge variant="secondary" className="text-xs bg-blue-900/30 text-blue-300 border-blue-800/50">
+                    {topic.slides.length} Slides
+                  </Badge>
+                )}
+              </div>
+            </div>
           </div>
         </Button>
 
         {isExpanded && (
-          <div className="ml-6 space-y-1">
+          <div className="px-3 pb-3 sm:px-4 sm:pb-4 space-y-1 animate-fade-in">
             {/* Videos */}
             {topic.videos?.map((video: Video, videoIndex: number) => (
               <Button
                 key={video.id}
                 variant="ghost"
-                className="w-full justify-start text-left p-2 h-auto hover:bg-slate-800 rounded-md group"
+                className="w-full justify-start text-left p-2 sm:p-3 h-auto hover:bg-slate-800/70 rounded-md group touch-manipulation transition-all duration-200"
                 onClick={() =>
                   onContentSelect({
                     type: "video",
@@ -160,11 +182,14 @@ const TopicItem = memo(
                   })
                 }
               >
-                <div className="flex items-center gap-2">
-                  <Play className="h-3 w-3 text-red-400" />
-                  <span className="text-xs text-slate-300 group-hover:text-white truncate">
-                    {videoIndex + 1}. {video.title}
-                  </span>
+                <div className="flex items-center gap-3 w-full">
+                  <Play className="h-4 w-4 text-red-400 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs sm:text-sm text-slate-300 group-hover:text-white truncate block">
+                      {videoIndex + 1}. {video.title}
+                    </span>
+                    <span className="text-xs text-slate-500 group-hover:text-slate-400">Video</span>
+                  </div>
                 </div>
               </Button>
             ))}
@@ -174,7 +199,7 @@ const TopicItem = memo(
               <Button
                 key={slide.id}
                 variant="ghost"
-                className="w-full justify-start text-left p-2 h-auto hover:bg-slate-800 rounded-md group"
+                className="w-full justify-start text-left p-2 sm:p-3 h-auto hover:bg-slate-800/70 rounded-md group touch-manipulation transition-all duration-200"
                 onClick={() =>
                   onContentSelect({
                     type: "slide",
@@ -186,11 +211,14 @@ const TopicItem = memo(
                   })
                 }
               >
-                <div className="flex items-center gap-2">
-                  <FileText className="h-3 w-3 text-blue-400" />
-                  <span className="text-xs text-slate-300 group-hover:text-white truncate">
-                    {(topic.videos?.length || 0) + slideIndex + 1}. {slide.title}
-                  </span>
+                <div className="flex items-center gap-3 w-full">
+                  <FileText className="h-4 w-4 text-blue-400 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs sm:text-sm text-slate-300 group-hover:text-white truncate block">
+                      {(topic.videos?.length || 0) + slideIndex + 1}. {slide.title}
+                    </span>
+                    <span className="text-xs text-slate-500 group-hover:text-slate-400">Slide</span>
+                  </div>
                 </div>
               </Button>
             ))}

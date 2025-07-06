@@ -351,11 +351,12 @@ export function FunctionalSidebar({ onContentSelect }: FunctionalSidebarProps) {
 
       {/* Course List */}
       <ScrollArea className="flex-1">
-        <div className="p-4 space-y-3">
+        <div className="p-2 sm:p-4 space-y-2 sm:space-y-3">
           {filteredCourses.length === 0 ? (
-            <div className="text-center py-8">
-              <BookOpen className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">No courses available</p>
+            <div className="text-center py-8 sm:py-12">
+              <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-sm sm:text-base text-muted-foreground">No courses available</p>
+              <p className="text-xs text-muted-foreground/70 mt-2">Check your semester selection</p>
             </div>
           ) : (
             filteredCourses.map((course) => (

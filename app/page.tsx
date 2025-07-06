@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Bell, Sun, User, Download, Maximize, ExternalLink, Moon, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { FunctionalSidebar } from "@/components/functional-sidebar"
 import { ContentViewer } from "@/components/content-viewer"
 import { useToast } from "@/hooks/use-toast"
@@ -296,94 +297,148 @@ export default function HomePage() {
       </header>
 
       {/* Main Content */}
-      <div className="flex h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)]">
+      <div className="flex h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)] overflow-hidden">
         {/* Content Area */}
-        <div className="flex-1 flex flex-col bg-background min-w-0">
+        <div className="flex-1 flex flex-col bg-background min-w-0 relative">
           {selectedContent ? (
             <>
               {/* Content Viewer */}
-              <div className="flex-1 p-2 sm:p-4 lg:p-6">
-                <div className="h-full rounded-xl overflow-hidden shadow-modern-lg border border-modern animate-fade-in">
+              <div className="flex-1 p-1 sm:p-3 md:p-4 lg:p-6 overflow-hidden">
+                <div className="h-full rounded-lg sm:rounded-xl overflow-hidden shadow-lg sm:shadow-modern-lg border border-border animate-fade-in">
                   <ContentViewer content={selectedContent} isLoading={isLoading} />
                 </div>
               </div>
 
-              {/* Bottom Controls */}
-              <div className="glass-dark px-3 sm:px-6 py-3 sm:py-4 border-t border-border">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 min-w-0 flex-1">
-                    <span className="badge-primary font-medium">
+              {/* Bottom Controls - Enhanced for mobile */}
+              <div className="bg-card/95 backdrop-blur-sm px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 border-t border-border/50 shadow-lg">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
+                  {/* Content Info */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0 flex-1">
+                    <Badge
+                      variant="secondary"
+                      className={`text-xs font-medium w-fit ${
+                        selectedContent.type === "video"
+                          ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                          : selectedContent.type === "slide"
+                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                            : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                      }`}
+                    >
                       {selectedContent.type === "slide"
                         ? "Slide Presentation"
                         : selectedContent.type === "video"
                           ? "Video Content"
                           : "Document"}
-                    </span>
+                    </Badge>
                     {selectedContent.courseTitle && (
-                      <span className="text-muted-foreground text-xs truncate">
+                      <span className="text-muted-foreground text-xs sm:text-sm truncate">
                         {selectedContent.courseTitle}
                         {selectedContent.topicTitle && ` • ${selectedContent.topicTitle}`}
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handleDownload}
-                      className="btn-secondary-modern flex-1 sm:flex-none text-xs sm:text-sm bg-transparent"
+                      className="flex-1 sm:flex-none text-xs sm:text-sm h-8 sm:h-9 touch-manipulation"
                       disabled={isLoading}
                     >
                       <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                      {selectedContent.type === "video" ? "Watch" : "Download"}
+                      <span className="hidden xs:inline">
+                        {selectedContent.type === "video" ? "Watch" : "Download"}
+                      </span>
+                      <span className="xs:hidden">
+                        {selectedContent.type === "video" ? "▶" : "↓"}
+                      </span>
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleFullscreen}
-                      className="btn-secondary-modern flex-1 sm:flex-none text-xs sm:text-sm bg-transparent"
-                      disabled={isLoading}
-                    >
-                      <Maximize className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                      <span className="hidden sm:inline">Fullscreen</span>
-                      <span className="sm:hidden">Full</span>
-                    </Button>
+                    {!isMobile && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleFullscreen}
+                        className="flex-1 sm:flex-none text-xs sm:text-sm h-8 sm:h-9 touch-manipulation"
+                        disabled={isLoading}
+                      >
+                        <Maximize className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                        <span className="hidden sm:inline">Fullscreen</span>
+                        <span className="sm:hidden">Full</span>
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => window.open(selectedContent.url, "_blank")}
-                      className="btn-secondary-modern flex-1 sm:flex-none text-xs sm:text-sm"
+                      className="flex-1 sm:flex-none text-xs sm:text-sm h-8 sm:h-9 touch-manipulation"
                       disabled={isLoading}
                     >
                       <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                      Open
+                      <span className="hidden xs:inline">Open</span>
+                      <span className="xs:hidden">↗</span>
                     </Button>
                   </div>
                 </div>
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center h-full p-4">
-              <div className="text-center max-w-sm sm:max-w-md animate-slide-up">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-primary-lg">
-                  <span className="text-primary-foreground font-bold text-lg sm:text-2xl">DIU</span>
+            <div className="flex items-center justify-center h-full p-4 sm:p-6 lg:p-8">
+              <div className="text-center max-w-sm sm:max-w-md lg:max-w-lg animate-slide-up">
+                {/* Logo */}
+                <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 gradient-primary rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-primary-lg transform hover:scale-105 transition-transform duration-300">
+                  <span className="text-primary-foreground font-bold text-xl sm:text-2xl lg:text-3xl">DIU</span>
                 </div>
-                <h2 className="text-lg sm:text-2xl font-semibold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent mb-2">
+
+                {/* Title */}
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-primary via-primary/90 to-primary/80 bg-clip-text text-transparent mb-4 leading-tight">
                   Welcome to DIU CSE Learning Platform
                 </h2>
-                <p className="text-muted-foreground mb-4 text-sm sm:text-base">
-                  Select a course from the sidebar to start viewing slides, videos, and study materials
+
+                {/* Description */}
+                <p className="text-muted-foreground mb-6 text-sm sm:text-base lg:text-lg leading-relaxed">
+                  Access your course materials, watch video lectures, and study with interactive content
                 </p>
-                <div className="text-xs sm:text-sm text-muted-foreground">
-                  Choose from available semesters and explore course content
+
+                {/* Features */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-xs sm:text-sm">
+                  <div className="flex flex-col items-center p-3 bg-card/50 rounded-lg border border-border/50">
+                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-2">
+                      <span className="text-blue-600 dark:text-blue-400 text-sm">📊</span>
+                    </div>
+                    <span className="text-muted-foreground">Slides</span>
+                  </div>
+                  <div className="flex flex-col items-center p-3 bg-card/50 rounded-lg border border-border/50">
+                    <div className="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-2">
+                      <span className="text-red-600 dark:text-red-400 text-sm">🎥</span>
+                    </div>
+                    <span className="text-muted-foreground">Videos</span>
+                  </div>
+                  <div className="flex flex-col items-center p-3 bg-card/50 rounded-lg border border-border/50">
+                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-2">
+                      <span className="text-green-600 dark:text-green-400 text-sm">📚</span>
+                    </div>
+                    <span className="text-muted-foreground">Documents</span>
+                  </div>
                 </div>
 
                 {/* Mobile CTA Button */}
                 {isMobile && (
-                  <Button onClick={() => setSidebarOpen(true)} className="mt-6 w-full btn-primary-modern">
-                    <Menu className="h-4 w-4 mr-2" />
+                  <Button
+                    onClick={() => setSidebarOpen(true)}
+                    className="w-full h-12 text-base font-medium bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 touch-manipulation"
+                  >
+                    <Menu className="h-5 w-5 mr-3" />
                     Browse Courses
                   </Button>
+                )}
+
+                {/* Desktop hint */}
+                {!isMobile && (
+                  <div className="text-xs text-muted-foreground/70 mt-4">
+                    Use the sidebar to navigate through semesters and courses
+                  </div>
                 )}
               </div>
             </div>
@@ -396,8 +451,8 @@ export default function HomePage() {
             ${isMobile ? "fixed inset-y-0 left-0 z-40" : "relative"}
             ${isMobile && !sidebarOpen ? "-translate-x-full" : "translate-x-0"}
             transition-transform duration-300 ease-in-out
-            ${isMobile ? "w-80 top-14" : "w-80"}
-            bg-card ${isMobile ? "border-r" : "border-l"} border-border flex-shrink-0
+            ${isMobile ? "w-[85vw] max-w-sm top-14" : "w-80 lg:w-96"}
+            bg-card/95 backdrop-blur-sm ${isMobile ? "border-r shadow-2xl" : "border-l"} border-border flex-shrink-0
           `}
         >
           {/* Mobile overlay */}

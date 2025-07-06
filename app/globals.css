@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import responsive design system */
+@import '../styles/responsive.css';
+
 @layer base {
   :root {
     /* Light Mode - Enhanced Modern Palette */
@@ -361,28 +364,299 @@
   }
 }
 
-/* Enhanced Responsive Design for Light Mode */
-@media (max-width: 640px) {
-  .card-light-modern {
-    border-radius: var(--radius);
-    box-shadow: 0 1px 2px 0 hsl(240 5.9% 10% / 0.05);
+/* Enhanced Responsive Design */
+
+/* Extra Small Devices (phones, 320px and up) */
+@media (max-width: 479px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 
-  .btn-light-primary,
-  .btn-light-secondary {
-    padding: 8px 16px;
-    font-size: 14px;
+  .text-responsive {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .btn-responsive {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    min-height: 2.5rem;
+  }
+
+  .card-responsive {
+    border-radius: 0.5rem;
+    padding: 1rem;
   }
 }
 
+/* Small Devices (landscape phones, 480px and up) */
+@media (min-width: 480px) and (max-width: 767px) {
+  .btn-responsive {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    min-height: 2.75rem;
+  }
+
+  .card-responsive {
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+  }
+}
+
+/* Medium Devices (tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .btn-responsive {
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+    min-height: 3rem;
+  }
+
+  .card-responsive {
+    border-radius: 1rem;
+    padding: 1.5rem;
+  }
+}
+
+/* Large Devices (desktops, 1024px and up) */
 @media (min-width: 1024px) {
-  .card-light-modern {
-    border-radius: calc(var(--radius) + 4px);
+  .btn-responsive {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+    min-height: 3.25rem;
+  }
+
+  .card-responsive {
+    border-radius: 1.25rem;
+    padding: 2rem;
   }
 
   .shadow-large-light {
     box-shadow: 0 20px 25px -5px hsl(240 5.9% 10% / 0.1), 0 8px 10px -6px hsl(240 5.9% 10% / 0.1);
   }
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .btn-touch {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    min-height: 3rem;
+    touch-action: manipulation;
+  }
+
+  .card-touch {
+    padding: 1.5rem;
+    border-radius: 1rem;
+  }
+}
+
+/* Professional animations and transitions */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Modern glass effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive grid system */
+.grid-responsive {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* Professional shadows */
+.shadow-modern {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-modern-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-modern-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Touch-friendly button styles */
+.btn-touch-friendly {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.75rem 1rem;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-touch-friendly:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease-in-out;
+}
+
+/* Enhanced focus styles for accessibility */
+.focus-visible:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+/* Smooth scrolling for better UX */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Improved text selection */
+::selection {
+  background-color: hsl(var(--primary) / 0.2);
+  color: hsl(var(--primary-foreground));
+}
+
+/* Better mobile viewport handling */
+@supports (height: 100dvh) {
+  .min-h-screen {
+    min-height: 100dvh;
+  }
+}
+
+/* Prevent zoom on input focus on iOS */
+@media screen and (max-width: 767px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Enhanced loading states */
+.loading-shimmer {
+  background: linear-gradient(90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--muted-foreground) / 0.1) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Improved hover states for touch devices */
+@media (hover: hover) and (pointer: fine) {
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -8px hsl(var(--foreground) / 0.2);
+    transition: all 0.2s ease-in-out;
+  }
+}
+
+/* Better spacing for mobile */
+@media (max-width: 640px) {
+  .mobile-spacing {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .mobile-spacing-y {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+}
+
+/* Professional card hover effects */
+.card-interactive {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.card-interactive:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px -8px hsl(var(--foreground) / 0.15);
+}
+
+.card-interactive:active {
+  transform: translateY(0);
 }
 
 /* Light Mode Specific Animations */
