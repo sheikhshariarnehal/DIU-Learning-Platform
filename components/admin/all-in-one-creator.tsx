@@ -339,8 +339,11 @@ export function AllInOneCreator({ editId, mode = "create", onSuccess }: AllInOne
     setIsCreating(true)
 
     try {
-      const response = await fetch("/api/admin/all-in-one", {
-        method: "POST",
+      const url = mode === "edit" ? `/api/admin/all-in-one/${editId}` : "/api/admin/all-in-one"
+      const method = mode === "edit" ? "PUT" : "POST"
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -350,43 +353,64 @@ export function AllInOneCreator({ editId, mode = "create", onSuccess }: AllInOne
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || "Failed to create content")
+        throw new Error(result.error || `Failed to ${mode} content`)
       }
 
-      // Success! Show detailed success message
-      const summary = result.data.summary
-      alert(
-        `🎉 Successfully created everything!\n\n` +
-        `📚 Semester: ${data.semester.title}\n` +
-        `📖 Courses: ${summary.courses_created}\n` +
-        `📝 Topics: ${summary.topics_created}\n` +
-        `📊 Slides: ${summary.slides_created}\n` +
-        `🎥 Videos: ${summary.videos_created}\n` +
-        `📋 Study Tools: ${summary.study_tools_created}`
-      )
+      if (mode === "edit") {
+        // Success message for edit
+        alert(`🎉 Successfully updated "${data.semester.title}"!`)
 
-      // Reset the form
-      setData({
-        semester: {
-          title: "",
-          description: "",
-          section: "",
-          has_midterm: true,
-          has_final: true
-        },
-        courses: []
-      })
-      setCurrentStep(0)
+        // Call onSuccess callback if provided
+        if (onSuccess) {
+          onSuccess()
+        } else {
+          router.push("/admin/all-in-one")
+        }
+      } else {
+        // Success message for create
+        const summary = result.data.summary
+        alert(
+          `🎉 Successfully created everything!\n\n` +
+          `📚 Semester: ${data.semester.title}\n` +
+          `📖 Courses: ${summary.courses_created}\n` +
+          `📝 Topics: ${summary.topics_created}\n` +
+          `📊 Slides: ${summary.slides_created}\n` +
+          `🎥 Videos: ${summary.videos_created}\n` +
+          `📋 Study Tools: ${summary.study_tools_created}`
+        )
+
+        // Reset the form
+        setData({
+          semester: {
+            title: "",
+            description: "",
+            section: "",
+            has_midterm: true,
+            has_final: true
+          },
+          courses: []
+        })
+        setCurrentStep(0)
+      }
 
       // Refresh the page to update any cached data
       router.refresh()
 
     } catch (error) {
-      console.error("Error creating content:", error)
-      alert(`❌ Error creating content: ${error.message}`)
+      console.error(`Error ${mode === "edit" ? "updating" : "creating"} content:`, error)
+      alert(`❌ Error ${mode === "edit" ? "updating" : "creating"} content: ${error.message}`)
     } finally {
       setIsCreating(false)
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Loading semester data...</span>
+      </div>
+    )
   }
 
   return (
@@ -951,12 +975,12 @@ export function AllInOneCreator({ editId, mode = "create", onSuccess }: AllInOne
                   {isCreating ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Creating...
+                      {mode === "edit" ? "Updating..." : "Creating..."}
                     </>
                   ) : (
                     <>
                       <Check className="h-4 w-4 mr-2" />
-                      Create Everything
+                      {mode === "edit" ? "Update Everything" : "Create Everything"}
                     </>
                   )}
                 </Button>
