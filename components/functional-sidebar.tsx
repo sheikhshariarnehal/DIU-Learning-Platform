@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { supabase } from "@/lib/supabase"
 import type { Database } from "@/lib/supabase"
@@ -308,11 +307,11 @@ export function FunctionalSidebar({ onContentSelect }: FunctionalSidebarProps) {
 
   if (isLoading) {
     return (
-      <div className="h-full flex flex-col bg-slate-900">
+      <div className="h-full flex flex-col bg-background">
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-teal-400 mx-auto mb-4" />
-            <p className="text-slate-400">Loading courses...</p>
+            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading courses...</p>
           </div>
         </div>
       </div>
@@ -320,22 +319,19 @@ export function FunctionalSidebar({ onContentSelect }: FunctionalSidebarProps) {
   }
 
   return (
-    <div className="h-full flex flex-col bg-transparent">
+    <div className="h-full flex flex-col bg-background">
       {/* Header */}
-      <div className="p-4 border-b border-sidebar-border bg-gradient-secondary">
-        <h3 className="text-lg font-semibold text-sidebar-foreground mb-4 flex items-center gap-2">
-          <div className="w-2 h-2 bg-gradient-primary rounded-full"></div>
-          Course Content
-        </h3>
+      <div className="p-4 border-b border-border">
+        <h3 className="text-lg font-semibold text-foreground mb-4">Course Content</h3>
 
         {/* Semester Selection */}
         <Select value={selectedSemester} onValueChange={setSelectedSemester}>
-          <SelectTrigger className="modern-card bg-sidebar-accent border-sidebar-border text-sidebar-foreground transition-modern hover-lift">
+          <SelectTrigger className="bg-card border-border text-foreground">
             <SelectValue placeholder="Select Semester" />
           </SelectTrigger>
-          <SelectContent className="modern-card bg-sidebar-accent border-sidebar-border">
+          <SelectContent className="bg-card border-border">
             {semesters.map((semester) => (
-              <SelectItem key={semester.id} value={semester.id} className="text-sidebar-foreground hover:bg-sidebar-accent transition-modern">
+              <SelectItem key={semester.id} value={semester.id} className="text-foreground hover:bg-accent">
                 {semester.title} {semester.section && `(${semester.section})`}
               </SelectItem>
             ))}
@@ -346,9 +342,9 @@ export function FunctionalSidebar({ onContentSelect }: FunctionalSidebarProps) {
       {/* Error Display */}
       {error && (
         <div className="p-4">
-          <Alert className="bg-destructive/20 border-destructive">
+          <Alert className="bg-destructive/10 border-destructive/20">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-destructive-foreground">{error}</AlertDescription>
+            <AlertDescription className="text-destructive">{error}</AlertDescription>
           </Alert>
         </div>
       )}
@@ -358,8 +354,8 @@ export function FunctionalSidebar({ onContentSelect }: FunctionalSidebarProps) {
         <div className="p-4 space-y-3">
           {filteredCourses.length === 0 ? (
             <div className="text-center py-8">
-              <BookOpen className="h-8 w-8 text-sidebar-foreground/50 mx-auto mb-3" />
-              <p className="text-sm text-sidebar-foreground/70">No courses available</p>
+              <BookOpen className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">No courses available</p>
             </div>
           ) : (
             filteredCourses.map((course) => (
@@ -426,34 +422,34 @@ const CourseItem = React.memo(
     getStudyToolLabel: (type: string) => string
   }) => {
     return (
-      <div className="space-y-3">
+      <div className="space-y-1">
         {/* Course Header */}
-        <div className="modern-card bg-sidebar-accent rounded-xl p-4 hover:bg-sidebar-accent/80 transition-modern hover-lift shadow-modern-sm">
+        <div className="bg-card rounded-lg p-3 hover:bg-accent/50 transition-colors border border-border">
           <Button
             variant="ghost"
-            className="w-full justify-start text-left p-0 h-auto hover:bg-transparent transition-modern"
+            className="w-full justify-start text-left p-0 h-auto hover:bg-transparent"
             onClick={() => onToggleCourse(course.id)}
           >
             <div className="flex items-center gap-2 w-full">
               {expandedCourses.has(course.id) ? (
-                <ChevronDown className="h-4 w-4 shrink-0 text-sidebar-foreground/60" />
+                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
               ) : (
-                <ChevronRight className="h-4 w-4 shrink-0 text-sidebar-foreground/60" />
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
               )}
               <div className="flex-1 min-w-0">
-                <div className="font-medium text-sm text-sidebar-foreground truncate">{course.title}</div>
-                <div className="text-xs text-sidebar-foreground/70">({course.course_code})</div>
-                <div className="text-xs text-sidebar-foreground/50">{course.teacher_name}</div>
+                <div className="font-medium text-sm text-foreground truncate">{course.title}</div>
+                <div className="text-xs text-muted-foreground">({course.course_code})</div>
+                <div className="text-xs text-muted-foreground">{course.teacher_name}</div>
 
                 {courseData && !courseData.isLoading && (
                   <div className="flex gap-2 mt-2">
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-xs bg-secondary text-secondary-foreground">
                       {courseData.topics.length} Topics
                     </Badge>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs border-border text-muted-foreground">
                       {Object.values(courseData.slides).flat().length} Slides
                     </Badge>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs border-border text-muted-foreground">
                       {Object.values(courseData.videos).flat().length} Videos
                     </Badge>
                   </div>
@@ -461,8 +457,8 @@ const CourseItem = React.memo(
 
                 {courseData?.isLoading && (
                   <div className="flex items-center gap-2 mt-2">
-                    <Loader2 className="h-3 w-3 animate-spin text-sidebar-foreground/60" />
-                    <span className="text-xs text-sidebar-foreground/60">Loading content...</span>
+                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Loading content...</span>
                   </div>
                 )}
               </div>
@@ -472,24 +468,24 @@ const CourseItem = React.memo(
 
         {/* Course Content */}
         {expandedCourses.has(course.id) && courseData && !courseData.isLoading && (
-          <div className="ml-4 space-y-3">
+          <div className="ml-4 space-y-2">
             {/* Study Tools Section */}
             {courseData.studyTools.length > 0 && (
-              <div className="modern-card bg-sidebar-accent/50 rounded-lg p-3 shadow-modern-sm">
+              <div>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-left p-2 h-auto hover:bg-sidebar-accent rounded-lg transition-modern"
+                  className="w-full justify-start text-left p-2 h-auto hover:bg-accent rounded-md"
                   onClick={() => onToggleStudyTools(course.id)}
                 >
                   <div className="flex items-center gap-2">
                     {expandedStudyTools.has(course.id) ? (
-                      <ChevronDown className="h-4 w-4 text-sidebar-foreground/60" />
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     ) : (
-                      <ChevronRight className="h-4 w-4 text-sidebar-foreground/60" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     )}
-                    <BookOpen className="h-4 w-4 text-blue-400" />
-                    <span className="text-sm text-sidebar-foreground font-medium">Study Resources</span>
-                    <Badge variant="secondary" className="text-xs ml-auto bg-gradient-primary text-white border-0">
+                    <BookOpen className="h-4 w-4 text-primary" />
+                    <span className="text-sm text-foreground">Study Resources</span>
+                    <Badge variant="secondary" className="text-xs bg-secondary text-secondary-foreground ml-auto">
                       {courseData.studyTools.length}
                     </Badge>
                   </div>
@@ -501,7 +497,7 @@ const CourseItem = React.memo(
                       <Button
                         key={tool.id}
                         variant="ghost"
-                        className="w-full justify-start text-left p-2 h-auto hover:bg-sidebar-accent rounded-md"
+                        className="w-full justify-start text-left p-2 h-auto hover:bg-accent rounded-md"
                         onClick={() =>
                           tool.content_url &&
                           onContentClick("document", tool.title, tool.content_url, tool.id, undefined, course.title)
@@ -510,9 +506,9 @@ const CourseItem = React.memo(
                       >
                         <div className="flex items-center gap-2">
                           {getStudyToolIcon(tool.type)}
-                          <span className="text-xs text-sidebar-foreground/80">{getStudyToolLabel(tool.type)}</span>
+                          <span className="text-xs text-foreground">{getStudyToolLabel(tool.type)}</span>
                           {tool.exam_type !== "both" && (
-                            <Badge variant="outline" className="text-xs ml-auto">
+                            <Badge variant="outline" className="text-xs border-border text-muted-foreground ml-auto">
                               {tool.exam_type}
                             </Badge>
                           )}
@@ -526,60 +522,59 @@ const CourseItem = React.memo(
 
             {/* Topics Section */}
             {courseData.topics.length > 0 && (
-              <div className="modern-card bg-sidebar-accent/50 rounded-lg p-3 shadow-modern-sm">
+              <div>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-left p-2 h-auto hover:bg-sidebar-accent rounded-lg transition-modern"
+                  className="w-full justify-start text-left p-2 h-auto hover:bg-accent rounded-md"
                   onClick={() => onToggleTopics(course.id)}
                 >
                   <div className="flex items-center gap-2">
                     {expandedTopics.has(course.id) ? (
-                      <ChevronDown className="h-4 w-4 text-sidebar-foreground/60" />
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     ) : (
-                      <ChevronRight className="h-4 w-4 text-sidebar-foreground/60" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     )}
-                    <FileText className="h-4 w-4 text-cyan-400" />
-                    <span className="text-sm text-sidebar-foreground font-medium">Topics</span>
-                    <Badge variant="secondary" className="text-xs ml-auto bg-gradient-accent text-white border-0">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-foreground">Topics</span>
+                    <Badge variant="secondary" className="text-xs bg-secondary text-secondary-foreground ml-auto">
                       {courseData.topics.length}
                     </Badge>
                   </div>
                 </Button>
 
                 {expandedTopics.has(course.id) && (
-                  <div className="ml-6 space-y-2 mt-3">
+                  <div className="ml-6 space-y-1">
                     {courseData.topics.map((topic: Topic, index: number) => {
                       const topicSlides = courseData.slides[topic.id] || []
                       const topicVideos = courseData.videos[topic.id] || []
 
                       return (
-                        <div key={topic.id} className="modern-card bg-sidebar-accent/30 rounded-lg p-2 shadow-modern-sm">
+                        <div key={topic.id}>
                           <Button
                             variant="ghost"
-                            className="w-full justify-start text-left p-2 h-auto hover:bg-sidebar-accent rounded-lg transition-modern"
+                            className="w-full justify-start text-left p-2 h-auto hover:bg-accent rounded-md"
                             onClick={() => onToggleTopicItem(topic.id)}
                           >
                             <div className="flex items-center gap-2 w-full">
                               {expandedTopicItems.has(topic.id) ? (
-                                <ChevronDown className="h-3 w-3 text-sidebar-foreground/60" />
+                                <ChevronDown className="h-3 w-3 text-muted-foreground" />
                               ) : (
-                                <ChevronRight className="h-3 w-3 text-sidebar-foreground/60" />
+                                <ChevronRight className="h-3 w-3 text-muted-foreground" />
                               )}
-                              <div className="w-1.5 h-1.5 bg-gradient-primary rounded-full"></div>
-                              <span className="text-sm flex-1 text-sidebar-foreground/90 truncate font-medium">
+                              <span className="text-sm flex-1 text-foreground truncate">
                                 {index + 1}. {topic.title}
                               </span>
                             </div>
                           </Button>
 
                           {expandedTopicItems.has(topic.id) && (
-                            <div className="ml-6 space-y-1 mt-2">
+                            <div className="ml-6 space-y-1">
                               {/* Videos */}
                               {topicVideos.map((video: Video, videoIndex: number) => (
                                 <Button
                                   key={video.id}
                                   variant="ghost"
-                                  className="w-full justify-start text-left p-2 h-auto hover:bg-sidebar-accent rounded-lg group transition-modern hover-lift"
+                                  className="w-full justify-start text-left p-2 h-auto hover:bg-accent rounded-md group"
                                   onClick={() =>
                                     onContentClick(
                                       "video",
@@ -592,10 +587,8 @@ const CourseItem = React.memo(
                                   }
                                 >
                                   <div className="flex items-center gap-2">
-                                    <div className="w-6 h-6 bg-gradient-accent rounded-md flex items-center justify-center">
-                                      <Play className="h-3 w-3 text-white" />
-                                    </div>
-                                    <span className="text-xs text-sidebar-foreground/70 group-hover:text-sidebar-foreground truncate">
+                                    <Play className="h-3 w-3 text-red-400" />
+                                    <span className="text-xs text-muted-foreground group-hover:text-foreground truncate">
                                       {videoIndex + 1}. {video.title}
                                     </span>
                                   </div>
@@ -607,7 +600,7 @@ const CourseItem = React.memo(
                                 <Button
                                   key={slide.id}
                                   variant="ghost"
-                                  className="w-full justify-start text-left p-2 h-auto hover:bg-sidebar-accent rounded-lg group transition-modern hover-lift"
+                                  className="w-full justify-start text-left p-2 h-auto hover:bg-accent rounded-md group"
                                   onClick={() =>
                                     onContentClick(
                                       "slide",
@@ -620,10 +613,8 @@ const CourseItem = React.memo(
                                   }
                                 >
                                   <div className="flex items-center gap-2">
-                                    <div className="w-6 h-6 bg-gradient-primary rounded-md flex items-center justify-center">
-                                      <FileText className="h-3 w-3 text-white" />
-                                    </div>
-                                    <span className="text-xs text-sidebar-foreground/70 group-hover:text-sidebar-foreground truncate">
+                                    <FileText className="h-3 w-3 text-blue-400" />
+                                    <span className="text-xs text-muted-foreground group-hover:text-foreground truncate">
                                       {topicVideos.length + slideIndex + 1}. {slide.title}
                                     </span>
                                   </div>
@@ -631,7 +622,7 @@ const CourseItem = React.memo(
                               ))}
 
                               {topicSlides.length === 0 && topicVideos.length === 0 && (
-                                <div className="text-xs text-sidebar-foreground/50 py-2 pl-2">No content available</div>
+                                <div className="text-xs text-muted-foreground py-2 pl-2">No content available</div>
                               )}
                             </div>
                           )}
@@ -646,7 +637,7 @@ const CourseItem = React.memo(
             {/* Empty state for course with no content */}
             {courseData.topics.length === 0 && courseData.studyTools.length === 0 && (
               <div className="text-center py-4">
-                <p className="text-xs text-sidebar-foreground/50">No content available for this course</p>
+                <p className="text-xs text-muted-foreground">No content available for this course</p>
               </div>
             )}
           </div>

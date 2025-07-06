@@ -1,6 +1,7 @@
 import type React from "react"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
 import { AdminHeader } from "@/components/admin/admin-header"
+import { ThemeProvider } from "@/components/theme-provider"
 
 export default function AdminLayout({
   children,
@@ -20,12 +21,14 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <AdminSidebar user={mockUser} />
-      <div className="lg:pl-64">
-        <AdminHeader user={mockUser} />
-        <main className="p-6">{children}</main>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <div className="min-h-screen bg-background">
+        <AdminSidebar user={mockUser} />
+        <div className="lg:pl-64">
+          <AdminHeader user={mockUser} />
+          <main className="p-6">{children}</main>
+        </div>
       </div>
-    </div>
+    </ThemeProvider>
   )
 }

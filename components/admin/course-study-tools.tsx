@@ -1,21 +1,99 @@
-import { supabase } from "@/lib/supabase"
+"use client"
+
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Edit, Trash2, FileText, BookOpen, Users, ExternalLink } from "lucide-react"
+import { EditStudyToolDialog } from "@/components/admin/edit-study-tool-dialog"
+
+interface StudyTool {
+  id: string
+  title: string
+  type: string
+  content_url: string | null
+  exam_type: string
+  created_at: string
+}
 
 interface CourseStudyToolsProps {
   courseId: string
 }
 
-export async function CourseStudyTools({ courseId }: CourseStudyToolsProps) {
-  const { data: studyTools, error } = await supabase
-    .from("study_tools")
-    .select("*")
-    .eq("course_id", courseId)
-    .order("created_at", { ascending: false })
+export function CourseStudyTools({ courseId }: CourseStudyToolsProps) {
+  const [studyTools, setStudyTools] = useState<StudyTool[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [editingTool, setEditingTool] = useState<any>(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+
+  useEffect(() => {
+    fetchStudyTools()
+  }, [courseId])
+
+  const fetchStudyTools = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch(`/api/courses/${courseId}/study-tools`)
+      if (!response.ok) {
+        throw new Error("Failed to fetch study tools")
+      }
+      const data = await response.json()
+      setStudyTools(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load study tools")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this study tool?")) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/admin/study-tools/${id}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to delete study tool")
+      }
+
+      await fetchStudyTools()
+    } catch (error) {
+      console.error("Error deleting study tool:", error)
+      alert("Failed to delete study tool")
+    }
+  }
+
+  const handleEdit = (tool: StudyTool) => {
+    // Transform the tool to match the expected interface for the edit dialog
+    const toolWithCourse = {
+      ...tool,
+      course: {
+        id: courseId,
+        title: "", // We don't have course title here, but it's not used in the edit dialog
+        course_code: "",
+      },
+    }
+    setEditingTool(toolWithCourse)
+    setEditDialogOpen(true)
+  }
+
+  const handleEditSuccess = () => {
+    setEditDialogOpen(false)
+    setEditingTool(null)
+    fetchStudyTools()
+  }
+
+  if (loading) {
+    return <div className="text-center py-6">Loading study tools...</div>
+  }
 
   if (error) {
-    return <div className="text-red-500 text-sm">Error loading study tools: {error.message}</div>
+    return <div className="text-red-500 text-sm">Error loading study tools: {error}</div>
   }
 
   if (!studyTools || studyTools.length === 0) {
@@ -104,15 +182,23 @@ export async function CourseStudyTools({ courseId }: CourseStudyToolsProps) {
                 </a>
               </Button>
             )}
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={() => handleEdit(tool)}>
               <Edit className="h-3 w-3" />
             </Button>
-            <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+            <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700" onClick={() => handleDelete(tool.id)}>
               <Trash2 className="h-3 w-3" />
             </Button>
           </div>
         </div>
       ))}
+
+      {/* Edit Dialog */}
+      <EditStudyToolDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        studyTool={editingTool}
+        onSuccess={handleEditSuccess}
+      />
     </div>
   )
 }

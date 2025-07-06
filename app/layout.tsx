@@ -1,7 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
-import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import "./globals.css"
 
 export const metadata: Metadata = {
   title: "DIU CSE Learning Platform",
@@ -20,13 +20,8 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
-      <body className="min-h-screen bg-background font-sans antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
+      <body className="min-h-screen bg-background text-foreground font-sans antialiased">
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange={false}>
           <div className="relative flex min-h-screen flex-col">{children}</div>
         </ThemeProvider>
       </body>

@@ -13,19 +13,20 @@ import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 
 interface CoursePageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function CoursePage({ params }: CoursePageProps) {
+  const { id } = await params
   const { data: course, error } = await supabase
     .from("courses")
     .select(`
       *,
       semesters(title, section)
     `)
-    .eq("id", params.id)
+    .eq("id", id)
     .single()
 
   if (error || !course) {
@@ -65,7 +66,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
               <CardTitle className="text-lg">Topics</CardTitle>
               <CardDescription>Course topics and their content</CardDescription>
             </div>
-            <CreateTopicDialog courseId={params.id}>
+            <CreateTopicDialog courseId={id}>
               <Button size="sm">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Topic
@@ -74,7 +75,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
           </CardHeader>
           <CardContent>
             <Suspense fallback={<TopicsSkeleton />}>
-              <CourseTopics courseId={params.id} />
+              <CourseTopics courseId={id} />
             </Suspense>
           </CardContent>
         </Card>
@@ -85,7 +86,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
               <CardTitle className="text-lg">Study Tools</CardTitle>
               <CardDescription>Exam materials and resources</CardDescription>
             </div>
-            <CreateStudyToolDialog courseId={params.id}>
+            <CreateStudyToolDialog courseId={id}>
               <Button size="sm">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Tool
@@ -94,7 +95,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
           </CardHeader>
           <CardContent>
             <Suspense fallback={<StudyToolsSkeleton />}>
-              <CourseStudyTools courseId={params.id} />
+              <CourseStudyTools courseId={id} />
             </Suspense>
           </CardContent>
         </Card>

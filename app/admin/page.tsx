@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DashboardStats } from "@/components/admin/dashboard-stats"
 import { RecentActivity } from "@/components/admin/recent-activity"
 import { ContentChart } from "@/components/admin/content-chart"
+import { AllInOneCreator } from "@/components/admin/all-in-one-creator"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function AdminDashboard() {
@@ -16,6 +17,19 @@ export default function AdminDashboard() {
       <Suspense fallback={<DashboardStatsSkeleton />}>
         <DashboardStats />
       </Suspense>
+
+      {/* All-in-One Creator Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>🚀 All-in-One Creator</CardTitle>
+          <CardDescription>
+            Create complete semester structure with courses, topics, content, and study tools in one workflow
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AllInOneCreator />
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">

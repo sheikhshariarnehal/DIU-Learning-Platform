@@ -23,9 +23,15 @@ export default function HomePage() {
   const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { toast } = useToast()
   const isMobile = useIsMobile()
   const { theme, setTheme } = useTheme()
+
+  // Ensure component is mounted before accessing theme
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Initialize with default content if available
   useEffect(() => {
@@ -179,81 +185,111 @@ export default function HomePage() {
   }
 
   const toggleTheme = () => {
-    const newTheme = theme === "dark" ? "light" : "dark"
-    setTheme(newTheme)
+    if (!mounted) return
+    setTheme(theme === "dark" ? "light" : "dark")
 
     toast({
       title: "Theme Changed",
-      description: `Switched to ${newTheme} mode`,
+      description: `Switched to ${theme === "dark" ? "light" : "dark"} mode`,
     })
   }
 
+  if (!mounted) {
+    return null // Prevent hydration mismatch
+  }
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       {/* Header */}
-      <header className="border-b border-border bg-gradient-surface backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 shadow-modern-md">
-        <div className="flex h-14 sm:h-16 items-center justify-between px-3 sm:px-6">
-          {/* Left Section - Logo and Mobile Menu */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Mobile Menu Button */}
-            {isMobile && (
+      <header className="glass border-b border-border sticky top-0 z-50 backdrop-blur-md bg-background/80">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 lg:h-18 items-center justify-between">
+            {/* Left Section - Logo and Mobile Menu */}
+            <div className="flex items-center gap-3 lg:gap-4">
+              {/* Mobile Menu Button */}
+              {isMobile && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="hover-lift focus-ring mr-2 h-9 w-9"
+                >
+                  {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </Button>
+              )}
+
+              {/* Logo Section */}
+              <div className="flex items-center gap-3 lg:gap-4">
+                <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg flex items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20">
+                  <img
+                    src="/images/diu-logo.png"
+                    alt="Daffodil International University Logo"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-bold text-lg lg:text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                    DIU CSE
+                  </span>
+                  <span className="text-xs text-muted-foreground hidden sm:block">Learning Platform</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Center Section - Navigation (Hidden on mobile) */}
+            <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+              <Button variant="ghost" className="hover-lift focus-ring text-sm font-medium px-4 py-2 rounded-lg">
+                Home
+              </Button>
+              <Button variant="ghost" className="hover-lift focus-ring text-sm font-medium px-4 py-2 rounded-lg">
+                People
+              </Button>
+              <Button className="btn-primary-modern text-sm px-6 py-2 rounded-lg font-medium">Video Lecture</Button>
+              <Button variant="ghost" className="hover-lift focus-ring text-sm font-medium px-4 py-2 rounded-lg">
+                Result
+              </Button>
+            </nav>
+
+            {/* Right Section - Controls */}
+            <div className="flex items-center gap-2 lg:gap-3">
+              {/* Theme Toggle */}
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="text-muted-foreground hover:text-foreground hover:bg-accent mr-1"
+                onClick={toggleTheme}
+                className="hover-lift focus-ring w-9 h-9 lg:w-10 lg:h-10 rounded-lg"
+                title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
               >
-                {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {theme === "dark" ? (
+                  <Sun className="h-4 w-4 lg:h-5 lg:w-5" />
+                ) : (
+                  <Moon className="h-4 w-4 lg:h-5 lg:w-5" />
+                )}
               </Button>
-            )}
 
-            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-primary rounded-lg flex items-center justify-center shadow-modern-sm">
-              <span className="text-white font-bold text-xs sm:text-sm">DIU</span>
-            </div>
-            <span className="font-semibold text-sm sm:text-lg text-foreground">DIU CSE</span>
-          </div>
+              {/* Notifications */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hover-lift focus-ring relative w-9 h-9 lg:w-10 lg:h-10 rounded-lg"
+                title="Notifications"
+              >
+                <Bell className="h-4 w-4 lg:h-5 lg:w-5" />
+                <span className="absolute -top-1 -right-1 h-2 w-2 bg-destructive rounded-full animate-pulse-subtle"></span>
+              </Button>
 
-          {/* Center Section - Navigation (Hidden on mobile) */}
-          <nav className="hidden md:flex items-center gap-4 lg:gap-8">
-            <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-accent text-sm transition-modern">
-              Home
-            </Button>
-            <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-accent text-sm transition-modern">
-              People
-            </Button>
-            <Button className="bg-gradient-primary hover:opacity-90 text-white border-0 rounded-lg px-4 py-2 text-sm shadow-modern-sm transition-modern hover-lift">
-              Video Lecture
-            </Button>
-            <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-accent text-sm transition-modern">
-              Result
-            </Button>
-          </nav>
+              {/* Login Button */}
+              <Button className="btn-primary-modern font-medium px-4 py-2 lg:px-6 lg:py-2 text-sm rounded-lg hidden sm:flex">
+                Log In
+              </Button>
 
-          {/* Right Section - Controls */}
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className="text-muted-foreground hover:text-foreground hover:bg-accent w-8 h-8 sm:w-10 sm:h-10 transition-modern hover-lift rounded-lg"
-              title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-            >
-              {theme === "dark" ? <Sun className="h-3 w-3 sm:h-4 sm:w-4" /> : <Moon className="h-3 w-3 sm:h-4 sm:w-4" />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-muted-foreground hover:text-foreground hover:bg-accent relative w-8 h-8 sm:w-10 sm:h-10 transition-modern hover-lift rounded-lg"
-              title="Notifications"
-            >
-              <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="absolute -top-1 -right-1 h-2 w-2 bg-gradient-accent rounded-full shadow-modern-sm"></span>
-            </Button>
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium px-2 py-1 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm">
-              Log In
-            </Button>
-            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-muted rounded-full flex items-center justify-center">
-              <User className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+              {/* User Avatar */}
+              <div className="w-8 h-8 lg:w-9 lg:h-9 bg-muted rounded-full flex items-center justify-center border-2 border-border hover:border-primary/50 transition-colors">
+                <User className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground" />
+              </div>
+
+              {/* Mobile Login (visible only on small screens) */}
+              <Button className="btn-primary-modern font-medium px-3 py-1 text-xs rounded-lg sm:hidden">Login</Button>
             </div>
           </div>
         </div>
@@ -262,21 +298,21 @@ export default function HomePage() {
       {/* Main Content */}
       <div className="flex h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)]">
         {/* Content Area */}
-        <div className="flex-1 flex flex-col bg-gradient-surface min-w-0">
+        <div className="flex-1 flex flex-col bg-background min-w-0">
           {selectedContent ? (
             <>
               {/* Content Viewer */}
               <div className="flex-1 p-2 sm:p-4 lg:p-6">
-                <div className="modern-card bg-card rounded-xl p-4 sm:p-6 h-full shadow-modern-lg">
+                <div className="h-full rounded-xl overflow-hidden shadow-modern-lg border border-modern animate-fade-in">
                   <ContentViewer content={selectedContent} isLoading={isLoading} />
                 </div>
               </div>
 
               {/* Bottom Controls */}
-              <div className="bg-gradient-secondary px-3 sm:px-6 py-3 sm:py-4 border-t border-border shadow-modern-md">
+              <div className="glass-dark px-3 sm:px-6 py-3 sm:py-4 border-t border-border">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 min-w-0 flex-1">
-                    <span className="text-foreground text-xs sm:text-sm font-medium">
+                    <span className="badge-primary font-medium">
                       {selectedContent.type === "slide"
                         ? "Slide Presentation"
                         : selectedContent.type === "video"
@@ -295,7 +331,7 @@ export default function HomePage() {
                       variant="outline"
                       size="sm"
                       onClick={handleDownload}
-                      className="flex-1 sm:flex-none text-xs sm:text-sm bg-gradient-primary text-white border-0 hover:opacity-90 transition-modern hover-lift shadow-modern-sm"
+                      className="btn-secondary-modern flex-1 sm:flex-none text-xs sm:text-sm bg-transparent"
                       disabled={isLoading}
                     >
                       <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -305,7 +341,7 @@ export default function HomePage() {
                       variant="outline"
                       size="sm"
                       onClick={handleFullscreen}
-                      className="flex-1 sm:flex-none text-xs sm:text-sm bg-gradient-accent text-white border-0 hover:opacity-90 transition-modern hover-lift shadow-modern-sm"
+                      className="btn-secondary-modern flex-1 sm:flex-none text-xs sm:text-sm bg-transparent"
                       disabled={isLoading}
                     >
                       <Maximize className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -316,7 +352,7 @@ export default function HomePage() {
                       variant="outline"
                       size="sm"
                       onClick={() => window.open(selectedContent.url, "_blank")}
-                      className="flex-1 sm:flex-none text-xs sm:text-sm bg-gradient-secondary border border-border hover:bg-gradient-primary hover:text-white transition-modern hover-lift shadow-modern-sm"
+                      className="btn-secondary-modern flex-1 sm:flex-none text-xs sm:text-sm"
                       disabled={isLoading}
                     >
                       <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -327,29 +363,24 @@ export default function HomePage() {
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center h-full p-4 bg-gradient-surface">
-              <div className="text-center max-w-sm sm:max-w-md">
-                <div className="modern-card bg-gradient-primary w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-modern-lg hover-lift">
-                  <span className="text-white font-bold text-xl sm:text-3xl">DIU</span>
+            <div className="flex items-center justify-center h-full p-4">
+              <div className="text-center max-w-sm sm:max-w-md animate-slide-up">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-primary-lg">
+                  <span className="text-primary-foreground font-bold text-lg sm:text-2xl">DIU</span>
                 </div>
-                <h2 className="text-xl sm:text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-4">
+                <h2 className="text-lg sm:text-2xl font-semibold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent mb-2">
                   Welcome to DIU CSE Learning Platform
                 </h2>
-                <div className="modern-card bg-card/50 backdrop-blur-sm rounded-xl p-6 mb-6 shadow-modern-md">
-                  <p className="text-muted-foreground mb-4 text-sm sm:text-base">
-                    Select a course from the sidebar to start viewing slides, videos, and study materials
-                  </p>
-                  <div className="text-xs sm:text-sm text-muted-foreground/70">
-                    Choose from available semesters and explore course content
-                  </div>
+                <p className="text-muted-foreground mb-4 text-sm sm:text-base">
+                  Select a course from the sidebar to start viewing slides, videos, and study materials
+                </p>
+                <div className="text-xs sm:text-sm text-muted-foreground">
+                  Choose from available semesters and explore course content
                 </div>
 
                 {/* Mobile CTA Button */}
                 {isMobile && (
-                  <Button
-                    onClick={() => setSidebarOpen(true)}
-                    className="mt-6 w-full bg-gradient-primary hover:opacity-90 text-white border-0 rounded-xl py-3 transition-modern hover-lift shadow-modern-md"
-                  >
+                  <Button onClick={() => setSidebarOpen(true)} className="mt-6 w-full btn-primary-modern">
                     <Menu className="h-4 w-4 mr-2" />
                     Browse Courses
                   </Button>
@@ -366,7 +397,7 @@ export default function HomePage() {
             ${isMobile && !sidebarOpen ? "-translate-x-full" : "translate-x-0"}
             transition-transform duration-300 ease-in-out
             ${isMobile ? "w-80 top-14" : "w-80"}
-            bg-sidebar ${isMobile ? "border-r" : "border-l"} border-sidebar-border flex-shrink-0 shadow-modern-lg
+            bg-card ${isMobile ? "border-r" : "border-l"} border-border flex-shrink-0
           `}
         >
           {/* Mobile overlay */}
@@ -374,7 +405,7 @@ export default function HomePage() {
             <div className="fixed inset-0 bg-black/50 z-30 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
           )}
 
-          <div className="relative z-40 h-full bg-gradient-secondary">
+          <div className="relative z-40 h-full bg-card">
             <FunctionalSidebar onContentSelect={handleContentSelect} />
           </div>
         </div>

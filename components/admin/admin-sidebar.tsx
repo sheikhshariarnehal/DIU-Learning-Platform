@@ -19,6 +19,7 @@ import {
   Users,
   X,
   Shield,
+  Zap,
 } from "lucide-react"
 
 interface AdminUser {
@@ -38,6 +39,7 @@ interface AdminSidebarProps {
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: Home },
+  { name: "All-in-One Creator", href: "/admin/all-in-one", icon: Zap, badge: "New" },
   { name: "Semesters", href: "/admin/semesters", icon: Calendar },
   { name: "Courses", href: "/admin/courses", icon: BookOpen },
   { name: "Topics", href: "/admin/topics", icon: GraduationCap },
@@ -82,20 +84,20 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
       {/* Sidebar */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-300 ease-in-out lg:translate-x-0",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between p-6 border-b border-border">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center">
-                <Shield className="h-4 w-4 text-white" />
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <Shield className="h-4 w-4 text-primary-foreground" />
               </div>
               <div>
-                <h2 className="font-semibold text-gray-900">Admin Panel</h2>
-                <p className="text-xs text-gray-500">DIU CSE</p>
+                <h2 className="font-semibold text-foreground">Admin Panel</h2>
+                <p className="text-xs text-muted-foreground">DIU CSE</p>
               </div>
             </div>
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setIsMobileMenuOpen(false)}>
@@ -103,26 +105,8 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
             </Button>
           </div>
 
-          {/* User info */}
-          <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                <Users className="h-5 w-5 text-gray-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{user.full_name}</p>
-                <p className="text-xs text-gray-500 truncate">{user.email}</p>
-              </div>
-            </div>
-            <div className="mt-2">
-              <Badge className={cn("text-xs", getRoleBadgeColor(user.role))}>
-                {user.role.replace("_", " ").toUpperCase()}
-              </Badge>
-            </div>
-          </div>
-
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="p-4 space-y-1">
             {navigation.map((item) => {
               const isActive = pathname === item.href
               return (
@@ -131,16 +115,41 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                   href={item.href}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
-                    isActive ? "bg-teal-50 text-teal-700 border border-teal-200" : "text-gray-700 hover:bg-gray-100",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-foreground hover:bg-accent hover:text-accent-foreground",
                   )}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <item.icon className="h-4 w-4" />
-                  {item.name}
+                  <span className="flex-1">{item.name}</span>
+                  {item.badge && (
+                    <Badge variant="secondary" className="text-xs">
+                      {item.badge}
+                    </Badge>
+                  )}
                 </Link>
               )
             })}
           </nav>
+
+          {/* User info */}
+          <div className="p-4 border-t border-border mt-auto">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                <Users className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{user.full_name}</p>
+                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+              </div>
+            </div>
+            <div className="mt-2">
+              <Badge className={cn("text-xs", getRoleBadgeColor(user.role))}>
+                {user.role.replace("_", " ").toUpperCase()}
+              </Badge>
+            </div>
+          </div>
         </div>
       </div>
     </>
