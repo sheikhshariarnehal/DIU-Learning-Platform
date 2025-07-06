@@ -9,6 +9,23 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Generator',
+            value: 'DIU CSE Learning Platform',
+          },
+          {
+            key: 'X-Creator',
+            value: 'DIU CSE Department',
+          },
+        ],
+      },
+    ]
+  },
 }
 
 export default nextConfig

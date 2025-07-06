@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://diu-learning.vercel.app/sitemap.xml
