@@ -4,6 +4,42 @@ import { memo, useState, useCallback } from "react"
 import { ChevronDown, ChevronRight, FileText, Play, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+
+// Smart text truncation utility for professional display
+const smartTruncate = (text: string, maxLength: number = 45): string => {
+  if (text.length <= maxLength) return text
+
+  // Try to find a good breaking point (space, dash, colon, period)
+  const breakPoints = [' ', '-', ':', '.', ',']
+  let bestBreak = -1
+
+  // Look for break points in the latter half of the allowed length
+  for (let i = Math.floor(maxLength * 0.6); i < maxLength; i++) {
+    if (breakPoints.includes(text[i])) {
+      bestBreak = i
+    }
+  }
+
+  // If we found a good break point, use it
+  if (bestBreak > 0) {
+    return text.substring(0, bestBreak) + '...'
+  }
+
+  // Otherwise, truncate at maxLength and add ellipsis
+  return text.substring(0, maxLength - 3) + '...'
+}
+
+// Professional topic title formatter
+const formatTopicTitle = (index: number, title: string, maxLength: number = 38): string => {
+  const prefix = `${index + 1}. `
+  const availableLength = maxLength - prefix.length
+
+  if (title.length <= availableLength) {
+    return `${prefix}${title}`
+  }
+
+  return `${prefix}${smartTruncate(title, availableLength)}`
+}
 import type { Database } from "@/lib/supabase"
 
 type Course = Database["public"]["Tables"]["courses"]["Row"]
@@ -149,10 +185,10 @@ const TopicItem = memo(
             )}
             <div className="flex-1 min-w-0">
               <span
-                className="text-sm sm:text-base font-medium text-slate-300 truncate block"
+                className="text-sm sm:text-base font-medium text-slate-300 topic-title-professional block"
                 title={`${index + 1}. ${topic.title}`}
               >
-                {index + 1}. {topic.title}
+                {formatTopicTitle(index, topic.title, 35)}
               </span>
               <div className="flex items-center gap-2 mt-1">
                 {topic.videos?.length > 0 && (

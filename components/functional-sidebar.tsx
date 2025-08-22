@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { supabase } from "@/lib/supabase"
 import type { Database } from "@/lib/supabase"
+import { ProfessionalTopicTitle } from "@/components/ui/professional-topic-title"
 import React from "react"
 
 type Semester = Database["public"]["Tables"]["semesters"]["Row"]
@@ -17,6 +18,42 @@ type Topic = Database["public"]["Tables"]["topics"]["Row"]
 type Slide = Database["public"]["Tables"]["slides"]["Row"]
 type Video = Database["public"]["Tables"]["videos"]["Row"]
 type StudyTool = Database["public"]["Tables"]["study_tools"]["Row"]
+
+// Smart text truncation utility for professional display
+const smartTruncate = (text: string, maxLength: number = 45): string => {
+  if (text.length <= maxLength) return text
+
+  // Try to find a good breaking point (space, dash, colon, period)
+  const breakPoints = [' ', '-', ':', '.', ',']
+  let bestBreak = -1
+
+  // Look for break points in the latter half of the allowed length
+  for (let i = Math.floor(maxLength * 0.6); i < maxLength; i++) {
+    if (breakPoints.includes(text[i])) {
+      bestBreak = i
+    }
+  }
+
+  // If we found a good break point, use it
+  if (bestBreak > 0) {
+    return text.substring(0, bestBreak) + '...'
+  }
+
+  // Otherwise, truncate at maxLength and add ellipsis
+  return text.substring(0, maxLength - 3) + '...'
+}
+
+// Professional topic title formatter
+const formatTopicTitle = (index: number, title: string, maxLength: number = 42): string => {
+  const prefix = `${index + 1}. `
+  const availableLength = maxLength - prefix.length
+
+  if (title.length <= availableLength) {
+    return `${prefix}${title}`
+  }
+
+  return `${prefix}${smartTruncate(title, availableLength)}`
+}
 
 interface ContentItem {
   type: "slide" | "video" | "document"
@@ -571,7 +608,7 @@ const CourseItem = React.memo(
                         <div key={topic.id}>
                           <Button
                             variant="ghost"
-                            className="w-full justify-start text-left p-2 h-auto hover:bg-accent rounded-md min-w-0"
+                            className="w-full justify-start text-left p-3 h-auto min-w-0 sidebar-item-professional"
                             onClick={() => onToggleTopicItem(topic.id)}
                           >
                             <div className="flex items-center gap-2 w-full min-w-0">
@@ -580,12 +617,15 @@ const CourseItem = React.memo(
                               ) : (
                                 <ChevronRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                               )}
-                              <span
-                                className="text-sm flex-1 text-foreground min-w-0 sidebar-topic-title-wrap"
-                                title={`${index + 1}. ${topic.title}`}
-                              >
-                                {index + 1}. {topic.title}
-                              </span>
+                              <div className="flex-1 min-w-0">
+                                <ProfessionalTopicTitle
+                                  index={index}
+                                  title={topic.title}
+                                  maxLength={42}
+                                  variant="default"
+                                  className="text-foreground"
+                                />
+                              </div>
                             </div>
                           </Button>
 

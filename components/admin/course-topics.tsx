@@ -6,6 +6,27 @@ import { Edit, Trash2, Eye, Plus, FileText } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Link from "next/link"
 
+// Professional text truncation for admin tables
+const truncateText = (text: string, maxLength: number = 50): string => {
+  if (text.length <= maxLength) return text
+
+  // Find a good breaking point
+  const breakPoints = [' ', '-', ':', '.', ',']
+  let bestBreak = -1
+
+  for (let i = Math.floor(maxLength * 0.7); i < maxLength; i++) {
+    if (breakPoints.includes(text[i])) {
+      bestBreak = i
+    }
+  }
+
+  if (bestBreak > 0) {
+    return text.substring(0, bestBreak) + '...'
+  }
+
+  return text.substring(0, maxLength - 3) + '...'
+}
+
 interface CourseTopicsProps {
   courseId: string
 }
@@ -68,9 +89,17 @@ export async function CourseTopics({ courseId }: CourseTopicsProps) {
             <TableRow key={topic.id}>
               <TableCell className="font-medium">
                 <div className="max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
-                  <span className="block truncate" title={topic.title}>
-                    {topic.title}
+                  <span
+                    className="block text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight"
+                    title={topic.title}
+                  >
+                    {truncateText(topic.title, 55)}
                   </span>
+                  {topic.title.length > 55 && (
+                    <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 block">
+                      {topic.title.length} characters
+                    </span>
+                  )}
                 </div>
               </TableCell>
               <TableCell>

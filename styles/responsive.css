@@ -251,16 +251,110 @@
   line-height: 1.4;
 }
 
-/* Alternative: Allow wrapping for very long titles */
-.sidebar-topic-title-wrap {
+/* Professional topic title styling */
+.topic-title-professional {
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  line-height: 1.3;
-  max-height: 2.6em; /* 2 lines * 1.3 line-height */
-  word-break: break-word;
-  hyphens: auto;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  transition: all 0.2s ease-in-out;
+}
+
+.topic-title-professional:hover {
+  color: rgb(59 130 246); /* blue-500 */
+}
+
+/* Enhanced sidebar styling */
+.sidebar-item-professional {
+  transition: all 0.15s ease-in-out;
+  border-radius: 0.5rem;
+  position: relative;
+}
+
+.sidebar-item-professional:hover {
+  background-color: rgba(59, 130, 246, 0.08);
+  transform: translateX(2px);
+}
+
+.sidebar-item-professional:hover .topic-title-professional {
+  color: rgb(59 130 246);
+}
+
+/* Professional badge styling */
+.badge-professional {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgb(99 102 241), rgb(139 92 246));
+  color: white;
+  border: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Professional table styling */
+.table-professional {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-professional th {
+  background: linear-gradient(135deg, rgb(248 250 252), rgb(241 245 249));
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: 0.025em;
+  color: rgb(51 65 85);
+  border-bottom: 2px solid rgb(226 232 240);
+}
+
+.table-professional td {
+  border-bottom: 1px solid rgb(241 245 249);
+  transition: background-color 0.15s ease-in-out;
+}
+
+.table-professional tr:hover td {
+  background-color: rgb(248 250 252);
+}
+
+/* Enhanced text truncation with fade effect */
+.text-truncate-fade {
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.text-truncate-fade::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  background: linear-gradient(to right, transparent, currentColor);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.text-truncate-fade.truncated::after {
+  opacity: 0.1;
+}
+
+/* Professional loading states */
+.loading-professional {
+  background: linear-gradient(90deg,
+    rgba(226, 232, 240, 0.3) 25%,
+    rgba(226, 232, 240, 0.5) 50%,
+    rgba(226, 232, 240, 0.3) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 /* For very narrow sidebars */
