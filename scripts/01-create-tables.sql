@@ -12,6 +12,15 @@ CREATE TABLE IF NOT EXISTS semesters (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Add description column if it doesn't exist (for existing tables)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_name='semesters' AND column_name='description') THEN
+        ALTER TABLE semesters ADD COLUMN description TEXT;
+    END IF;
+END $$;
+
 -- Courses table
 CREATE TABLE IF NOT EXISTS courses (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

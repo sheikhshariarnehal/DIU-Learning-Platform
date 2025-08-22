@@ -7,6 +7,9 @@ interface SemesterData {
   section: string
   has_midterm: boolean
   has_final: boolean
+  start_date?: string
+  end_date?: string
+  credits?: number
 }
 
 interface CourseData {
@@ -14,6 +17,9 @@ interface CourseData {
   title: string
   course_code: string
   teacher_name: string
+  teacher_email?: string
+  credits?: number
+  description?: string
   topics: TopicData[]
   studyTools: StudyToolData[]
 }
@@ -22,8 +28,9 @@ interface TopicData {
   id?: string
   title: string
   description: string
-  slides: { id?: string; title: string; url: string }[]
-  videos: { id?: string; title: string; url: string }[]
+  order_index?: number
+  slides: { id?: string; title: string; url: string; description?: string }[]
+  videos: { id?: string; title: string; url: string; description?: string; duration?: string }[]
 }
 
 interface StudyToolData {
@@ -32,6 +39,8 @@ interface StudyToolData {
   type: string
   content_url: string
   exam_type: string
+  description?: string
+  file_size?: string
 }
 
 interface AllInOneData {

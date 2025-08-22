@@ -20,6 +20,9 @@ import {
   X,
   Shield,
   Zap,
+  Sparkles,
+  GitCompare,
+  TestTube,
 } from "lucide-react"
 
 interface AdminUser {
@@ -39,7 +42,10 @@ interface AdminSidebarProps {
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: Home },
-  { name: "All-in-One Creator", href: "/admin/all-in-one", icon: Zap, badge: "New" },
+  { name: "All-in-One Creator", href: "/admin/all-in-one", icon: Zap },
+  { name: "Enhanced Creator", href: "/admin/enhanced-creator", icon: Sparkles, badge: "New" },
+  { name: "Creator Comparison", href: "/admin/creator-comparison", icon: GitCompare, badge: "Demo" },
+  { name: "Test Enhanced", href: "/admin/test-enhanced", icon: TestTube, badge: "Test" },
   { name: "Semesters", href: "/admin/semesters", icon: Calendar },
   { name: "Courses", href: "/admin/courses", icon: BookOpen },
   { name: "Topics", href: "/admin/topics", icon: GraduationCap },

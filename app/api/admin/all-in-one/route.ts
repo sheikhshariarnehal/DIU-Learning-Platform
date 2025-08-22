@@ -7,12 +7,18 @@ interface SemesterData {
   section: string
   has_midterm: boolean
   has_final: boolean
+  start_date?: string
+  end_date?: string
+  credits?: number
 }
 
 interface CourseData {
   title: string
   course_code: string
   teacher_name: string
+  teacher_email?: string
+  credits?: number
+  description?: string
   topics: TopicData[]
   studyTools: StudyToolData[]
 }
@@ -20,8 +26,9 @@ interface CourseData {
 interface TopicData {
   title: string
   description: string
-  slides: { title: string; url: string }[]
-  videos: { title: string; url: string }[]
+  order_index?: number
+  slides: { title: string; url: string; description?: string }[]
+  videos: { title: string; url: string; description?: string; duration?: string }[]
 }
 
 interface StudyToolData {
@@ -29,6 +36,8 @@ interface StudyToolData {
   type: string
   content_url: string
   exam_type: string
+  description?: string
+  file_size?: string
 }
 
 interface AllInOneData {
@@ -68,9 +77,17 @@ export async function POST(request: NextRequest) {
 
     // Start transaction-like operations
     // Create semester first
+    const semesterInsertData = {
+      title: data.semester.title,
+      description: data.semester.description,
+      section: data.semester.section,
+      has_midterm: data.semester.has_midterm,
+      has_final: data.semester.has_final
+    }
+
     const { data: semesterData, error: semesterError } = await db
       .from("semesters")
-      .insert([data.semester])
+      .insert([semesterInsertData])
       .select()
       .single()
 
@@ -87,14 +104,16 @@ export async function POST(request: NextRequest) {
     for (const course of data.courses) {
       try {
         // Create course
+        const courseInsertData = {
+          title: course.title,
+          course_code: course.course_code,
+          teacher_name: course.teacher_name,
+          semester_id: semesterData.id
+        }
+
         const { data: courseData, error: courseError } = await db
           .from("courses")
-          .insert([{
-            title: course.title,
-            course_code: course.course_code,
-            teacher_name: course.teacher_name,
-            semester_id: semesterData.id
-          }])
+          .insert([courseInsertData])
           .select()
           .single()
 
@@ -114,7 +133,7 @@ export async function POST(request: NextRequest) {
               title: topic.title,
               description: topic.description || "",
               course_id: courseData.id,
-              order_index: topicIndex + 1
+              order_index: topic.order_index || topicIndex + 1
             }])
             .select()
             .single()
