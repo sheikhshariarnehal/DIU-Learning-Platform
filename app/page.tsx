@@ -213,7 +213,8 @@ export default function HomePage() {
                   variant="ghost"
                   size="icon"
                   onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="hover-lift focus-ring mr-2 h-9 w-9"
+                  className="hover-lift focus-ring mr-2 h-10 w-10 touch-optimized-button"
+                  aria-label={sidebarOpen ? "Close course menu" : "Open course menu"}
                 >
                   {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                 </Button>
@@ -427,9 +428,10 @@ export default function HomePage() {
                 {isMobile && (
                   <Button
                     onClick={() => setSidebarOpen(true)}
-                    className="w-full h-12 text-base font-medium bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 touch-manipulation"
+                    className="w-full h-14 text-base font-medium bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 touch-optimized-button mobile-course-item"
+                    aria-label="Open course browser"
                   >
-                    <Menu className="h-5 w-5 mr-3" />
+                    <Menu className="h-6 w-6 mr-3" />
                     Browse Courses
                   </Button>
                 )}
@@ -451,20 +453,25 @@ export default function HomePage() {
             ${isMobile ? "fixed inset-y-0 left-0 z-40" : "relative"}
             ${isMobile && !sidebarOpen ? "-translate-x-full" : "translate-x-0"}
             transition-transform duration-300 ease-in-out
-            ${isMobile ? "w-[85vw] max-w-sm top-14" : "w-80 lg:w-96 xl:w-[28rem]"}
+            ${isMobile ? "w-[90vw] max-w-sm top-14" : "w-80 lg:w-96 xl:w-[28rem]"}
             bg-card/95 backdrop-blur-sm ${isMobile ? "border-r shadow-2xl" : "border-l"} border-border flex-shrink-0
+            ${isMobile ? "mobile-sidebar" : ""}
           `}
         >
           {/* Mobile overlay */}
           {isMobile && sidebarOpen && (
-            <div className="fixed inset-0 bg-black/50 z-30 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+            <div
+              className="fixed inset-0 bg-black/60 z-30 backdrop-blur-sm transition-opacity duration-300"
+              onClick={() => setSidebarOpen(false)}
+              onTouchStart={(e) => e.preventDefault()}
+            />
           )}
 
           <div className="relative z-40 h-full bg-card">
             <FunctionalSidebar
-            onContentSelect={handleContentSelect}
-            selectedContentId={selectedContent?.id}
-          />
+              onContentSelect={handleContentSelect}
+              selectedContentId={selectedContent?.id}
+            />
           </div>
         </div>
       </div>

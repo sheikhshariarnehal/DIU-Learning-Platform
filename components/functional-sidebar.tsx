@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { supabase } from "@/lib/supabase"
 import type { Database } from "@/lib/supabase"
 import { ProfessionalTopicTitle } from "@/components/ui/professional-topic-title"
+import { useIsMobile } from "@/components/ui/use-mobile"
 import React from "react"
 
 type Semester = Database["public"]["Tables"]["semesters"]["Row"]
@@ -100,6 +101,12 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
 
   // Course data cache with loading states
   const [courseData, setCourseData] = useState({})
+
+  // Mobile-specific state and functionality
+  const isMobile = useIsMobile()
+  const [touchStartY, setTouchStartY] = useState(null)
+  const [isScrolling, setIsScrolling] = useState(false)
+  const [compactMode, setCompactMode] = useState(false)
 
   // Fetch semesters on component mount
   useEffect(() => {
@@ -359,17 +366,39 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
   return (
     <div className="h-full flex flex-col bg-background">
       {/* Header */}
-      <div className="p-4 border-b border-border">
-        <h3 className="text-lg font-semibold text-foreground mb-4">Course Content</h3>
+      <div className={`${isMobile ? 'p-3' : 'p-4'} border-b border-border`}>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-foreground`}>
+            Course Content
+          </h3>
+          {isMobile && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setCompactMode(!compactMode)}
+              className="h-8 w-8 p-0"
+            >
+              {compactMode ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </Button>
+          )}
+        </div>
 
         {/* Semester Selection */}
         <Select value={selectedSemester} onValueChange={setSelectedSemester}>
-          <SelectTrigger className="bg-card border-border text-foreground">
-            <SelectValue placeholder="Select Semester" />
+          <SelectTrigger className={`bg-card border-border text-foreground ${isMobile ? 'h-10 text-sm' : 'h-11'}`}>
+            <SelectValue placeholder={isMobile ? "Select Semester" : "Choose your semester"} />
           </SelectTrigger>
           <SelectContent className="bg-card border-border">
             {semesters.map((semester) => (
-              <SelectItem key={semester.id} value={semester.id} className="text-foreground hover:bg-accent">
+              <SelectItem
+                key={semester.id}
+                value={semester.id}
+                className={`text-foreground hover:bg-accent ${isMobile ? 'text-sm py-2' : ''}`}
+              >
                 {semester.title} {semester.section && `(${semester.section})`}
               </SelectItem>
             ))}
@@ -389,11 +418,31 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
 
       {/* Course List */}
       <ScrollArea className="flex-1">
-        <div className="p-2 sm:p-4 space-y-2 sm:space-y-3">
+        <div
+          className={`${isMobile ? 'p-2' : 'p-4'} space-y-${isMobile ? '2' : '3'}`}
+          onTouchStart={(e) => {
+            setTouchStartY(e.touches[0].clientY)
+            setIsScrolling(false)
+          }}
+          onTouchMove={(e) => {
+            if (touchStartY !== null) {
+              const deltaY = Math.abs(e.touches[0].clientY - touchStartY)
+              if (deltaY > 10) {
+                setIsScrolling(true)
+              }
+            }
+          }}
+          onTouchEnd={() => {
+            setTouchStartY(null)
+            setTimeout(() => setIsScrolling(false), 100)
+          }}
+        >
           {filteredCourses.length === 0 ? (
-            <div className="text-center py-8 sm:py-12">
-              <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-sm sm:text-base text-muted-foreground">No courses available</p>
+            <div className={`text-center ${isMobile ? 'py-6' : 'py-8 sm:py-12'}`}>
+              <BookOpen className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10 sm:h-12 sm:w-12'} text-muted-foreground mx-auto mb-4`} />
+              <p className={`${isMobile ? 'text-sm' : 'text-sm sm:text-base'} text-muted-foreground`}>
+                No courses available
+              </p>
               <p className="text-xs text-muted-foreground/70 mt-2">Check your semester selection</p>
             </div>
           ) : (
@@ -414,6 +463,9 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
                 getStudyToolIcon={getStudyToolIcon}
                 getStudyToolLabel={getStudyToolLabel}
                 selectedContentId={selectedContentId}
+                isMobile={isMobile}
+                compactMode={compactMode}
+                isScrolling={isScrolling}
               />
             ))
           )}
@@ -440,6 +492,9 @@ const CourseItem = React.memo(
     getStudyToolIcon,
     getStudyToolLabel,
     selectedContentId,
+    isMobile = false,
+    compactMode = false,
+    isScrolling = false,
   }: {
     course: Course
     courseData?: any
@@ -462,38 +517,51 @@ const CourseItem = React.memo(
     getStudyToolIcon: (type: string) => React.ReactNode
     getStudyToolLabel: (type: string) => string
     selectedContentId?: string
+    isMobile?: boolean
+    compactMode?: boolean
+    isScrolling?: boolean
   }) => {
     return (
-      <div className="space-y-1">
+      <div className={`space-y-${isMobile ? '1' : '2'}`}>
         {/* Course Header */}
-        <div className="bg-card rounded-lg p-3 hover:bg-accent/50 transition-colors border border-border">
+        <div className={`bg-card rounded-lg ${isMobile ? 'p-2' : 'p-3'} hover:bg-accent/50 transition-colors border border-border touch-manipulation`}>
           <Button
             variant="ghost"
-            className="w-full justify-start text-left p-0 h-auto hover:bg-transparent"
-            onClick={() => onToggleCourse(course.id)}
+            className={`w-full justify-start text-left p-0 h-auto hover:bg-transparent ${isMobile ? 'min-h-[44px]' : ''}`}
+            onClick={() => !isScrolling && onToggleCourse(course.id)}
           >
             <div className="flex items-center gap-2 w-full">
               {expandedCourses.has(course.id) ? (
-                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <ChevronDown className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} shrink-0 text-muted-foreground`} />
               ) : (
-                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <ChevronRight className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} shrink-0 text-muted-foreground`} />
               )}
               <div className="flex-1 min-w-0">
-                <div className="font-medium text-sm text-foreground truncate">{course.title}</div>
-                <div className="text-xs text-muted-foreground">({course.course_code})</div>
-                <div className="text-xs text-muted-foreground">{course.teacher_name}</div>
+                <div className={`font-medium ${isMobile ? 'text-sm' : 'text-sm'} text-foreground truncate`}>
+                  {course.title}
+                </div>
+                {!compactMode && (
+                  <>
+                    <div className="text-xs text-muted-foreground">({course.course_code})</div>
+                    <div className="text-xs text-muted-foreground">{course.teacher_name}</div>
+                  </>
+                )}
 
-                {courseData && !courseData.isLoading && (
-                  <div className="flex gap-2 mt-2">
-                    <Badge variant="secondary" className="text-xs bg-secondary text-secondary-foreground">
+                {courseData && !courseData.isLoading && !compactMode && (
+                  <div className={`flex gap-1 mt-2 ${isMobile ? 'flex-wrap' : ''}`}>
+                    <Badge variant="secondary" className={`${isMobile ? 'text-xs px-1.5 py-0.5' : 'text-xs'} bg-secondary text-secondary-foreground`}>
                       {courseData.topics.length} Topics
                     </Badge>
-                    <Badge variant="outline" className="text-xs border-border text-muted-foreground">
-                      {Object.values(courseData.slides).flat().length} Slides
-                    </Badge>
-                    <Badge variant="outline" className="text-xs border-border text-muted-foreground">
-                      {Object.values(courseData.videos).flat().length} Videos
-                    </Badge>
+                    {!isMobile && (
+                      <>
+                        <Badge variant="outline" className="text-xs border-border text-muted-foreground">
+                          {Object.values(courseData.slides).flat().length} Slides
+                        </Badge>
+                        <Badge variant="outline" className="text-xs border-border text-muted-foreground">
+                          {Object.values(courseData.videos).flat().length} Videos
+                        </Badge>
+                      </>
+                    )}
                   </div>
                 )}
 
@@ -581,18 +649,18 @@ const CourseItem = React.memo(
               <div className="min-w-0">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-left p-2 h-auto hover:bg-accent rounded-md"
-                  onClick={() => onToggleTopics(course.id)}
+                  className={`w-full justify-start text-left ${isMobile ? 'p-2 min-h-[44px]' : 'p-2'} h-auto hover:bg-accent rounded-md touch-manipulation`}
+                  onClick={() => !isScrolling && onToggleTopics(course.id)}
                 >
                   <div className="flex items-center gap-2">
                     {expandedTopics.has(course.id) ? (
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      <ChevronDown className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-muted-foreground`} />
                     ) : (
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <ChevronRight className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-muted-foreground`} />
                     )}
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-foreground">Topics</span>
-                    <Badge variant="secondary" className="text-xs bg-secondary text-secondary-foreground ml-auto">
+                    <FileText className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-muted-foreground`} />
+                    <span className={`${isMobile ? 'text-sm font-medium' : 'text-sm'} text-foreground`}>Topics</span>
+                    <Badge variant="secondary" className={`${isMobile ? 'text-xs px-1.5 py-0.5' : 'text-xs'} bg-secondary text-secondary-foreground ml-auto`}>
                       {courseData.topics.length}
                     </Badge>
                   </div>
@@ -608,21 +676,21 @@ const CourseItem = React.memo(
                         <div key={topic.id}>
                           <Button
                             variant="ghost"
-                            className="w-full justify-start text-left p-3 h-auto min-w-0 sidebar-item-professional"
-                            onClick={() => onToggleTopicItem(topic.id)}
+                            className={`w-full justify-start text-left ${isMobile ? 'p-2 min-h-[44px]' : 'p-3'} h-auto min-w-0 sidebar-item-professional touch-manipulation`}
+                            onClick={() => !isScrolling && onToggleTopicItem(topic.id)}
                           >
                             <div className="flex items-center gap-2 w-full min-w-0">
                               {expandedTopicItems.has(topic.id) ? (
-                                <ChevronDown className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                <ChevronDown className={`${isMobile ? 'h-4 w-4' : 'h-3 w-3'} text-muted-foreground flex-shrink-0`} />
                               ) : (
-                                <ChevronRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                <ChevronRight className={`${isMobile ? 'h-4 w-4' : 'h-3 w-3'} text-muted-foreground flex-shrink-0`} />
                               )}
                               <div className="flex-1 min-w-0">
                                 <ProfessionalTopicTitle
                                   index={index}
                                   title={topic.title}
-                                  maxLength={42}
-                                  variant="default"
+                                  maxLength={isMobile ? 30 : 42}
+                                  variant={isMobile ? "compact" : "default"}
                                   className="text-foreground"
                                 />
                               </div>
@@ -630,7 +698,7 @@ const CourseItem = React.memo(
                           </Button>
 
                           {expandedTopicItems.has(topic.id) && (
-                            <div className="ml-6 space-y-1">
+                            <div className={`${isMobile ? 'ml-4' : 'ml-6'} space-y-1`}>
                               {/* Videos */}
                               {topicVideos.map((video: Video, videoIndex: number) => {
                                 const isSelected = selectedContentId === video.id
@@ -638,13 +706,13 @@ const CourseItem = React.memo(
                                   <Button
                                     key={video.id}
                                     variant="ghost"
-                                    className={`w-full justify-start text-left p-2 h-auto rounded-md group transition-all duration-200 ${
+                                    className={`w-full justify-start text-left ${isMobile ? 'p-2 min-h-[40px]' : 'p-2'} h-auto rounded-md group transition-all duration-200 touch-manipulation ${
                                       isSelected
                                         ? "bg-primary/10 border border-primary/20 shadow-sm"
                                         : "hover:bg-accent"
                                     }`}
                                     onClick={() =>
-                                      onContentClick(
+                                      !isScrolling && onContentClick(
                                         "video",
                                         video.title,
                                         video.youtube_url,
@@ -655,8 +723,8 @@ const CourseItem = React.memo(
                                     }
                                   >
                                     <div className="flex items-center gap-2">
-                                      <Play className={`h-3 w-3 ${isSelected ? "text-red-500" : "text-red-400"}`} />
-                                      <span className={`text-xs truncate ${
+                                      <Play className={`${isMobile ? 'h-4 w-4' : 'h-3 w-3'} ${isSelected ? "text-red-500" : "text-red-400"}`} />
+                                      <span className={`${isMobile ? 'text-sm' : 'text-xs'} truncate ${
                                         isSelected
                                           ? "text-foreground font-medium"
                                           : "text-muted-foreground group-hover:text-foreground"
@@ -678,13 +746,13 @@ const CourseItem = React.memo(
                                   <Button
                                     key={slide.id}
                                     variant="ghost"
-                                    className={`w-full justify-start text-left p-2 h-auto rounded-md group transition-all duration-200 ${
+                                    className={`w-full justify-start text-left ${isMobile ? 'p-2 min-h-[40px]' : 'p-2'} h-auto rounded-md group transition-all duration-200 touch-manipulation ${
                                       isSelected
                                         ? "bg-primary/10 border border-primary/20 shadow-sm"
                                         : "hover:bg-accent"
                                     }`}
                                     onClick={() =>
-                                      onContentClick(
+                                      !isScrolling && onContentClick(
                                         "slide",
                                         slide.title,
                                         slide.google_drive_url,
@@ -695,8 +763,8 @@ const CourseItem = React.memo(
                                     }
                                   >
                                     <div className="flex items-center gap-2">
-                                      <FileText className={`h-3 w-3 ${isSelected ? "text-blue-500" : "text-blue-400"}`} />
-                                      <span className={`text-xs truncate ${
+                                      <FileText className={`${isMobile ? 'h-4 w-4' : 'h-3 w-3'} ${isSelected ? "text-blue-500" : "text-blue-400"}`} />
+                                      <span className={`${isMobile ? 'text-sm' : 'text-xs'} truncate ${
                                         isSelected
                                           ? "text-foreground font-medium"
                                           : "text-muted-foreground group-hover:text-foreground"
