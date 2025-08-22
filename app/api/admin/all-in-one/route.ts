@@ -37,7 +37,6 @@ interface StudyToolData {
   content_url: string
   exam_type: string
   description?: string
-  file_size?: string
 }
 
 interface AllInOneData {

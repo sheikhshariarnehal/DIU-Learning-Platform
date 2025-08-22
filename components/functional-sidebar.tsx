@@ -282,10 +282,10 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
 
   const toggleTopicItem = useCallback((topicId: string) => {
     setExpandedTopicItems((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(topicId)) {
-        newSet.delete(topicId)
-      } else {
+      const newSet = new Set()
+      // If the clicked topic is already expanded, close it (empty set)
+      // If it's not expanded, open only this topic (set with only this topic)
+      if (!prev.has(topicId)) {
         newSet.add(topicId)
       }
       return newSet
@@ -522,7 +522,7 @@ const CourseItem = React.memo(
     isScrolling?: boolean
   }) => {
     return (
-      <div className={`space-y-${isMobile ? '1' : '2'}`}>
+      <div className={isMobile ? 'space-y-1' : 'space-y-2'}>
         {/* Course Header */}
         <div className={`bg-card rounded-lg ${isMobile ? 'p-2' : 'p-3'} hover:bg-accent/50 transition-colors border border-border touch-manipulation`}>
           <Button
@@ -676,7 +676,11 @@ const CourseItem = React.memo(
                         <div key={topic.id}>
                           <Button
                             variant="ghost"
-                            className={`w-full justify-start text-left ${isMobile ? 'p-2 min-h-[44px]' : 'p-3'} h-auto min-w-0 sidebar-item-professional touch-manipulation`}
+                            className={`w-full justify-start text-left ${isMobile ? 'p-2 min-h-[44px]' : 'p-3'} h-auto min-w-0 sidebar-item-professional touch-manipulation ${
+                              expandedTopicItems.has(topic.id)
+                                ? 'bg-primary/10 border border-primary/20 shadow-sm'
+                                : 'hover:bg-accent'
+                            }`}
                             onClick={() => !isScrolling && onToggleTopicItem(topic.id)}
                           >
                             <div className="flex items-center gap-2 w-full min-w-0">
@@ -689,18 +693,53 @@ const CourseItem = React.memo(
                                 <ProfessionalTopicTitle
                                   index={index}
                                   title={topic.title}
-                                  maxLength={isMobile ? 30 : 42}
+                                  maxLength={isMobile ? 25 : 35}
                                   variant={isMobile ? "compact" : "default"}
-                                  className="text-foreground"
+                                  className={expandedTopicItems.has(topic.id) ? "text-primary font-semibold" : "text-foreground"}
                                 />
                               </div>
+
+                              {/* Content count badge */}
+                              {!expandedTopicItems.has(topic.id) && (
+                                <Badge
+                                  variant="secondary"
+                                  className={`${isMobile ? 'text-xs px-1.5 py-0.5' : 'text-xs'} bg-secondary/80 text-secondary-foreground ml-2 flex-shrink-0`}
+                                >
+                                  {topicVideos.length + topicSlides.length}
+                                </Badge>
+                              )}
                             </div>
                           </Button>
 
                           {expandedTopicItems.has(topic.id) && (
-                            <div className={`${isMobile ? 'ml-4' : 'ml-6'} space-y-1`}>
-                              {/* Videos */}
-                              {topicVideos.map((video: Video, videoIndex: number) => {
+                            <div className={`${isMobile ? 'ml-4' : 'ml-6'} space-y-1 topic-content-enter-active mt-2 p-2 bg-muted/30 rounded-lg border border-border/50`}>
+                              {/* Content Header */}
+                              <div className="flex items-center justify-between mb-2 pb-1 border-b border-border/30">
+                                <span className="text-xs font-medium text-muted-foreground">
+                                  Topic Content
+                                </span>
+                                <div className="flex gap-1">
+                                  {topicVideos.length > 0 && (
+                                    <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                                      {topicVideos.length} Videos
+                                    </Badge>
+                                  )}
+                                  {topicSlides.length > 0 && (
+                                    <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                                      {topicSlides.length} Slides
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Videos Section */}
+                              {topicVideos.length > 0 && (
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Play className="h-3 w-3 text-red-400" />
+                                    <span className="text-xs font-medium text-muted-foreground">Videos</span>
+                                  </div>
+                                  {topicVideos.map((video: Video, videoIndex: number) => {
                                 const isSelected = selectedContentId === video.id
                                 return (
                                   <Button
@@ -737,10 +776,18 @@ const CourseItem = React.memo(
                                     </div>
                                   </Button>
                                 )
-                              })}
+                                  })}
+                                </div>
+                              )}
 
-                              {/* Slides */}
-                              {topicSlides.map((slide: Slide, slideIndex: number) => {
+                              {/* Slides Section */}
+                              {topicSlides.length > 0 && (
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <FileText className="h-3 w-3 text-blue-400" />
+                                    <span className="text-xs font-medium text-muted-foreground">Slides</span>
+                                  </div>
+                                  {topicSlides.map((slide: Slide, slideIndex: number) => {
                                 const isSelected = selectedContentId === slide.id
                                 return (
                                   <Button
@@ -777,10 +824,14 @@ const CourseItem = React.memo(
                                     </div>
                                   </Button>
                                 )
-                              })}
+                                  })}
+                                </div>
+                              )}
 
                               {topicSlides.length === 0 && topicVideos.length === 0 && (
-                                <div className="text-xs text-muted-foreground py-2 pl-2">No content available</div>
+                                <div className="text-xs text-muted-foreground py-2 pl-2 text-center">
+                                  No content available for this topic
+                                </div>
                               )}
                             </div>
                           )}

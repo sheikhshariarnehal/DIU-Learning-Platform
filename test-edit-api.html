@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Enhanced Creator Edit API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Enhanced Creator Edit API Test</h1>
+        <p>Test the PUT endpoint for updating semesters</p>
+        
+        <button onclick="testGetSemester()">1. Get Semester Data</button>
+        <button onclick="testUpdateSemester()">2. Test Update Semester</button>
+        <button onclick="testMinimalUpdate()">3. Test Minimal Update</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3002';
+        const SEMESTER_ID = '730ce4bf-36a9-46b7-9ef7-0c90007ee2d0';
+        
+        function showResult(message, type = 'info') {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = message;
+        }
+        
+        async function testGetSemester() {
+            try {
+                showResult('Fetching semester data...', 'info');
+                
+                const response = await fetch(`${API_BASE}/api/admin/all-in-one/${SEMESTER_ID}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult(`GET Success:\n${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    showResult(`GET Error:\n${JSON.stringify(data, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                showResult(`GET Exception:\n${error.message}`, 'error');
+            }
+        }
+        
+        async function testUpdateSemester() {
+            try {
+                showResult('Testing semester update...', 'info');
+                
+                // First get the current data
+                const getResponse = await fetch(`${API_BASE}/api/admin/all-in-one/${SEMESTER_ID}`);
+                const currentData = await getResponse.json();
+                
+                if (!getResponse.ok) {
+                    showResult(`Failed to get current data:\n${JSON.stringify(currentData, null, 2)}`, 'error');
+                    return;
+                }
+                
+                // Modify the title slightly
+                const updatedData = {
+                    ...currentData,
+                    semester: {
+                        ...currentData.semester,
+                        title: currentData.semester.title + ' (Updated)',
+                        description: 'Updated via API test'
+                    }
+                };
+                
+                // Send PUT request
+                const putResponse = await fetch(`${API_BASE}/api/admin/all-in-one/${SEMESTER_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+                
+                const result = await putResponse.json();
+                
+                if (putResponse.ok) {
+                    showResult(`PUT Success:\n${JSON.stringify(result, null, 2)}`, 'success');
+                } else {
+                    showResult(`PUT Error (${putResponse.status}):\n${JSON.stringify(result, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                showResult(`PUT Exception:\n${error.message}`, 'error');
+            }
+        }
+        
+        async function testMinimalUpdate() {
+            try {
+                showResult('Testing minimal update...', 'info');
+                
+                const minimalData = {
+                    semester: {
+                        title: 'Test Semester (Minimal)',
+                        description: 'Minimal test update',
+                        section: 'TEST',
+                        has_midterm: true,
+                        has_final: true
+                    },
+                    courses: []
+                };
+                
+                const response = await fetch(`${API_BASE}/api/admin/all-in-one/${SEMESTER_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(minimalData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult(`Minimal PUT Success:\n${JSON.stringify(result, null, 2)}`, 'success');
+                } else {
+                    showResult(`Minimal PUT Error (${response.status}):\n${JSON.stringify(result, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                showResult(`Minimal PUT Exception:\n${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

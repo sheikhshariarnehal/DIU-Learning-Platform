@@ -553,8 +553,7 @@ export function EnhancedAllInOneCreator({ editId, mode = "create", onSuccess }: 
                   type: "previous_questions",
                   content_url: "",
                   exam_type: "both",
-                  description: "",
-                  file_size: ""
+                  description: ""
                 }
               ]
             }
@@ -1837,15 +1836,7 @@ export function EnhancedAllInOneCreator({ editId, mode = "create", onSuccess }: 
                                         className="resize-none"
                                       />
                                     </div>
-                                    <div className="space-y-2">
-                                      <Label className="text-sm font-medium">File Size (optional)</Label>
-                                      <Input
-                                        placeholder="e.g., 2.5 MB"
-                                        value={tool.file_size || ""}
-                                        onChange={(e) => updateStudyTool(courseIndex, toolIndex, "file_size", e.target.value)}
-                                        className="h-9"
-                                      />
-                                    </div>
+
 
                                     {/* Resource Preview */}
                                     <div className="p-3 bg-muted/30 rounded-lg">
@@ -1857,11 +1848,6 @@ export function EnhancedAllInOneCreator({ editId, mode = "create", onSuccess }: 
                                         <Badge variant="outline" className="text-xs">
                                           {tool.exam_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                         </Badge>
-                                        {tool.file_size && (
-                                          <Badge variant="secondary" className="text-xs">
-                                            {tool.file_size}
-                                          </Badge>
-                                        )}
                                       </div>
                                       {tool.content_url && (
                                         <div className="mt-2 text-xs text-muted-foreground">
