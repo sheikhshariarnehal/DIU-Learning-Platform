@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,9 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { toast } from "sonner"
@@ -24,30 +22,26 @@ import {
   Plus,
   Trash2,
   Edit3,
-  Save,
   ArrowLeft,
   ArrowRight,
   Upload,
-  Link,
-  GraduationCap,
-  Users,
-  Clock,
-  Target,
-  Sparkles,
   Loader2,
   AlertCircle,
   CheckCircle2,
-  Info,
   X,
-  Copy,
   Eye,
-  Settings,
   Zap,
   Play,
-  BarChart3
+  Sparkles,
+  Clock,
+  Users,
+  Target,
+  BarChart3,
+  Link,
+  Save
 } from "lucide-react"
 
-// Enhanced interfaces with validation
+// Optimized interfaces
 interface SemesterData {
   title: string
   description: string
@@ -72,8 +66,8 @@ interface TopicData {
   title: string
   description: string
   order_index?: number
-  slides: { title: string; url: string; description?: string }[]
-  videos: { title: string; url: string; description?: string; duration?: string }[]
+  slides: { title: string; url: string }[]
+  videos: { title: string; url: string; duration?: string }[]
 }
 
 interface StudyToolData {
@@ -82,7 +76,6 @@ interface StudyToolData {
   content_url: string
   exam_type: string
   description?: string
-  file_size?: string
 }
 
 interface AllInOneData {
@@ -100,11 +93,11 @@ interface EnhancedAllInOneCreatorProps {
   onSuccess?: () => void
 }
 
-// Validation functions
+// Optimized validation functions
 const validateSemester = (semester: SemesterData): string[] => {
   const errors: string[] = []
-  if (!semester.title.trim()) errors.push("Semester title is required")
-  if (!semester.section.trim()) errors.push("Section is required")
+  if (!semester.title?.trim()) errors.push("Semester title is required")
+  if (!semester.section?.trim()) errors.push("Section is required")
   if (semester.start_date && semester.end_date && new Date(semester.start_date) >= new Date(semester.end_date)) {
     errors.push("Start date must be before end date")
   }
@@ -113,16 +106,17 @@ const validateSemester = (semester: SemesterData): string[] => {
 
 const validateCourse = (course: CourseData): string[] => {
   const errors: string[] = []
-  if (!course.title.trim()) errors.push("Course title is required")
-  if (!course.course_code.trim()) errors.push("Course code is required")
-  if (!course.teacher_name.trim()) errors.push("Teacher name is required")
+  if (!course.title?.trim()) errors.push("Course title is required")
+  if (!course.course_code?.trim()) errors.push("Course code is required")
+  if (!course.teacher_name?.trim()) errors.push("Teacher name is required")
   if (course.teacher_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(course.teacher_email)) {
-    errors.push("Invalid teacher email format")
+    errors.push("Invalid email format")
   }
   return errors
 }
 
 const validateUrl = (url: string): boolean => {
+  if (!url) return false
   try {
     new URL(url)
     return true
@@ -131,26 +125,18 @@ const validateUrl = (url: string): boolean => {
   }
 }
 
-// Check if form is ready for submission
+// Optimized form validation
 const isFormReadyForSubmission = (data: AllInOneData): boolean => {
-  // Check semester
-  if (!data.semester.title.trim() || !data.semester.section.trim()) {
-    return false
-  }
-
-  // Check courses
-  if (data.courses.length === 0) {
-    return false
-  }
-
-  // Check if all courses have required fields
-  for (const course of data.courses) {
-    if (!course.title.trim() || !course.course_code.trim() || !course.teacher_name.trim()) {
-      return false
-    }
-  }
-
-  return true
+  return !!(
+    data.semester?.title?.trim() &&
+    data.semester?.section?.trim() &&
+    data.courses?.length > 0 &&
+    data.courses.every(course =>
+      course.title?.trim() &&
+      course.course_code?.trim() &&
+      course.teacher_name?.trim()
+    )
+  )
 }
 
 export function EnhancedAllInOneCreator({ editId, mode = "create", onSuccess }: EnhancedAllInOneCreatorProps = {}) {
@@ -160,13 +146,13 @@ export function EnhancedAllInOneCreator({ editId, mode = "create", onSuccess }: 
   const [isLoading, setIsLoading] = useState(false)
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({})
   const [previewMode, setPreviewMode] = useState(false)
-  const [autoSave, setAutoSave] = useState(true)
+  const [autoSave, setAutoSave] = useState(mode === "edit")
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [creationSuccess, setCreationSuccess] = useState<{
     semesterTitle: string
     summary: any
   } | null>(null)
-  
+
   const [data, setData] = useState<AllInOneData>({
     semester: {
       title: "",
@@ -181,125 +167,153 @@ export function EnhancedAllInOneCreator({ editId, mode = "create", onSuccess }: 
     courses: []
   })
 
-  const steps = [
-    { 
-      title: "Semester Setup", 
-      icon: Calendar, 
+  // Memoized steps configuration
+  const steps = useMemo(() => [
+    {
+      title: "Semester Setup",
+      icon: Calendar,
       description: mode === "edit" ? "Edit semester information" : "Configure semester details",
       color: "bg-blue-500"
     },
-    { 
-      title: "Course Management", 
-      icon: BookOpen, 
+    {
+      title: "Course Management",
+      icon: BookOpen,
       description: mode === "edit" ? "Edit courses" : "Add and configure courses",
       color: "bg-green-500"
     },
-    { 
-      title: "Content Creation", 
-      icon: FileText, 
+    {
+      title: "Content Creation",
+      icon: FileText,
       description: mode === "edit" ? "Edit topics and materials" : "Create topics, slides, and videos",
       color: "bg-purple-500"
     },
-    { 
-      title: "Study Resources", 
-      icon: ClipboardList, 
+    {
+      title: "Study Resources",
+      icon: ClipboardList,
       description: mode === "edit" ? "Edit study materials" : "Add study tools and resources",
       color: "bg-orange-500"
     },
-    { 
-      title: "Review & Publish", 
-      icon: Check, 
+    {
+      title: "Review & Publish",
+      icon: Check,
       description: mode === "edit" ? "Review and update" : "Review and create everything",
       color: "bg-emerald-500"
     }
-  ]
+  ], [mode])
 
-  // Calculate progress
-  const calculateProgress = () => {
+  // Memoized progress calculation
+  const progress = useMemo(() => {
     let completed = 0
     const total = steps.length
 
-    // Step 0: Semester - Check if basic semester info is filled
-    if (data.semester.title && data.semester.section) completed++
+    // Step 0: Semester
+    if (data.semester?.title && data.semester?.section) completed++
 
-    // Step 1: Courses - Check if at least one complete course exists
-    if (data.courses.length > 0 && data.courses.every(c => c.title && c.course_code && c.teacher_name)) completed++
+    // Step 1: Courses
+    if (data.courses?.length > 0 && data.courses.every(c => c.title && c.course_code && c.teacher_name)) completed++
 
-    // Step 2: Content - Check if any course has topics with content
-    const hasContent = data.courses.some(c =>
-      c.topics.length > 0 && c.topics.some(t =>
-        t.title && (t.slides.length > 0 || t.videos.length > 0)
-      )
-    )
-    if (hasContent || data.courses.some(c => c.topics.length > 0)) completed++
+    // Step 2: Content
+    if (data.courses?.some(c => c.topics?.length > 0)) completed++
 
-    // Step 3: Study Tools - Check if any course has study resources
-    if (data.courses.some(c => c.studyTools.length > 0)) completed++
+    // Step 3: Study Tools
+    if (data.courses?.some(c => c.studyTools?.length > 0)) completed++
 
-    // Step 4: Review - Available when at least basic structure is complete
+    // Step 4: Review
     if (completed >= 2) completed++
 
     return Math.min((completed / total) * 100, 100)
-  }
+  }, [data, steps.length])
 
-  // Auto-save functionality
-  useEffect(() => {
-    if (autoSave && mode === "edit" && editId) {
-      const timer = setTimeout(() => {
-        handleAutoSave()
-      }, 30000) // Auto-save every 30 seconds
+  // Optimized auto-save with useCallback
+  const handleAutoSave = useCallback(async () => {
+    if (mode !== "edit" || !editId || !isFormReadyForSubmission(data)) return
 
-      return () => clearTimeout(timer)
-    }
-  }, [data, autoSave, mode, editId])
-
-  const handleAutoSave = async () => {
-    if (mode !== "edit" || !editId) return
-    
     try {
       const response = await fetch(`/api/admin/all-in-one/${editId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, auto_save: true }),
       })
-      
+
       if (response.ok) {
         setLastSaved(new Date())
-        toast.success("Auto-saved successfully", { duration: 2000 })
+        toast.success("Auto-saved", { duration: 1000 })
       }
     } catch (error) {
       console.error("Auto-save failed:", error)
     }
-  }
+  }, [mode, editId, data])
 
-  // Load existing data when in edit mode
+  // Auto-save effect
+  useEffect(() => {
+    if (!autoSave || mode !== "edit" || !editId) return
+
+    const timer = setTimeout(handleAutoSave, 30000)
+    return () => clearTimeout(timer)
+  }, [autoSave, mode, editId, handleAutoSave])
+
+  // Optimized data loading
+  const loadExistingData = useCallback(async () => {
+    if (!editId) return
+
+    setIsLoading(true)
+    try {
+      const response = await fetch(`/api/admin/all-in-one/${editId}`)
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        if (response.status === 404) {
+          throw new Error("Semester not found")
+        }
+        throw new Error(errorData.error || `Server error: ${response.status}`)
+      }
+
+      const existingData = await response.json()
+
+      // Validate the data structure
+      if (!existingData.semester || !existingData.courses) {
+        throw new Error("Invalid data format received")
+      }
+
+      setData(existingData)
+      toast.success("Data loaded successfully")
+    } catch (error) {
+      console.error("Error loading data:", error)
+      const errorMessage = error instanceof Error ? error.message : "Failed to load data"
+      toast.error(`Failed to load data: ${errorMessage}`)
+
+      // If semester not found, offer options
+      if (errorMessage.includes("not found")) {
+        toast.error("Semester not found", {
+          duration: 5000,
+          action: {
+            label: "View All Semesters",
+            onClick: () => router.push("/admin/enhanced-creator/list")
+          }
+        })
+
+        // Show error state with navigation options
+        setTimeout(() => {
+          if (confirm("Semester not found. Would you like to view all semesters or create a new one?\n\nClick OK to view all semesters, Cancel to create new.")) {
+            router.push("/admin/enhanced-creator/list")
+          } else {
+            router.push("/admin/enhanced-creator")
+          }
+        }, 2000)
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [editId])
+
   useEffect(() => {
     if (mode === "edit" && editId) {
       loadExistingData()
     }
-  }, [mode, editId])
+  }, [mode, editId, loadExistingData])
 
-  const loadExistingData = async () => {
-    setIsLoading(true)
-    try {
-      const response = await fetch(`/api/admin/all-in-one/${editId}`)
-      if (!response.ok) {
-        throw new Error("Failed to load semester data")
-      }
-
-      const existingData = await response.json()
-      setData(existingData)
-      toast.success("Data loaded successfully")
-    } catch (error) {
-      console.error("Error loading existing data:", error)
-      toast.error("Failed to load semester data. Please try again.")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // Course management functions
-  const addCourse = () => {
+  // Optimized course management
+  const addCourse = useCallback(() => {
     setData(prev => ({
       ...prev,
       courses: [
@@ -316,24 +330,24 @@ export function EnhancedAllInOneCreator({ editId, mode = "create", onSuccess }: 
         }
       ]
     }))
-  }
+  }, [])
 
-  const removeCourse = (index: number) => {
+  const removeCourse = useCallback((index: number) => {
     setData(prev => ({
       ...prev,
       courses: prev.courses.filter((_, i) => i !== index)
     }))
     toast.success("Course removed")
-  }
+  }, [])
 
-  const updateCourse = (index: number, field: keyof CourseData, value: any) => {
+  const updateCourse = useCallback((index: number, field: keyof CourseData, value: any) => {
     setData(prev => ({
       ...prev,
-      courses: prev.courses.map((course, i) => 
+      courses: prev.courses.map((course, i) =>
         i === index ? { ...course, [field]: value } : course
       )
     }))
-  }
+  }, [])
 
   // Topic management functions
   const addTopic = (courseIndex: number) => {
@@ -900,11 +914,11 @@ export function EnhancedAllInOneCreator({ editId, mode = "create", onSuccess }: 
               </Button>
 
               <Button
-                onClick={() => router.push("/admin/semesters")}
+                onClick={() => router.push("/admin/enhanced-creator/list")}
                 className="h-20 flex-col bg-blue-600 hover:bg-blue-700"
               >
                 <Eye className="h-6 w-6 mb-2" />
-                View All Semesters
+                View All Enhanced Semesters
               </Button>
 
               <Button
@@ -984,10 +998,10 @@ export function EnhancedAllInOneCreator({ editId, mode = "create", onSuccess }: 
             <div className="flex items-center justify-between">
               <h3 className="font-semibold">Progress Overview</h3>
               <Badge variant="outline" className="font-mono">
-                {Math.round(calculateProgress())}% Complete
+                {Math.round(progress)}% Complete
               </Badge>
             </div>
-            <Progress value={calculateProgress()} className="h-2" />
+            <Progress value={progress} className="h-2" />
             <div className="grid grid-cols-5 gap-2">
               {steps.map((step, index) => (
                 <div

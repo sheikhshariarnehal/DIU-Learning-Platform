@@ -1,39 +1,44 @@
-"use client"
-
+import { Metadata } from "next"
 import { EnhancedAllInOneCreator } from "@/components/admin/enhanced-all-in-one-creator"
+import { Button } from "@/components/ui/button"
+import { List, Plus } from "lucide-react"
+import Link from "next/link"
+
+export const metadata: Metadata = {
+  title: "Enhanced Creator - DIU Learning Platform",
+  description: "Create complete semester structures with our advanced workflow. Enhanced UI, real-time validation, and auto-save functionality.",
+  keywords: ["semester creator", "course management", "DIU", "learning platform", "education"],
+  robots: "noindex, nofollow", // Admin pages shouldn't be indexed
+}
 
 export default function EnhancedCreatorPage() {
   return (
-    <div className="space-y-6">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 bg-clip-text text-transparent">
+    <main className="container mx-auto py-6 space-y-6">
+      {/* Navigation Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/admin/enhanced-creator/list">
+            <Button variant="outline">
+              <List className="h-4 w-4 mr-2" />
+              View All Enhanced Semesters
+            </Button>
+          </Link>
+        </div>
+        <div className="text-sm text-muted-foreground">
           Enhanced All-in-One Creator
-        </h1>
-        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Experience our next-generation semester creation tool with enhanced user interface, 
-          improved workflow, and advanced features for better productivity.
-        </p>
-        <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            Enhanced UI/UX
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-            Real-time Validation
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-            Auto-save Support
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-            Progress Tracking
-          </div>
         </div>
       </div>
 
+      <header className="text-center space-y-3">
+        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 bg-clip-text text-transparent">
+          Enhanced All-in-One Creator
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Create complete semester structures with enhanced workflow and real-time validation.
+        </p>
+      </header>
+
       <EnhancedAllInOneCreator mode="create" />
-    </div>
+    </main>
   )
 }
