@@ -148,7 +148,10 @@ const TopicItem = memo(
               <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-slate-400 transition-transform duration-200" />
             )}
             <div className="flex-1 min-w-0">
-              <span className="text-sm sm:text-base font-medium text-slate-300 truncate block">
+              <span
+                className="text-sm sm:text-base font-medium text-slate-300 truncate block"
+                title={`${index + 1}. ${topic.title}`}
+              >
                 {index + 1}. {topic.title}
               </span>
               <div className="flex items-center gap-2 mt-1">

@@ -344,7 +344,7 @@ export function EnhancedCreatorView({ semesterId }: EnhancedCreatorViewProps) {
                         <div className="space-y-2">
                           {course.topics.map((topic) => (
                             <div key={topic.id} className="text-sm p-2 bg-muted rounded">
-                              <div className="font-medium">{topic.title}</div>
+                              <div className="font-medium truncate" title={topic.title}>{topic.title}</div>
                               <div className="text-xs text-muted-foreground">
                                 {topic.slides.length} slides, {topic.videos.length} videos
                               </div>

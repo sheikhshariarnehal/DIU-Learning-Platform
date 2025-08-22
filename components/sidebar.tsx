@@ -441,7 +441,10 @@ export function Sidebar({ onContentSelect }: SidebarProps) {
                                     ) : (
                                       <ChevronRight className="h-3 w-3 text-muted-foreground" />
                                     )}
-                                    <span className="text-xs font-medium flex-1 truncate">
+                                    <span
+                                      className="text-xs font-medium flex-1 truncate"
+                                      title={`Section ${sectionIndex + 1}: ${topic.title}`}
+                                    >
                                       Section {sectionIndex + 1}: {topic.title}
                                     </span>
                                     <Badge variant="outline" className="text-xs">

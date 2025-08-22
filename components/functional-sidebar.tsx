@@ -541,7 +541,7 @@ const CourseItem = React.memo(
 
             {/* Topics Section */}
             {courseData.topics.length > 0 && (
-              <div>
+              <div className="min-w-0">
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-left p-2 h-auto hover:bg-accent rounded-md"
@@ -562,7 +562,7 @@ const CourseItem = React.memo(
                 </Button>
 
                 {expandedTopics.has(course.id) && (
-                  <div className="ml-6 space-y-1">
+                  <div className="ml-6 space-y-1 min-w-0">
                     {courseData.topics.map((topic: Topic, index: number) => {
                       const topicSlides = courseData.slides[topic.id] || []
                       const topicVideos = courseData.videos[topic.id] || []
@@ -571,16 +571,19 @@ const CourseItem = React.memo(
                         <div key={topic.id}>
                           <Button
                             variant="ghost"
-                            className="w-full justify-start text-left p-2 h-auto hover:bg-accent rounded-md"
+                            className="w-full justify-start text-left p-2 h-auto hover:bg-accent rounded-md min-w-0"
                             onClick={() => onToggleTopicItem(topic.id)}
                           >
-                            <div className="flex items-center gap-2 w-full">
+                            <div className="flex items-center gap-2 w-full min-w-0">
                               {expandedTopicItems.has(topic.id) ? (
-                                <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                                <ChevronDown className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                               ) : (
-                                <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                                <ChevronRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                               )}
-                              <span className="text-sm flex-1 text-foreground truncate">
+                              <span
+                                className="text-sm flex-1 text-foreground min-w-0 sidebar-topic-title-wrap"
+                                title={`${index + 1}. ${topic.title}`}
+                              >
                                 {index + 1}. {topic.title}
                               </span>
                             </div>

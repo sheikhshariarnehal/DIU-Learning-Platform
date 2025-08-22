@@ -451,7 +451,7 @@ export default function HomePage() {
             ${isMobile ? "fixed inset-y-0 left-0 z-40" : "relative"}
             ${isMobile && !sidebarOpen ? "-translate-x-full" : "translate-x-0"}
             transition-transform duration-300 ease-in-out
-            ${isMobile ? "w-[85vw] max-w-sm top-14" : "w-80 lg:w-96"}
+            ${isMobile ? "w-[85vw] max-w-sm top-14" : "w-80 lg:w-96 xl:w-[28rem]"}
             bg-card/95 backdrop-blur-sm ${isMobile ? "border-r shadow-2xl" : "border-l"} border-border flex-shrink-0
           `}
         >

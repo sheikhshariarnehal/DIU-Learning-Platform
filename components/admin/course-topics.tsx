@@ -66,7 +66,13 @@ export async function CourseTopics({ courseId }: CourseTopicsProps) {
         <TableBody>
           {topics.map((topic) => (
             <TableRow key={topic.id}>
-              <TableCell className="font-medium">{topic.title}</TableCell>
+              <TableCell className="font-medium">
+                <div className="max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
+                  <span className="block truncate" title={topic.title}>
+                    {topic.title}
+                  </span>
+                </div>
+              </TableCell>
               <TableCell>
                 <Badge variant="secondary">#{topic.order_index}</Badge>
               </TableCell>
