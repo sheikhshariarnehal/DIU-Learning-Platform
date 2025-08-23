@@ -67,7 +67,7 @@ interface TopicData {
   description: string
   order_index?: number
   slides: { title: string; url: string }[]
-  videos: { title: string; url: string; duration?: string }[]
+  videos: { title: string; url: string }[]
 }
 
 interface StudyToolData {
@@ -495,7 +495,7 @@ export function EnhancedAllInOneCreator({ editId, mode = "create", onSuccess }: 
                 ti === topicIndex
                   ? {
                       ...topic,
-                      videos: [...topic.videos, { title: "", url: "", description: "", duration: "" }]
+                      videos: [...topic.videos, { title: "", url: "", description: "" }]
                     }
                   : topic
               )
@@ -1606,7 +1606,7 @@ export function EnhancedAllInOneCreator({ editId, mode = "create", onSuccess }: 
                                       </div>
                                       {topic.videos.map((video, videoIndex) => (
                                         <div key={videoIndex} className="flex gap-2 p-3 border rounded-lg bg-muted/30">
-                                          <div className="flex-1 grid gap-2 md:grid-cols-3">
+                                          <div className="flex-1 grid gap-2 md:grid-cols-2">
                                             <Input
                                               placeholder="Video title"
                                               value={video.title}
@@ -1617,12 +1617,6 @@ export function EnhancedAllInOneCreator({ editId, mode = "create", onSuccess }: 
                                               placeholder="YouTube URL"
                                               value={video.url}
                                               onChange={(e) => updateVideo(courseIndex, topicIndex, videoIndex, "url", e.target.value)}
-                                              className="h-8 text-sm"
-                                            />
-                                            <Input
-                                              placeholder="Duration (e.g., 15:30)"
-                                              value={video.duration || ""}
-                                              onChange={(e) => updateVideo(courseIndex, topicIndex, videoIndex, "duration", e.target.value)}
                                               className="h-8 text-sm"
                                             />
                                           </div>

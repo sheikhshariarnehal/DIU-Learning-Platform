@@ -30,7 +30,7 @@ interface TopicData {
   description: string
   order_index?: number
   slides: { id?: string; title: string; url: string; description?: string }[]
-  videos: { id?: string; title: string; url: string; description?: string; duration?: string }[]
+  videos: { id?: string; title: string; url: string; description?: string }[]
 }
 
 interface StudyToolData {
@@ -450,7 +450,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
               title: video.title,
               youtube_url: video.url,
               description: video.description || null,
-              duration: video.duration || null,
               topic_id: topicId,
               order_index: index
             }))

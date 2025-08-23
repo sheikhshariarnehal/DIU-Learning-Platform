@@ -28,7 +28,7 @@ interface TopicData {
   description: string
   order_index?: number
   slides: { title: string; url: string; description?: string }[]
-  videos: { title: string; url: string; description?: string; duration?: string }[]
+  videos: { title: string; url: string; description?: string }[]
 }
 
 interface StudyToolData {
