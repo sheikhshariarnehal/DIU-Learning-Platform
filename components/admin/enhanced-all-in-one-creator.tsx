@@ -125,6 +125,18 @@ const validateUrl = (url: string): boolean => {
   }
 }
 
+const validateGoogleUrl = (url: string): boolean => {
+  if (!url) return false
+  try {
+    const urlObj = new URL(url)
+    // Support all Google services and domains
+    const googleDomainPattern = /^(drive|docs|sheets|forms|sites|calendar|meet|classroom|photos|maps|translate|scholar|books|news|mail|youtube|blogger|plus|hangouts|keep|jamboard|earth|chrome|play|store|pay|ads|analytics|search|trends|alerts|groups|contacts|voice|duo|allo|spaces|currents|my|accounts|support|developers|cloud|firebase|colab|datastudio|optimize|tagmanager|marketingplatform|admob|adsense|doubleclick|googleadservices|googlesyndication|googletagmanager|googleusercontent|gstatic|googleapis|appspot|firebaseapp|web\.app|page\.link|goo\.gl|g\.co)\.google\.com$/
+    return googleDomainPattern.test(urlObj.hostname) || urlObj.hostname === 'google.com'
+  } catch {
+    return false
+  }
+}
+
 // Optimized form validation
 const isFormReadyForSubmission = (data: AllInOneData): boolean => {
   return !!(
@@ -635,8 +647,12 @@ export function EnhancedAllInOneCreator({ editId, mode = "create", onSuccess }: 
               if (slide.title && !slide.url) {
                 contentErrors.push(`Course ${ci + 1}, Topic ${ti + 1}, Slide ${si + 1}: URL is required when title is provided`)
               }
-              if (slide.url && !validateUrl(slide.url)) {
-                contentErrors.push(`Course ${ci + 1}, Topic ${ti + 1}, Slide ${si + 1}: Invalid URL`)
+              if (slide.url) {
+                if (!validateUrl(slide.url)) {
+                  contentErrors.push(`Course ${ci + 1}, Topic ${ti + 1}, Slide ${si + 1}: Invalid URL format`)
+                } else if (!validateGoogleUrl(slide.url)) {
+                  contentErrors.push(`Course ${ci + 1}, Topic ${ti + 1}, Slide ${si + 1}: Please use a Google service URL (Drive, Docs, Sheets, etc.)`)
+                }
               }
             })
             topic.videos.forEach((video, vi) => {
@@ -704,8 +720,12 @@ export function EnhancedAllInOneCreator({ editId, mode = "create", onSuccess }: 
           if (slide.title && !slide.url) {
             allErrors.push(`Course ${ci + 1}, Topic ${ti + 1}, Slide ${si + 1}: URL is required when title is provided`)
           }
-          if (slide.url && !validateUrl(slide.url)) {
-            allErrors.push(`Course ${ci + 1}, Topic ${ti + 1}, Slide ${si + 1}: Invalid URL`)
+          if (slide.url) {
+            if (!validateUrl(slide.url)) {
+              allErrors.push(`Course ${ci + 1}, Topic ${ti + 1}, Slide ${si + 1}: Invalid URL format`)
+            } else if (!validateGoogleUrl(slide.url)) {
+              allErrors.push(`Course ${ci + 1}, Topic ${ti + 1}, Slide ${si + 1}: Please use a Google service URL (Drive, Docs, Sheets, etc.)`)
+            }
           }
         })
         topic.videos.forEach((video, vi) => {
