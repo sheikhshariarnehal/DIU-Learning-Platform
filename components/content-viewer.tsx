@@ -423,18 +423,31 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
       content-viewer-container h-full bg-white dark:bg-slate-900 rounded-lg overflow-hidden
       shadow-lg sm:shadow-2xl relative transition-all duration-300
       ${isFullscreen ? 'fixed inset-0 z-50 rounded-none' : ''}
+      ${isMobile ? 'mobile-content-viewer' : ''}
     `}>
       {/* Content Header */}
-      <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 via-black/40 to-transparent p-3 sm:p-4 lg:p-5">
+      <div className={`
+        absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 via-black/40 to-transparent
+        ${isMobile ? 'p-2 sm:p-3' : 'p-3 sm:p-4 lg:p-5'}
+        ${isFullscreen && isMobile ? 'pt-safe-top' : ''}
+      `}>
         <div className="flex items-start justify-between text-white gap-2 sm:gap-3">
           <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
             {getContentIcon()}
             <div className="min-w-0 flex-1">
-              <h3 className="font-semibold text-sm sm:text-base lg:text-lg leading-tight line-clamp-2 mb-1">
+              <h3 className={`
+                font-semibold leading-tight line-clamp-2 mb-1
+                ${isMobile ? 'text-xs sm:text-sm' : 'text-sm sm:text-base lg:text-lg'}
+              `}>
                 {content.title}
               </h3>
               {content.topicTitle && (
-                <p className="text-xs sm:text-sm opacity-80 truncate mb-0.5">{content.topicTitle}</p>
+                <p className={`
+                  opacity-80 truncate mb-0.5
+                  ${isMobile ? 'text-xs' : 'text-xs sm:text-sm'}
+                `}>
+                  {content.topicTitle}
+                </p>
               )}
               {content.courseTitle && (
                 <p className="text-xs opacity-70 truncate">{content.courseTitle}</p>
@@ -442,26 +455,31 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
             </div>
           </div>
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            {/* View Time */}
-            <div className="hidden sm:flex items-center gap-1 text-white/80 text-xs">
-              <Clock className="h-3 w-3" />
-              <span>{formatTime(viewTime)}</span>
-            </div>
+            {/* View Time - Hidden on mobile in header, shown in mobile controls */}
+            {!isMobile && (
+              <div className="hidden sm:flex items-center gap-1 text-white/80 text-xs">
+                <Clock className="h-3 w-3" />
+                <span>{formatTime(viewTime)}</span>
+              </div>
+            )}
 
             <Badge
               variant="secondary"
-              className={`text-xs px-2 py-1 font-medium ${
-                content.type === "video"
+              className={`
+                font-medium
+                ${isMobile ? 'text-xs px-1.5 py-0.5' : 'text-xs px-2 py-1'}
+                ${content.type === "video"
                   ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
                   : content.type === "slide"
                     ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
                     : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-              }`}
+                }
+              `}
             >
-              {content.type}
+              {isMobile ? content.type.charAt(0).toUpperCase() : content.type}
             </Badge>
 
-            {/* Modern Controls */}
+            {/* Desktop Controls */}
             {!isMobile && showControls && (
               <div className="flex items-center gap-1">
                 {/* Bookmark */}
@@ -559,17 +577,31 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
               </div>
             )}
 
-            {/* Mobile Fullscreen */}
+            {/* Mobile Controls - Essential controls only */}
             {isMobile && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleFullscreen}
-                className="text-white hover:bg-white/20 p-1.5 h-auto touch-manipulation"
-                title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-              >
-                <Maximize2 className="h-3 w-3" />
-              </Button>
+              <div className="flex items-center gap-1">
+                {/* Bookmark - Essential for mobile */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBookmark}
+                  className="text-white hover:bg-white/20 p-1.5 h-auto touch-manipulation"
+                  title={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+                >
+                  <Bookmark className={`h-3 w-3 ${isBookmarked ? 'fill-current' : ''}`} />
+                </Button>
+
+                {/* Fullscreen - Essential for mobile */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleFullscreen}
+                  className="text-white hover:bg-white/20 p-1.5 h-auto touch-manipulation"
+                  title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                >
+                  <Maximize2 className="h-3 w-3" />
+                </Button>
+              </div>
             )}
             <Button
               variant="ghost"
@@ -587,18 +619,33 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
       {/* Loading overlay */}
       {iframeLoading && (
         <div className="absolute inset-0 bg-white dark:bg-slate-900 flex items-center justify-center z-10">
-          <div className="text-center p-4 sm:p-6">
-            <Loader2 className="h-8 w-8 sm:h-10 sm:w-10 animate-spin text-slate-400 mx-auto mb-4" />
-            <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base font-medium mb-2">
+          <div className={`
+            text-center
+            ${isMobile ? 'p-3' : 'p-4 sm:p-6'}
+          `}>
+            <Loader2 className={`
+              animate-spin text-slate-400 mx-auto mb-4
+              ${isMobile ? 'h-6 w-6' : 'h-8 w-8 sm:h-10 sm:w-10'}
+            `} />
+            <p className={`
+              text-slate-600 dark:text-slate-300 font-medium mb-2
+              ${isMobile ? 'text-sm' : 'text-sm sm:text-base'}
+            `}>
               Loading {content.type}...
             </p>
             <div className="flex items-center justify-center gap-2 mt-3">
               {getContentIcon()}
-              <span className="text-sm text-slate-500 dark:text-slate-400 truncate max-w-xs sm:max-w-sm">
+              <span className={`
+                text-slate-500 dark:text-slate-400 truncate
+                ${isMobile ? 'text-xs max-w-[200px]' : 'text-sm max-w-xs sm:max-w-sm'}
+              `}>
                 {content.title}
               </span>
             </div>
-            <div className="mt-4 w-full max-w-xs mx-auto bg-slate-200 dark:bg-slate-700 rounded-full h-1">
+            <div className={`
+              mt-4 w-full mx-auto bg-slate-200 dark:bg-slate-700 rounded-full h-1
+              ${isMobile ? 'max-w-[200px]' : 'max-w-xs'}
+            `}>
               <div className="bg-blue-500 h-1 rounded-full animate-pulse" style={{ width: '60%' }}></div>
             </div>
           </div>
@@ -607,16 +654,35 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
 
       {/* Error state */}
       {iframeError && (
-        <div className="absolute inset-0 bg-white dark:bg-slate-900 flex items-center justify-center z-10 p-4 sm:p-6">
-          <div className="text-center max-w-sm sm:max-w-md lg:max-w-lg mx-auto">
-            <AlertCircle className="h-12 w-12 sm:h-16 sm:w-16 text-red-400 mx-auto mb-6" />
-            <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">
+        <div className={`
+          absolute inset-0 bg-white dark:bg-slate-900 flex items-center justify-center z-10
+          ${isMobile ? 'p-3' : 'p-4 sm:p-6'}
+        `}>
+          <div className={`
+            text-center mx-auto
+            ${isMobile ? 'max-w-[280px]' : 'max-w-sm sm:max-w-md lg:max-w-lg'}
+          `}>
+            <AlertCircle className={`
+              text-red-400 mx-auto mb-6
+              ${isMobile ? 'h-10 w-10' : 'h-12 w-12 sm:h-16 sm:w-16'}
+            `} />
+            <h3 className={`
+              font-bold text-slate-800 dark:text-slate-200 mb-3
+              ${isMobile ? 'text-base' : 'text-lg sm:text-xl'}
+            `}>
               Content Unavailable
             </h3>
-            <p className="text-slate-600 dark:text-slate-300 mb-4 text-sm sm:text-base leading-relaxed">
+            <p className={`
+              text-slate-600 dark:text-slate-300 mb-4 leading-relaxed
+              ${isMobile ? 'text-sm' : 'text-sm sm:text-base'}
+            `}>
               Unable to load this {content.type}. This might be due to:
             </p>
-            <ul className="text-sm text-slate-500 dark:text-slate-400 text-left space-y-2 mb-6 bg-slate-50 dark:bg-slate-800 p-4 rounded-lg">
+            <ul className={`
+              text-slate-500 dark:text-slate-400 text-left space-y-2 mb-6
+              bg-slate-50 dark:bg-slate-800 rounded-lg
+              ${isMobile ? 'text-xs p-3' : 'text-sm p-4'}
+            `}>
               <li className="flex items-start gap-2">
                 <span className="text-red-400 mt-0.5">•</span>
                 Content is private or restricted
@@ -667,7 +733,10 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
 
       {/* Content iframe with modern transforms */}
       <div
-        className="w-full h-full flex items-center justify-center overflow-hidden"
+        className={`
+          w-full h-full flex items-center justify-center overflow-hidden
+          ${isMobile ? 'mobile-overflow-responsive' : ''}
+        `}
         style={{
           transform: `scale(${zoomLevel / 100}) rotate(${isRotated}deg)`,
           transition: 'transform 0.3s ease-in-out'
@@ -677,7 +746,10 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
           <iframe
             ref={iframeRef}
             src={embedUrl}
-            className="w-full h-full border-0 bg-black"
+            className={`
+              w-full h-full border-0 bg-black
+              ${isMobile ? 'touch-manipulation' : ''}
+            `}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
             title={content.title}
@@ -690,7 +762,10 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
           <iframe
             ref={iframeRef}
             src={embedUrl}
-            className="w-full h-full border-0 bg-white dark:bg-slate-800"
+            className={`
+              w-full h-full border-0 bg-white dark:bg-slate-800
+              ${isMobile ? 'touch-manipulation' : ''}
+            `}
             title={content.title}
             onLoad={handleIframeLoad}
             onError={handleIframeError}
@@ -742,6 +817,8 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
         </div>
       )}
 
+
+
       {/* Fullscreen exit overlay for mobile */}
       {isFullscreen && isMobile && (
         <div className="absolute top-4 right-4 z-30">
@@ -749,15 +826,15 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
             variant="ghost"
             size="sm"
             onClick={toggleFullscreen}
-            className="bg-black/50 text-white hover:bg-black/70 p-2 rounded-full"
+            className="bg-black/50 text-white hover:bg-black/70 p-2 rounded-full touch-manipulation"
           >
             <ExternalLink className="h-4 w-4 rotate-180" />
           </Button>
         </div>
       )}
 
-      {/* Zoom Level Indicator */}
-      {zoomLevel !== 100 && (
+      {/* Zoom Level Indicator - Desktop only when not 100% */}
+      {!isMobile && zoomLevel !== 100 && (
         <div className="absolute top-4 left-4 z-30">
           <div className="bg-black/60 backdrop-blur-sm rounded-lg px-3 py-1 text-white text-sm">
             {zoomLevel}%

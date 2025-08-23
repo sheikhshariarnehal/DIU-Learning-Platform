@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Toaster } from "@/components/ui/toaster"
 import { useIsMobile } from "@/components/ui/use-mobile"
 import { useTheme } from "next-themes"
+import { trackContentEvent, trackDownloadEvent, trackError } from "@/lib/analytics"
 
 interface ContentItem {
   type: "slide" | "video" | "document"
@@ -63,15 +64,16 @@ export default function HomePage() {
   const handleContentSelect = async (content: ContentItem) => {
     setIsLoading(true)
     try {
-      // Log content access for analytics
-      await fetch("/api/analytics/content-access", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contentId: content.id,
-          contentType: content.type,
-          timestamp: new Date().toISOString(),
-        }),
+      // Log content access for analytics (both internal and Vercel Analytics)
+      await trackContentEvent({
+        contentId: content.id,
+        contentType: content.type === "document" ? "slide" : content.type,
+        action: "view",
+        metadata: {
+          title: content.title,
+          topicTitle: content.topicTitle,
+          courseTitle: content.courseTitle,
+        },
       })
 
       setSelectedContent(content)
@@ -87,6 +89,11 @@ export default function HomePage() {
       })
     } catch (error) {
       console.error("Error loading content:", error)
+      trackError("Content loading failed", {
+        contentId: content.id,
+        contentType: content.type,
+        error: error instanceof Error ? error.message : "Unknown error",
+      })
       toast({
         title: "Error",
         description: "Failed to load content. Please try again.",
@@ -122,15 +129,15 @@ export default function HomePage() {
         }
       }
 
-      // Log download action
-      await fetch("/api/analytics/download", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contentId: selectedContent.id,
-          contentType: selectedContent.type,
-          timestamp: new Date().toISOString(),
-        }),
+      // Log download action (both internal and Vercel Analytics)
+      await trackDownloadEvent({
+        contentId: selectedContent.id,
+        contentType: selectedContent.type === "document" ? "slide" : selectedContent.type,
+        metadata: {
+          title: selectedContent.title,
+          topicTitle: selectedContent.topicTitle,
+          courseTitle: selectedContent.courseTitle,
+        },
       })
 
       toast({
@@ -139,6 +146,11 @@ export default function HomePage() {
       })
     } catch (error) {
       console.error("Download error:", error)
+      trackError("Download failed", {
+        contentId: selectedContent.id,
+        contentType: selectedContent.type,
+        error: error instanceof Error ? error.message : "Unknown error",
+      })
       toast({
         title: "Download Failed",
         description: "Unable to download content. Please try again.",
@@ -301,15 +313,15 @@ export default function HomePage() {
         <div className="flex-1 flex flex-col bg-background min-w-0 relative">
           {selectedContent ? (
             <>
-              {/* Content Viewer */}
-              <div className="flex-1 p-1 sm:p-3 md:p-4 lg:p-6 overflow-hidden">
-                <div className="h-full rounded-lg sm:rounded-xl overflow-hidden shadow-lg sm:shadow-modern-lg border border-border animate-fade-in">
+              {/* Content Viewer - Enhanced mobile padding */}
+              <div className="flex-1 p-0.5 sm:p-1 md:p-3 lg:p-4 xl:p-6 overflow-hidden">
+                <div className="h-full rounded-md sm:rounded-lg md:rounded-xl overflow-hidden shadow-md sm:shadow-lg md:shadow-modern-lg border border-border animate-fade-in">
                   <ContentViewer content={selectedContent} isLoading={isLoading} />
                 </div>
               </div>
 
               {/* Bottom Controls - Enhanced for mobile */}
-              <div className="bg-card/95 backdrop-blur-sm px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 border-t border-border/50 shadow-lg">
+              <div className="bg-card/95 backdrop-blur-sm px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 border-t border-border/50 shadow-lg">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
                   {/* Content Info */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0 flex-1">
@@ -330,24 +342,24 @@ export default function HomePage() {
                           : "Document"}
                     </Badge>
                     {selectedContent.courseTitle && (
-                      <span className="text-muted-foreground text-xs sm:text-sm truncate">
+                      <span className="text-muted-foreground text-xs sm:text-sm truncate max-w-[200px] sm:max-w-none">
                         {selectedContent.courseTitle}
                         {selectedContent.topicTitle && ` • ${selectedContent.topicTitle}`}
                       </span>
                     )}
                   </div>
 
-                  {/* Action Buttons */}
+                  {/* Action Buttons - Responsive layout */}
                   <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={handleDownload}
-                      className="flex-1 sm:flex-none text-xs sm:text-sm h-8 sm:h-9 touch-manipulation"
+                      className="flex-1 sm:flex-none text-xs sm:text-sm h-8 sm:h-9 touch-manipulation min-w-0"
                       disabled={isLoading}
                     >
-                      <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                      <span className="hidden xs:inline">
+                      <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
+                      <span className="hidden xs:inline truncate">
                         {selectedContent.type === "video" ? "Watch" : "Download"}
                       </span>
                       <span className="xs:hidden">

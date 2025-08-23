@@ -4,6 +4,7 @@ import { memo, useState, useCallback } from "react"
 import { ChevronDown, ChevronRight, FileText, Play, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useIsMobile } from "@/components/ui/use-mobile"
 
 // Smart text truncation utility for professional display
 const smartTruncate = (text: string, maxLength: number = 45): string => {
@@ -169,34 +170,49 @@ const TopicItem = memo(
     selectedContentId?: string
   }) => {
     const [isExpanded, setIsExpanded] = useState(false)
+    const isMobile = useIsMobile()
 
     return (
       <div className="bg-slate-900/50 rounded-lg border border-slate-700/30">
         <Button
           variant="ghost"
-          className="w-full justify-start text-left p-3 sm:p-4 h-auto hover:bg-slate-800/50 rounded-lg touch-manipulation"
+          className={`
+            w-full justify-start text-left h-auto hover:bg-slate-800/50 rounded-lg touch-manipulation
+            ${isMobile ? 'p-2 sm:p-3' : 'p-3 sm:p-4'}
+          `}
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          <div className="flex items-center gap-3 w-full">
+          <div className="flex items-center gap-2 sm:gap-3 w-full">
             {isExpanded ? (
-              <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-slate-400 transition-transform duration-200" />
+              <ChevronDown className={`
+                text-slate-400 transition-transform duration-200
+                ${isMobile ? 'h-4 w-4' : 'h-4 w-4 sm:h-5 sm:w-5'}
+              `} />
             ) : (
-              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-slate-400 transition-transform duration-200" />
+              <ChevronRight className={`
+                text-slate-400 transition-transform duration-200
+                ${isMobile ? 'h-4 w-4' : 'h-4 w-4 sm:h-5 sm:w-5'}
+              `} />
             )}
             <div className="flex-1 min-w-0">
               <span
-                className="text-sm sm:text-base font-medium text-slate-300 topic-title-professional block"
+                className={`
+                  font-medium text-slate-300 topic-title-professional block
+                  ${isMobile ? 'text-sm' : 'text-sm sm:text-base'}
+                `}
                 title={`${index + 1}. ${topic.title}`}
               >
-                {formatTopicTitle(index, topic.title, 50)}
+                {formatTopicTitle(index, topic.title, isMobile ? 35 : 50)}
               </span>
-
             </div>
           </div>
         </Button>
 
         {isExpanded && (
-          <div className="px-3 pb-3 sm:px-4 sm:pb-4 space-y-1 animate-fade-in">
+          <div className={`
+            space-y-1 animate-fade-in
+            ${isMobile ? 'px-2 pb-2 sm:px-3 sm:pb-3' : 'px-3 pb-3 sm:px-4 sm:pb-4'}
+          `}>
             {/* Videos */}
             {topic.videos?.map((video: Video, videoIndex: number) => {
               const isSelected = selectedContentId === video.id
@@ -204,11 +220,14 @@ const TopicItem = memo(
                 <Button
                   key={video.id}
                   variant="ghost"
-                  className={`w-full justify-start text-left p-2 h-auto rounded group touch-manipulation transition-colors ${
-                    isSelected
+                  className={`
+                    w-full justify-start text-left h-auto rounded group touch-manipulation transition-colors
+                    ${isMobile ? 'p-1.5 min-h-[40px]' : 'p-2'}
+                    ${isSelected
                       ? "bg-primary/20 text-white"
                       : "hover:bg-slate-800/50 text-slate-300 hover:text-white"
-                  }`}
+                    }
+                  `}
                   onClick={() =>
                     onContentSelect({
                       type: "video",
@@ -220,13 +239,17 @@ const TopicItem = memo(
                     })
                   }
                 >
-                  <div className="flex items-center gap-2 w-full">
-                    <Play className={`h-3 w-3 flex-shrink-0 ${
-                      isSelected ? "text-red-300" : "text-red-400"
-                    }`} />
-                    <span className={`text-sm truncate ${
-                      isSelected ? "font-medium" : ""
-                    }`}>
+                  <div className="flex items-center gap-2 w-full min-w-0">
+                    <Play className={`
+                      flex-shrink-0
+                      ${isMobile ? 'h-3 w-3' : 'h-3 w-3'}
+                      ${isSelected ? "text-red-300" : "text-red-400"}
+                    `} />
+                    <span className={`
+                      truncate
+                      ${isMobile ? 'text-xs' : 'text-sm'}
+                      ${isSelected ? "font-medium" : ""}
+                    `}>
                       {video.title}
                     </span>
                   </div>
@@ -241,11 +264,14 @@ const TopicItem = memo(
                 <Button
                   key={slide.id}
                   variant="ghost"
-                  className={`w-full justify-start text-left p-2 h-auto rounded group touch-manipulation transition-colors ${
-                    isSelected
+                  className={`
+                    w-full justify-start text-left h-auto rounded group touch-manipulation transition-colors
+                    ${isMobile ? 'p-1.5 min-h-[40px]' : 'p-2'}
+                    ${isSelected
                       ? "bg-primary/20 text-white"
                       : "hover:bg-slate-800/50 text-slate-300 hover:text-white"
-                  }`}
+                    }
+                  `}
                   onClick={() =>
                     onContentSelect({
                       type: "slide",
@@ -257,13 +283,17 @@ const TopicItem = memo(
                     })
                   }
                 >
-                  <div className="flex items-center gap-2 w-full">
-                    <FileText className={`h-3 w-3 flex-shrink-0 ${
-                      isSelected ? "text-blue-300" : "text-blue-400"
-                    }`} />
-                    <span className={`text-sm truncate ${
-                      isSelected ? "font-medium" : ""
-                    }`}>
+                  <div className="flex items-center gap-2 w-full min-w-0">
+                    <FileText className={`
+                      flex-shrink-0
+                      ${isMobile ? 'h-3 w-3' : 'h-3 w-3'}
+                      ${isSelected ? "text-blue-300" : "text-blue-400"}
+                    `} />
+                    <span className={`
+                      truncate
+                      ${isMobile ? 'text-xs' : 'text-sm'}
+                      ${isSelected ? "font-medium" : ""}
+                    `}>
                       {slide.title}
                     </span>
                   </div>

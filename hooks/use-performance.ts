@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { trackPerformance } from '@/lib/analytics'
 
 interface PerformanceMetrics {
   renderTime: number
@@ -28,10 +29,13 @@ export function usePerformanceMonitor(componentName: string) {
       }
     }
 
-    // Send metrics to analytics in production (optional)
-    if (process.env.NODE_ENV === 'production' && renderTime > 200) {
-      // You can send this to your analytics service
-      // analytics.track('slow_render', { componentName, renderTime })
+    // Send metrics to analytics in production
+    if (renderTime > 200) {
+      trackPerformance({
+        componentName,
+        renderTime,
+        isSlowRender: true,
+      })
     }
   })
 
