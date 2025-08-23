@@ -55,9 +55,64 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
     }
   }
 
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen)
+  const toggleFullscreen = async () => {
+    try {
+      if (!isFullscreen) {
+        // Enter fullscreen
+        const element = document.querySelector('.content-viewer-container')
+        if (element) {
+          if (element.requestFullscreen) {
+            await element.requestFullscreen()
+          } else if ((element as any).webkitRequestFullscreen) {
+            await (element as any).webkitRequestFullscreen()
+          } else if ((element as any).msRequestFullscreen) {
+            await (element as any).msRequestFullscreen()
+          } else {
+            // Fallback to CSS fullscreen
+            setIsFullscreen(true)
+          }
+        }
+      } else {
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          await document.exitFullscreen()
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen()
+        } else if ((document as any).msExitFullscreen) {
+          await (document as any).msExitFullscreen()
+        } else {
+          // Fallback to CSS fullscreen
+          setIsFullscreen(false)
+        }
+      }
+    } catch (error) {
+      console.error('Fullscreen error:', error)
+      // Fallback to CSS fullscreen
+      setIsFullscreen(!isFullscreen)
+    }
   }
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isCurrentlyFullscreen = !!(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).msFullscreenElement
+      )
+      setIsFullscreen(isCurrentlyFullscreen)
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+    document.addEventListener('msfullscreenchange', handleFullscreenChange)
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange)
+      document.removeEventListener('msfullscreenchange', handleFullscreenChange)
+    }
+  }, [])
 
   const getContentIcon = () => {
     const iconSize = isMobile ? "h-4 w-4" : "h-5 w-5 lg:h-6 lg:w-6"
@@ -157,7 +212,7 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
 
   return (
     <div className={`
-      h-full bg-white dark:bg-slate-900 rounded-lg overflow-hidden
+      content-viewer-container h-full bg-white dark:bg-slate-900 rounded-lg overflow-hidden
       shadow-lg sm:shadow-2xl relative transition-all duration-300
       ${isFullscreen ? 'fixed inset-0 z-50 rounded-none' : ''}
     `}>

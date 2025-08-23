@@ -202,9 +202,9 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       {/* Header */}
-      <header className="glass border-b border-border sticky top-0 z-50 backdrop-blur-md bg-background/80">
+      <header className="border-b border-border/50 sticky top-0 z-50 backdrop-blur-sm bg-background/95 shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 lg:h-18 items-center justify-between">
+          <div className="flex h-16 items-center justify-between">
             {/* Left Section - Logo and Mobile Menu */}
             <div className="flex items-center gap-3 lg:gap-4">
               {/* Mobile Menu Button */}
@@ -221,8 +221,8 @@ export default function HomePage() {
               )}
 
               {/* Logo Section */}
-              <div className="flex items-center gap-3 lg:gap-4">
-                <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg flex items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-lg flex items-center justify-center bg-primary/10 border border-primary/20">
                   <img
                     src="/images/diu-logo.png"
                     alt="Daffodil International University Logo"
@@ -230,7 +230,7 @@ export default function HomePage() {
                   />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-bold text-lg lg:text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                  <span className="font-semibold text-lg text-foreground">
                     DIU CSE
                   </span>
                   <span className="text-xs text-muted-foreground hidden sm:block">Learning Platform</span>
@@ -239,33 +239,35 @@ export default function HomePage() {
             </div>
 
             {/* Center Section - Navigation (Hidden on mobile) */}
-            <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
-              <Button variant="ghost" className="hover-lift focus-ring text-sm font-medium px-4 py-2 rounded-lg">
+            <nav className="hidden lg:flex items-center gap-1">
+              <Button variant="ghost" className="text-sm font-medium px-4 py-2 rounded-md hover:bg-accent transition-colors">
                 Home
               </Button>
-              <Button variant="ghost" className="hover-lift focus-ring text-sm font-medium px-4 py-2 rounded-lg">
-                People
+              <Button variant="ghost" className="text-sm font-medium px-4 py-2 rounded-md hover:bg-accent transition-colors">
+                Notes
               </Button>
-              <Button className="btn-primary-modern text-sm px-6 py-2 rounded-lg font-medium">Video Lecture</Button>
-              <Button variant="ghost" className="hover-lift focus-ring text-sm font-medium px-4 py-2 rounded-lg">
+              <Button variant="default" className="text-sm px-6 py-2 rounded-md font-medium bg-primary hover:bg-primary/90">
+                Video Lecture
+              </Button>
+              <Button variant="ghost" className="text-sm font-medium px-4 py-2 rounded-md hover:bg-accent transition-colors">
                 Result
               </Button>
             </nav>
 
             {/* Right Section - Controls */}
-            <div className="flex items-center gap-2 lg:gap-3">
+            <div className="flex items-center gap-2">
               {/* Theme Toggle */}
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={toggleTheme}
-                className="hover-lift focus-ring w-9 h-9 lg:w-10 lg:h-10 rounded-lg"
+                className="w-9 h-9 rounded-md hover:bg-accent transition-colors"
                 title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
               >
                 {theme === "dark" ? (
-                  <Sun className="h-4 w-4 lg:h-5 lg:w-5" />
+                  <Sun className="h-4 w-4" />
                 ) : (
-                  <Moon className="h-4 w-4 lg:h-5 lg:w-5" />
+                  <Moon className="h-4 w-4" />
                 )}
               </Button>
 
@@ -273,25 +275,21 @@ export default function HomePage() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="hover-lift focus-ring relative w-9 h-9 lg:w-10 lg:h-10 rounded-lg"
+                className="w-9 h-9 rounded-md hover:bg-accent transition-colors"
                 title="Notifications"
               >
-                <Bell className="h-4 w-4 lg:h-5 lg:w-5" />
-                <span className="absolute -top-1 -right-1 h-2 w-2 bg-destructive rounded-full animate-pulse-subtle"></span>
+                <Bell className="h-4 w-4" />
               </Button>
 
-              {/* Login Button */}
-              <Button className="btn-primary-modern font-medium px-4 py-2 lg:px-6 lg:py-2 text-sm rounded-lg hidden sm:flex">
-                Log In
+              {/* Profile Icon */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-9 h-9 rounded-full hover:bg-accent transition-colors"
+                title="Profile"
+              >
+                <User className="h-4 w-4" />
               </Button>
-
-              {/* User Avatar */}
-              <div className="w-8 h-8 lg:w-9 lg:h-9 bg-muted rounded-full flex items-center justify-center border-2 border-border hover:border-primary/50 transition-colors">
-                <User className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground" />
-              </div>
-
-              {/* Mobile Login (visible only on small screens) */}
-              <Button className="btn-primary-modern font-medium px-3 py-1 text-xs rounded-lg sm:hidden">Login</Button>
             </div>
           </div>
         </div>
@@ -353,7 +351,7 @@ export default function HomePage() {
                         {selectedContent.type === "video" ? "Watch" : "Download"}
                       </span>
                       <span className="xs:hidden">
-                        {selectedContent.type === "video" ? "▶" : "↓"}
+                        {selectedContent.type === "video" ? "▶" : "Download"}
                       </span>
                     </Button>
                     {!isMobile && (
@@ -369,17 +367,7 @@ export default function HomePage() {
                         <span className="sm:hidden">Full</span>
                       </Button>
                     )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.open(selectedContent.url, "_blank")}
-                      className="flex-1 sm:flex-none text-xs sm:text-sm h-8 sm:h-9 touch-manipulation"
-                      disabled={isLoading}
-                    >
-                      <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                      <span className="hidden xs:inline">Open</span>
-                      <span className="xs:hidden">↗</span>
-                    </Button>
+
                   </div>
                 </div>
               </div>
