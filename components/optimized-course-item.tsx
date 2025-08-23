@@ -188,20 +188,9 @@ const TopicItem = memo(
                 className="text-sm sm:text-base font-medium text-slate-300 topic-title-professional block"
                 title={`${index + 1}. ${topic.title}`}
               >
-                {formatTopicTitle(index, topic.title, 35)}
+                {formatTopicTitle(index, topic.title, 50)}
               </span>
-              <div className="flex items-center gap-2 mt-1">
-                {topic.videos?.length > 0 && (
-                  <Badge variant="secondary" className="text-xs bg-red-900/30 text-red-300 border-red-800/50">
-                    {topic.videos.length} Videos
-                  </Badge>
-                )}
-                {topic.slides?.length > 0 && (
-                  <Badge variant="secondary" className="text-xs bg-blue-900/30 text-blue-300 border-blue-800/50">
-                    {topic.slides.length} Slides
-                  </Badge>
-                )}
-              </div>
+
             </div>
           </div>
         </Button>
@@ -215,10 +204,10 @@ const TopicItem = memo(
                 <Button
                   key={video.id}
                   variant="ghost"
-                  className={`w-full justify-start text-left p-2 sm:p-3 h-auto rounded-md group touch-manipulation transition-all duration-200 ${
+                  className={`w-full justify-start text-left p-2 h-auto rounded group touch-manipulation transition-colors ${
                     isSelected
-                      ? "bg-primary/20 border border-primary/30 shadow-md"
-                      : "hover:bg-slate-800/70"
+                      ? "bg-primary/20 text-white"
+                      : "hover:bg-slate-800/50 text-slate-300 hover:text-white"
                   }`}
                   onClick={() =>
                     onContentSelect({
@@ -231,29 +220,15 @@ const TopicItem = memo(
                     })
                   }
                 >
-                  <div className="flex items-center gap-3 w-full">
-                    <Play className={`h-4 w-4 flex-shrink-0 ${
+                  <div className="flex items-center gap-2 w-full">
+                    <Play className={`h-3 w-3 flex-shrink-0 ${
                       isSelected ? "text-red-300" : "text-red-400"
                     }`} />
-                    <div className="flex-1 min-w-0">
-                      <span className={`text-xs sm:text-sm truncate block ${
-                        isSelected
-                          ? "text-white font-medium"
-                          : "text-slate-300 group-hover:text-white"
-                      }`}>
-                        {videoIndex + 1}. {video.title}
-                      </span>
-                      <span className={`text-xs ${
-                        isSelected
-                          ? "text-slate-300"
-                          : "text-slate-500 group-hover:text-slate-400"
-                      }`}>
-                        Video
-                      </span>
-                    </div>
-                    {isSelected && (
-                      <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
-                    )}
+                    <span className={`text-sm truncate ${
+                      isSelected ? "font-medium" : ""
+                    }`}>
+                      {video.title}
+                    </span>
                   </div>
                 </Button>
               )
@@ -266,10 +241,10 @@ const TopicItem = memo(
                 <Button
                   key={slide.id}
                   variant="ghost"
-                  className={`w-full justify-start text-left p-2 sm:p-3 h-auto rounded-md group touch-manipulation transition-all duration-200 ${
+                  className={`w-full justify-start text-left p-2 h-auto rounded group touch-manipulation transition-colors ${
                     isSelected
-                      ? "bg-primary/20 border border-primary/30 shadow-md"
-                      : "hover:bg-slate-800/70"
+                      ? "bg-primary/20 text-white"
+                      : "hover:bg-slate-800/50 text-slate-300 hover:text-white"
                   }`}
                   onClick={() =>
                     onContentSelect({
@@ -282,29 +257,15 @@ const TopicItem = memo(
                     })
                   }
                 >
-                  <div className="flex items-center gap-3 w-full">
-                    <FileText className={`h-4 w-4 flex-shrink-0 ${
+                  <div className="flex items-center gap-2 w-full">
+                    <FileText className={`h-3 w-3 flex-shrink-0 ${
                       isSelected ? "text-blue-300" : "text-blue-400"
                     }`} />
-                    <div className="flex-1 min-w-0">
-                      <span className={`text-xs sm:text-sm truncate block ${
-                        isSelected
-                          ? "text-white font-medium"
-                          : "text-slate-300 group-hover:text-white"
-                      }`}>
-                        {(topic.videos?.length || 0) + slideIndex + 1}. {slide.title}
-                      </span>
-                      <span className={`text-xs ${
-                        isSelected
-                          ? "text-slate-300"
-                          : "text-slate-500 group-hover:text-slate-400"
-                      }`}>
-                        Slide
-                      </span>
-                    </div>
-                    {isSelected && (
-                      <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
-                    )}
+                    <span className={`text-sm truncate ${
+                      isSelected ? "font-medium" : ""
+                    }`}>
+                      {slide.title}
+                    </span>
                   </div>
                 </Button>
               )
