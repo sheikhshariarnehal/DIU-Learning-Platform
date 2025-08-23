@@ -133,9 +133,11 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
 
       setSemesters(data)
 
-      // Auto-select first semester
+      // Auto-select the first active semester, or fallback to the first semester
       if (data && data.length > 0) {
-        setSelectedSemester(data[0].id)
+        const activeSemester = data.find(semester => semester.is_active === true)
+        const semesterToSelect = activeSemester || data[0]
+        setSelectedSemester(semesterToSelect.id)
       }
     } catch (err) {
       console.error("Error fetching semesters:", err)
@@ -390,7 +392,21 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
         {/* Semester Selection */}
         <Select value={selectedSemester} onValueChange={setSelectedSemester}>
           <SelectTrigger className={`bg-card border-border text-foreground ${isMobile ? 'h-10 text-sm' : 'h-11'}`}>
-            <SelectValue placeholder={isMobile ? "Select Semester" : "Choose your semester"} />
+            <SelectValue placeholder={isMobile ? "Select Semester" : "Choose your semester"}>
+              {selectedSemester && (() => {
+                const selectedSem = semesters.find(s => s.id === selectedSemester)
+                return selectedSem ? (
+                  <div className="flex items-center gap-2">
+                    <span>{selectedSem.title} {selectedSem.section && `(${selectedSem.section})`}</span>
+                    {(selectedSem.is_active ?? true) && (
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                        Active
+                      </span>
+                    )}
+                  </div>
+                ) : null
+              })()}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent className="bg-card border-border">
             {semesters.map((semester) => (
@@ -399,7 +415,16 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
                 value={semester.id}
                 className={`text-foreground hover:bg-accent ${isMobile ? 'text-sm py-2' : ''}`}
               >
-                {semester.title} {semester.section && `(${semester.section})`}
+                <div className="flex items-center justify-between w-full">
+                  <span>
+                    {semester.title} {semester.section && `(${semester.section})`}
+                  </span>
+                  {(semester.is_active ?? true) && (
+                    <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                      Active
+                    </span>
+                  )}
+                </div>
               </SelectItem>
             ))}
           </SelectContent>

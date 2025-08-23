@@ -42,13 +42,12 @@ interface AdminSidebarProps {
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: Home },
+  { name: "Create Semester", href: "/admin/semester-management", icon: GraduationCap, badge: "New" },
   { name: "All-in-One Creator", href: "/admin/all-in-one", icon: Zap },
-  { name: "Enhanced Creator", href: "/admin/enhanced-creator", icon: Sparkles, badge: "New" },
-  { name: "Creator Comparison", href: "/admin/creator-comparison", icon: GitCompare, badge: "Demo" },
-  { name: "Test Enhanced", href: "/admin/test-enhanced", icon: TestTube, badge: "Test" },
+  { name: "Enhanced Creator", href: "/admin/enhanced-creator", icon: Sparkles, badge: "Enhanced" },
   { name: "Semesters", href: "/admin/semesters", icon: Calendar },
   { name: "Courses", href: "/admin/courses", icon: BookOpen },
-  { name: "Topics", href: "/admin/topics", icon: GraduationCap },
+  { name: "Topics", href: "/admin/topics", icon: FileText },
   { name: "Content", href: "/admin/content", icon: FileText },
   { name: "Study Tools", href: "/admin/study-tools", icon: Play },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
@@ -102,8 +101,8 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 <Shield className="h-4 w-4 text-primary-foreground" />
               </div>
               <div>
-                <h2 className="font-semibold text-foreground">Admin Panel</h2>
-                <p className="text-xs text-muted-foreground">DIU CSE</p>
+                <h2 className="font-semibold text-foreground">Dashboard</h2>
+                <p className="text-xs text-muted-foreground">Admin</p>
               </div>
             </div>
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setIsMobileMenuOpen(false)}>

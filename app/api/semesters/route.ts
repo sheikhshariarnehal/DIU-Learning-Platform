@@ -3,7 +3,11 @@ import { supabase } from "@/lib/supabase"
 
 export async function GET() {
   try {
-    const { data, error } = await supabase.from("semesters").select("*").order("created_at", { ascending: false })
+    const { data, error } = await supabase
+      .from("semesters")
+      .select("*")
+      .order("is_active", { ascending: false }) // Active semesters first
+      .order("created_at", { ascending: false }) // Then by creation date
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })

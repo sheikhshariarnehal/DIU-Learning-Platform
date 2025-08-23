@@ -7,37 +7,40 @@ export async function GET() {
 
     console.log("Fetching semesters from database...")
 
-    // Get all semesters with basic info
+    // Start with basic fields that should always exist
     const { data: semesters, error: semestersError } = await db
       .from("semesters")
-      .select(`
-        id,
-        title,
-        description,
-        section,
-        has_midterm,
-        has_final,
-        start_date,
-        end_date,
-        created_at,
-        updated_at
-      `)
-      .order('updated_at', { ascending: false })
+      .select("*") // Select all fields to see what's available
+      .order('is_active', { ascending: false }) // Active semesters first
+      .order('updated_at', { ascending: false }) // Then by update date
 
     if (semestersError) {
       console.error("Error fetching semesters:", semestersError)
+      console.error("Error code:", semestersError.code)
+      console.error("Error details:", semestersError.details)
+      console.error("Error hint:", semestersError.hint)
       return NextResponse.json({
         success: false,
         error: "Database error",
-        details: semestersError.message
+        details: semestersError.message,
+        code: semestersError.code,
+        hint: semestersError.hint
       }, { status: 500 })
     }
 
     console.log(`Found ${semesters?.length || 0} semesters`)
+    if (semesters && semesters.length > 0) {
+      console.log("Sample semester data:", JSON.stringify(semesters[0], null, 2))
+      console.log("Available fields:", Object.keys(semesters[0]))
+    }
 
     // Return simple response without complex counting for now
     const semestersWithBasicCounts = (semesters || []).map(semester => ({
       ...semester,
+      is_active: semester.is_active ?? true, // Default to true if not set
+      default_credits: semester.default_credits ?? semester.credits ?? 3, // Try both field names
+      start_date: semester.start_date ?? null,
+      end_date: semester.end_date ?? null,
       courses_count: 0,
       topics_count: 0,
       materials_count: 0,

@@ -68,7 +68,10 @@ export function Sidebar({ onContentSelect }: SidebarProps) {
 
     setSemesters(data || [])
     if (data && data.length > 0) {
-      setSelectedSemester(data[0].id)
+      // Auto-select the first active semester, or fallback to the first semester
+      const activeSemester = data.find(semester => semester.is_active === true)
+      const semesterToSelect = activeSemester || data[0]
+      setSelectedSemester(semesterToSelect.id)
     }
   }
 
@@ -270,7 +273,16 @@ export function Sidebar({ onContentSelect }: SidebarProps) {
             <SelectContent>
               {semesters.map((semester) => (
                 <SelectItem key={semester.id} value={semester.id}>
-                  {semester.title}
+                  <div className="flex items-center justify-between w-full">
+                    <span>
+                      {semester.title} {semester.section && `(${semester.section})`}
+                    </span>
+                    {(semester.is_active ?? true) && (
+                      <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                        Active
+                      </span>
+                    )}
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
