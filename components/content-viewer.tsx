@@ -73,7 +73,7 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
     }
   }
 
-  // Fix YouTube URL format
+  // Fix YouTube URL format and Google Drive URLs
   const getEmbedUrl = (url: string, type: string) => {
     if (type === "video") {
       // Handle various YouTube URL formats
@@ -98,6 +98,31 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
       if (url.includes("youtube.com/embed/")) {
         const baseUrl = url.split("?")[0]
         return `${baseUrl}?enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}&rel=0&modestbranding=1`
+      }
+    } else if (type === "slide" || type === "document") {
+      // Handle Google Drive URLs for documents and slides
+      let fileId = ""
+
+      // Format: https://drive.google.com/file/d/FILE_ID/view
+      if (url.includes("/file/d/")) {
+        fileId = url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/)?.[1] || ""
+      }
+      // Format: https://drive.google.com/open?id=FILE_ID
+      else if (url.includes("open?id=")) {
+        fileId = url.match(/open\?id=([a-zA-Z0-9-_]+)/)?.[1] || ""
+      }
+      // Format: https://docs.google.com/document/d/FILE_ID/ or https://docs.google.com/presentation/d/FILE_ID/
+      else if (url.includes("docs.google.com")) {
+        fileId = url.match(/\/d\/([a-zA-Z0-9-_]+)/)?.[1] || ""
+      }
+      // Format: https://sheets.google.com/spreadsheets/d/FILE_ID/
+      else if (url.includes("sheets.google.com")) {
+        fileId = url.match(/\/d\/([a-zA-Z0-9-_]+)/)?.[1] || ""
+      }
+
+      if (fileId) {
+        // Return Google Drive embed URL for preview
+        return `https://drive.google.com/file/d/${fileId}/preview`
       }
     }
 
