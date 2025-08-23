@@ -1,7 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Loader2, AlertCircle, FileText, Play, BookOpen, ExternalLink, Maximize2, RotateCcw } from "lucide-react"
+import { useState, useEffect, useRef, useCallback } from "react"
+import {
+  Loader2, AlertCircle, FileText, Play, BookOpen, ExternalLink, Maximize2, RotateCcw,
+  ZoomIn, ZoomOut, RotateCw, Volume2, VolumeX, Settings, Share2, Bookmark,
+  PictureInPicture, Download, RefreshCw, Eye, EyeOff, Clock, Pause
+} from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -25,11 +29,38 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
   const [iframeLoading, setIframeLoading] = useState(true)
   const [iframeError, setIframeError] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [zoomLevel, setZoomLevel] = useState(100)
+  const [isBookmarked, setIsBookmarked] = useState(false)
+  const [viewTime, setViewTime] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
+  const [showControls, setShowControls] = useState(true)
+  const [isRotated, setIsRotated] = useState(0)
+  const [isPictureInPicture, setIsPictureInPicture] = useState(false)
+
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const viewTimeRef = useRef<NodeJS.Timeout>()
+  const controlsTimeoutRef = useRef<NodeJS.Timeout>()
+
   const isMobile = useIsMobile()
 
   useEffect(() => {
     setIframeLoading(true)
     setIframeError(false)
+    setZoomLevel(100)
+    setIsRotated(0)
+    setViewTime(0)
+
+    // Start view time tracking
+    viewTimeRef.current = setInterval(() => {
+      setViewTime(prev => prev + 1)
+    }, 1000)
+
+    return () => {
+      if (viewTimeRef.current) {
+        clearInterval(viewTimeRef.current)
+      }
+    }
   }, [content.url])
 
   const handleIframeLoad = () => {
@@ -45,7 +76,7 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
     setIframeError(false)
     setIframeLoading(true)
     // Force iframe reload by changing src
-    const iframe = document.querySelector('iframe')
+    const iframe = iframeRef.current
     if (iframe) {
       const src = iframe.src
       iframe.src = ''
@@ -54,6 +85,90 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
       }, 100)
     }
   }
+
+  // Modern functionality methods
+  const handleZoomIn = useCallback(() => {
+    setZoomLevel(prev => Math.min(prev + 25, 200))
+  }, [])
+
+  const handleZoomOut = useCallback(() => {
+    setZoomLevel(prev => Math.max(prev - 25, 50))
+  }, [])
+
+  const handleZoomReset = useCallback(() => {
+    setZoomLevel(100)
+  }, [])
+
+  const handleRotate = useCallback(() => {
+    setIsRotated(prev => (prev + 90) % 360)
+  }, [])
+
+  const handleBookmark = useCallback(() => {
+    setIsBookmarked(prev => !prev)
+    // Here you could save to localStorage or send to API
+    const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]')
+    if (!isBookmarked) {
+      bookmarks.push({
+        id: content.id,
+        title: content.title,
+        url: content.url,
+        type: content.type,
+        timestamp: new Date().toISOString()
+      })
+    } else {
+      const index = bookmarks.findIndex((b: any) => b.id === content.id)
+      if (index > -1) bookmarks.splice(index, 1)
+    }
+    localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
+  }, [content, isBookmarked])
+
+  const handleShare = useCallback(async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: content.title,
+          text: `Check out this ${content.type}: ${content.title}`,
+          url: window.location.href
+        })
+      } catch (err) {
+        console.log('Share cancelled')
+      }
+    } else {
+      // Fallback to clipboard
+      await navigator.clipboard.writeText(window.location.href)
+    }
+  }, [content])
+
+  const handlePictureInPicture = useCallback(async () => {
+    if (content.type === 'video' && iframeRef.current) {
+      try {
+        if (document.pictureInPictureEnabled) {
+          const video = iframeRef.current.contentDocument?.querySelector('video')
+          if (video) {
+            if (document.pictureInPictureElement) {
+              await document.exitPictureInPicture()
+              setIsPictureInPicture(false)
+            } else {
+              await video.requestPictureInPicture()
+              setIsPictureInPicture(true)
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Picture-in-picture error:', err)
+      }
+    }
+  }, [content.type])
+
+  const toggleControls = useCallback(() => {
+    setShowControls(prev => !prev)
+  }, [])
+
+  const formatTime = useCallback((seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }, [])
 
   const toggleFullscreen = async () => {
     try {
@@ -92,7 +207,7 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
     }
   }
 
-  // Listen for fullscreen changes
+  // Listen for fullscreen changes and keyboard shortcuts
   useEffect(() => {
     const handleFullscreenChange = () => {
       const isCurrentlyFullscreen = !!(
@@ -103,16 +218,109 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
       setIsFullscreen(isCurrentlyFullscreen)
     }
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target !== document.body) return // Only work when not in input fields
+
+      switch (e.key) {
+        case 'f':
+        case 'F':
+          e.preventDefault()
+          toggleFullscreen()
+          break
+        case '+':
+        case '=':
+          e.preventDefault()
+          handleZoomIn()
+          break
+        case '-':
+          e.preventDefault()
+          handleZoomOut()
+          break
+        case '0':
+          e.preventDefault()
+          handleZoomReset()
+          break
+        case 'r':
+        case 'R':
+          e.preventDefault()
+          handleRotate()
+          break
+        case 'b':
+        case 'B':
+          e.preventDefault()
+          handleBookmark()
+          break
+        case 's':
+        case 'S':
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault()
+            handleShare()
+          }
+          break
+        case 'h':
+        case 'H':
+          e.preventDefault()
+          toggleControls()
+          break
+      }
+    }
+
     document.addEventListener('fullscreenchange', handleFullscreenChange)
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
     document.addEventListener('msfullscreenchange', handleFullscreenChange)
+    document.addEventListener('keydown', handleKeyDown)
 
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange)
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange)
       document.removeEventListener('msfullscreenchange', handleFullscreenChange)
+      document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [])
+  }, [toggleFullscreen, handleZoomIn, handleZoomOut, handleZoomReset, handleRotate, handleBookmark, handleShare, toggleControls])
+
+  // Auto-hide controls
+  useEffect(() => {
+    const resetControlsTimeout = () => {
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current)
+      }
+      setShowControls(true)
+      controlsTimeoutRef.current = setTimeout(() => {
+        if (isFullscreen) {
+          setShowControls(false)
+        }
+      }, 3000)
+    }
+
+    const handleMouseMove = () => {
+      if (isFullscreen) {
+        resetControlsTimeout()
+      }
+    }
+
+    if (isFullscreen) {
+      document.addEventListener('mousemove', handleMouseMove)
+      resetControlsTimeout()
+    } else {
+      setShowControls(true)
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current)
+      }
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current)
+      }
+    }
+  }, [isFullscreen])
+
+  // Check if content is bookmarked on load
+  useEffect(() => {
+    const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]')
+    setIsBookmarked(bookmarks.some((b: any) => b.id === content.id))
+  }, [content.id])
 
   const getContentIcon = () => {
     const iconSize = isMobile ? "h-4 w-4" : "h-5 w-5 lg:h-6 lg:w-6"
@@ -234,6 +442,12 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
             </div>
           </div>
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+            {/* View Time */}
+            <div className="hidden sm:flex items-center gap-1 text-white/80 text-xs">
+              <Clock className="h-3 w-3" />
+              <span>{formatTime(viewTime)}</span>
+            </div>
+
             <Badge
               variant="secondary"
               className={`text-xs px-2 py-1 font-medium ${
@@ -246,15 +460,115 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
             >
               {content.type}
             </Badge>
-            {!isMobile && (
+
+            {/* Modern Controls */}
+            {!isMobile && showControls && (
+              <div className="flex items-center gap-1">
+                {/* Bookmark */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBookmark}
+                  className="text-white hover:bg-white/20 p-1.5 h-auto touch-manipulation"
+                  title={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+                >
+                  <Bookmark className={`h-3 w-3 ${isBookmarked ? 'fill-current' : ''}`} />
+                </Button>
+
+                {/* Share */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleShare}
+                  className="text-white hover:bg-white/20 p-1.5 h-auto touch-manipulation"
+                  title="Share content"
+                >
+                  <Share2 className="h-3 w-3" />
+                </Button>
+
+                {/* Zoom Controls */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleZoomOut}
+                  className="text-white hover:bg-white/20 p-1.5 h-auto touch-manipulation"
+                  title="Zoom out"
+                  disabled={zoomLevel <= 50}
+                >
+                  <ZoomOut className="h-3 w-3" />
+                </Button>
+
+                <span className="text-white/80 text-xs min-w-[3rem] text-center">{zoomLevel}%</span>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleZoomIn}
+                  className="text-white hover:bg-white/20 p-1.5 h-auto touch-manipulation"
+                  title="Zoom in"
+                  disabled={zoomLevel >= 200}
+                >
+                  <ZoomIn className="h-3 w-3" />
+                </Button>
+
+                {/* Rotate */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRotate}
+                  className="text-white hover:bg-white/20 p-1.5 h-auto touch-manipulation"
+                  title="Rotate content"
+                >
+                  <RotateCw className="h-3 w-3" />
+                </Button>
+
+                {/* Picture in Picture for videos */}
+                {content.type === 'video' && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handlePictureInPicture}
+                    className="text-white hover:bg-white/20 p-1.5 h-auto touch-manipulation"
+                    title="Picture in picture"
+                  >
+                    <PictureInPicture className="h-3 w-3" />
+                  </Button>
+                )}
+
+                {/* Fullscreen */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleFullscreen}
+                  className="text-white hover:bg-white/20 p-1.5 h-auto touch-manipulation"
+                  title={isFullscreen ? "Exit fullscreen (F)" : "Enter fullscreen (F)"}
+                >
+                  <Maximize2 className="h-3 w-3" />
+                </Button>
+
+                {/* Hide Controls */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleControls}
+                  className="text-white hover:bg-white/20 p-1.5 h-auto touch-manipulation"
+                  title="Hide controls (H)"
+                >
+                  <EyeOff className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+
+            {/* Mobile Fullscreen */}
+            {isMobile && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={toggleFullscreen}
-                className="text-white hover:bg-white/20 p-1.5 sm:p-2 h-auto touch-manipulation"
+                className="text-white hover:bg-white/20 p-1.5 h-auto touch-manipulation"
                 title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
               >
-                <Maximize2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                <Maximize2 className="h-3 w-3" />
               </Button>
             )}
             <Button
@@ -351,29 +665,81 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
         </div>
       )}
 
-      {/* Content iframe */}
-      {content.type === "video" ? (
-        <iframe
-          src={embedUrl}
-          className="w-full h-full border-0 bg-black"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          title={content.title}
-          onLoad={handleIframeLoad}
-          onError={handleIframeError}
-          referrerPolicy="strict-origin-when-cross-origin"
-          loading="lazy"
-        />
-      ) : (
-        <iframe
-          src={embedUrl}
-          className="w-full h-full border-0 bg-white dark:bg-slate-800"
-          title={content.title}
-          onLoad={handleIframeLoad}
-          onError={handleIframeError}
-          referrerPolicy="strict-origin-when-cross-origin"
-          loading="lazy"
-        />
+      {/* Content iframe with modern transforms */}
+      <div
+        className="w-full h-full flex items-center justify-center overflow-hidden"
+        style={{
+          transform: `scale(${zoomLevel / 100}) rotate(${isRotated}deg)`,
+          transition: 'transform 0.3s ease-in-out'
+        }}
+      >
+        {content.type === "video" ? (
+          <iframe
+            ref={iframeRef}
+            src={embedUrl}
+            className="w-full h-full border-0 bg-black"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            title={content.title}
+            onLoad={handleIframeLoad}
+            onError={handleIframeError}
+            referrerPolicy="strict-origin-when-cross-origin"
+            loading="lazy"
+          />
+        ) : (
+          <iframe
+            ref={iframeRef}
+            src={embedUrl}
+            className="w-full h-full border-0 bg-white dark:bg-slate-800"
+            title={content.title}
+            onLoad={handleIframeLoad}
+            onError={handleIframeError}
+            referrerPolicy="strict-origin-when-cross-origin"
+            loading="lazy"
+          />
+        )}
+      </div>
+
+      {/* Floating Controls (when main controls are hidden) */}
+      {isFullscreen && !showControls && !isMobile && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-30">
+          <div className="bg-black/80 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleControls}
+              className="text-white hover:bg-white/20 p-1.5 h-auto rounded-full"
+              title="Show controls (H)"
+            >
+              <Eye className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleFullscreen}
+              className="text-white hover:bg-white/20 p-1.5 h-auto rounded-full"
+              title="Exit fullscreen (F)"
+            >
+              <Maximize2 className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Keyboard Shortcuts Help */}
+      {isFullscreen && showControls && !isMobile && (
+        <div className="absolute bottom-4 right-4 z-30">
+          <div className="bg-black/60 backdrop-blur-sm rounded-lg p-3 text-white text-xs max-w-xs">
+            <div className="font-semibold mb-2">Keyboard Shortcuts:</div>
+            <div className="space-y-1 text-white/80">
+              <div><kbd className="bg-white/20 px-1 rounded">F</kbd> Fullscreen</div>
+              <div><kbd className="bg-white/20 px-1 rounded">+/-</kbd> Zoom</div>
+              <div><kbd className="bg-white/20 px-1 rounded">R</kbd> Rotate</div>
+              <div><kbd className="bg-white/20 px-1 rounded">B</kbd> Bookmark</div>
+              <div><kbd className="bg-white/20 px-1 rounded">H</kbd> Hide controls</div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Fullscreen exit overlay for mobile */}
@@ -387,6 +753,15 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
           >
             <ExternalLink className="h-4 w-4 rotate-180" />
           </Button>
+        </div>
+      )}
+
+      {/* Zoom Level Indicator */}
+      {zoomLevel !== 100 && (
+        <div className="absolute top-4 left-4 z-30">
+          <div className="bg-black/60 backdrop-blur-sm rounded-lg px-3 py-1 text-white text-sm">
+            {zoomLevel}%
+          </div>
         </div>
       )}
     </div>
