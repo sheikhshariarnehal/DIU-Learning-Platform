@@ -13,12 +13,13 @@ import { useTheme } from "next-themes"
 import { trackContentEvent, trackDownloadEvent, trackError } from "@/lib/analytics"
 
 interface ContentItem {
-  type: "slide" | "video" | "document"
+  type: "slide" | "video" | "document" | "syllabus"
   title: string
   url: string
   id: string
   topicTitle?: string
   courseTitle?: string
+  description?: string
 }
 
 export default function HomePage() {

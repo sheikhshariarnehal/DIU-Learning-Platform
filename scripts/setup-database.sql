@@ -185,8 +185,9 @@ END $$;
 CREATE TABLE IF NOT EXISTS study_tools (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
+  description TEXT,
   type VARCHAR(50) CHECK (type IN ('previous_questions', 'exam_note', 'syllabus', 'mark_distribution')),
-  content_url TEXT,
+  content_url TEXT CONSTRAINT valid_content_url CHECK (content_url IS NULL OR content_url ~* '^https?://.*'),
   course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
   exam_type VARCHAR(20) CHECK (exam_type IN ('midterm', 'final', 'both')) DEFAULT 'both',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -215,6 +216,13 @@ BEGIN
                    WHERE table_name='study_tools' AND column_name='exam_type') THEN
         ALTER TABLE study_tools ADD COLUMN exam_type VARCHAR(20) CHECK (exam_type IN ('midterm', 'final', 'both')) DEFAULT 'both';
         RAISE NOTICE 'Added exam_type column to study_tools table';
+    END IF;
+
+    -- Add description column if missing
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_name='study_tools' AND column_name='description') THEN
+        ALTER TABLE study_tools ADD COLUMN description TEXT;
+        RAISE NOTICE 'Added description column to study_tools table';
     END IF;
 END $$;
 

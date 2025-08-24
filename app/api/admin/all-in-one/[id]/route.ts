@@ -142,8 +142,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             id: tool.id,
             title: tool.title,
             type: tool.type,
-            content_url: tool.content_url || "",
-            exam_type: tool.exam_type
+            content_url: tool.content_url || null,
+            exam_type: tool.exam_type,
+            description: tool.description || null
           }))
         }
       })
@@ -484,14 +485,22 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       if (course.studyTools && course.studyTools.length > 0) {
         const studyToolsToInsert = course.studyTools
           .filter(tool => tool.title && tool.type && tool.exam_type)
-          .map(tool => ({
-            title: tool.title,
-            type: tool.type,
-            content_url: tool.content_url || '',
-            description: tool.description || null,
-            course_id: courseId,
-            exam_type: tool.exam_type
-          }))
+          .map(tool => {
+            const toolData: any = {
+              title: tool.title,
+              type: tool.type,
+              content_url: tool.content_url || null,
+              course_id: courseId,
+              exam_type: tool.exam_type
+            }
+
+            // Only add description if it has a value
+            if (tool.description) {
+              toolData.description = tool.description
+            }
+
+            return toolData
+          })
 
         if (studyToolsToInsert.length > 0) {
           console.log("Inserting study tools:", studyToolsToInsert)

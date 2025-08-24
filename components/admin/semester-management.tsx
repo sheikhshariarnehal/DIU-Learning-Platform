@@ -591,6 +591,21 @@ export function SemesterManagement() {
 
   // Study tool management functions
   const addStudyTool = useCallback((courseIndex: number) => {
+    // Determine default exam type based on semester configuration
+    const getDefaultExamType = () => {
+      const { has_midterm, has_final } = formData.semester
+
+      if (has_midterm && has_final) {
+        return "both"
+      } else if (has_final) {
+        return "final"
+      } else if (has_midterm) {
+        return "midterm"
+      } else {
+        return "both" // fallback
+      }
+    }
+
     setFormData(prev => ({
       ...prev,
       courses: prev.courses.map((course, i) =>
@@ -603,7 +618,7 @@ export function SemesterManagement() {
                   title: "",
                   type: "previous_questions",
                   content_url: "",
-                  exam_type: "both",
+                  exam_type: getDefaultExamType(),
                   description: ""
                 }
               ]
@@ -611,7 +626,58 @@ export function SemesterManagement() {
           : course
       )
     }))
-  }, [])
+  }, [formData.semester])
+
+  // Helper function to determine which fields should be shown based on study tool type
+  const getStudyToolFieldConfig = (type: string) => {
+    switch (type) {
+      case "previous_questions":
+        return {
+          showTitle: true,
+          showContentUrl: true,
+          showDescription: false,
+          showExamType: true,
+          titlePlaceholder: "e.g., Previous Questions 2024",
+          descriptionPlaceholder: ""
+        }
+      case "exam_note":
+        return {
+          showTitle: true,
+          showContentUrl: true,
+          showDescription: false,
+          showExamType: true,
+          titlePlaceholder: "e.g., Exam Notes - Chapter 1-5",
+          descriptionPlaceholder: ""
+        }
+      case "syllabus":
+        return {
+          showTitle: true,
+          showContentUrl: false,
+          showDescription: true,
+          showExamType: false,
+          titlePlaceholder: "e.g., Course Syllabus",
+          descriptionPlaceholder: "Describe the syllabus content, topics covered, etc."
+        }
+      case "mark_distribution":
+        return {
+          showTitle: true,
+          showContentUrl: true,
+          showDescription: false,
+          showExamType: true,
+          titlePlaceholder: "e.g., Mark Distribution Scheme",
+          descriptionPlaceholder: ""
+        }
+      default:
+        return {
+          showTitle: true,
+          showContentUrl: true,
+          showDescription: true,
+          showExamType: true,
+          titlePlaceholder: "e.g., Study Material",
+          descriptionPlaceholder: "Describe this study tool..."
+        }
+    }
+  }
 
   const removeStudyTool = useCallback((courseIndex: number, toolIndex: number) => {
     setFormData(prev => ({
@@ -635,9 +701,25 @@ export function SemesterManagement() {
         i === courseIndex
           ? {
               ...course,
-              studyTools: course.studyTools.map((tool, ti) =>
-                ti === toolIndex ? { ...tool, [field]: value } : tool
-              )
+              studyTools: course.studyTools.map((tool, ti) => {
+                if (ti === toolIndex) {
+                  const updatedTool = { ...tool, [field]: value }
+
+                  // If type is being changed, reset fields that are not applicable
+                  if (field === 'type') {
+                    const fieldConfig = getStudyToolFieldConfig(value)
+                    if (!fieldConfig.showContentUrl) {
+                      updatedTool.content_url = ""
+                    }
+                    if (!fieldConfig.showDescription) {
+                      updatedTool.description = ""
+                    }
+                  }
+
+                  return updatedTool
+                }
+                return tool
+              })
             }
           : course
       )
@@ -765,6 +847,19 @@ export function SemesterManagement() {
         return
       }
 
+      // Process form data to handle database constraints
+      const processedFormData = {
+        ...formData,
+        courses: formData.courses.map(course => ({
+          ...course,
+          studyTools: course.studyTools.map(tool => ({
+            ...tool,
+            content_url: tool.content_url?.trim() || null,
+            description: tool.description?.trim() || null
+          }))
+        }))
+      }
+
       const url = editingSemester ? `/api/admin/all-in-one/${editingSemester}` : "/api/admin/all-in-one"
       const method = editingSemester ? "PUT" : "POST"
 
@@ -773,7 +868,7 @@ export function SemesterManagement() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(processedFormData),
       })
 
       const result = await response.json()
@@ -1670,71 +1765,84 @@ export function SemesterManagement() {
                                           <Trash2 className="h-3 w-3" />
                                         </Button>
                                       </div>
-                                      <div className="grid gap-3 md:grid-cols-2">
-                                        <div className="space-y-2">
-                                          <Label className="text-sm font-medium">Title *</Label>
-                                          <Input
-                                            placeholder="e.g., Previous Questions"
-                                            value={tool.title}
-                                            onChange={(e) => updateStudyTool(index, toolIndex, "title", e.target.value)}
-                                            className="h-8"
-                                          />
-                                        </div>
-                                        <div className="space-y-2">
-                                          <Label className="text-sm font-medium">Type</Label>
-                                          <Select
-                                            value={tool.type}
-                                            onValueChange={(value) => updateStudyTool(index, toolIndex, "type", value)}
-                                          >
-                                            <SelectTrigger className="h-8">
-                                              <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem value="previous_questions">Previous Questions</SelectItem>
-                                              <SelectItem value="exam_notes">Exam Notes</SelectItem>
-                                              <SelectItem value="syllabus">Syllabus</SelectItem>
-                                              <SelectItem value="mark_distribution">Mark Distribution</SelectItem>
-                                              <SelectItem value="reference_books">Reference Books</SelectItem>
-                                              <SelectItem value="assignments">Assignments</SelectItem>
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                        <div className="space-y-2">
-                                          <Label className="text-sm font-medium">Content URL</Label>
-                                          <Input
-                                            placeholder="https://..."
-                                            value={tool.content_url}
-                                            onChange={(e) => updateStudyTool(index, toolIndex, "content_url", e.target.value)}
-                                            className="h-8"
-                                          />
-                                        </div>
-                                        <div className="space-y-2">
-                                          <Label className="text-sm font-medium">Exam Type</Label>
-                                          <Select
-                                            value={tool.exam_type}
-                                            onValueChange={(value) => updateStudyTool(index, toolIndex, "exam_type", value)}
-                                          >
-                                            <SelectTrigger className="h-8">
-                                              <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem value="both">Both Exams</SelectItem>
-                                              <SelectItem value="midterm">Midterm Only</SelectItem>
-                                              <SelectItem value="final">Final Only</SelectItem>
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                      </div>
-                                      <div className="space-y-2">
-                                        <Label className="text-sm font-medium">Description</Label>
-                                        <Textarea
-                                          placeholder="Describe this study tool..."
-                                          value={tool.description || ""}
-                                          onChange={(e) => updateStudyTool(index, toolIndex, "description", e.target.value)}
-                                          rows={2}
-                                          className="resize-none"
-                                        />
-                                      </div>
+                                      {(() => {
+                                        const fieldConfig = getStudyToolFieldConfig(tool.type)
+                                        return (
+                                          <>
+                                            <div className="grid gap-3 md:grid-cols-2">
+                                              {fieldConfig.showTitle && (
+                                                <div className="space-y-2">
+                                                  <Label className="text-sm font-medium">Title *</Label>
+                                                  <Input
+                                                    placeholder={fieldConfig.titlePlaceholder}
+                                                    value={tool.title}
+                                                    onChange={(e) => updateStudyTool(index, toolIndex, "title", e.target.value)}
+                                                    className="h-8"
+                                                  />
+                                                </div>
+                                              )}
+                                              <div className="space-y-2">
+                                                <Label className="text-sm font-medium">Type</Label>
+                                                <Select
+                                                  value={tool.type}
+                                                  onValueChange={(value) => updateStudyTool(index, toolIndex, "type", value)}
+                                                >
+                                                  <SelectTrigger className="h-8">
+                                                    <SelectValue />
+                                                  </SelectTrigger>
+                                                  <SelectContent>
+                                                    <SelectItem value="previous_questions">Previous Questions</SelectItem>
+                                                    <SelectItem value="exam_note">Exam Notes</SelectItem>
+                                                    <SelectItem value="syllabus">Syllabus</SelectItem>
+                                                    <SelectItem value="mark_distribution">Mark Distribution</SelectItem>
+                                                  </SelectContent>
+                                                </Select>
+                                              </div>
+                                              {fieldConfig.showContentUrl && (
+                                                <div className="space-y-2">
+                                                  <Label className="text-sm font-medium">Content URL</Label>
+                                                  <Input
+                                                    placeholder="https://..."
+                                                    value={tool.content_url}
+                                                    onChange={(e) => updateStudyTool(index, toolIndex, "content_url", e.target.value)}
+                                                    className="h-8"
+                                                  />
+                                                </div>
+                                              )}
+                                              {fieldConfig.showExamType && (
+                                                <div className="space-y-2">
+                                                  <Label className="text-sm font-medium">Exam Type</Label>
+                                                  <Select
+                                                    value={tool.exam_type}
+                                                    onValueChange={(value) => updateStudyTool(index, toolIndex, "exam_type", value)}
+                                                  >
+                                                    <SelectTrigger className="h-8">
+                                                      <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                      <SelectItem value="both">Both Exams</SelectItem>
+                                                      <SelectItem value="midterm">Midterm Only</SelectItem>
+                                                      <SelectItem value="final">Final Only</SelectItem>
+                                                    </SelectContent>
+                                                  </Select>
+                                                </div>
+                                              )}
+                                            </div>
+                                            {fieldConfig.showDescription && (
+                                              <div className="space-y-2">
+                                                <Label className="text-sm font-medium">Description</Label>
+                                                <Textarea
+                                                  placeholder={fieldConfig.descriptionPlaceholder}
+                                                  value={tool.description || ""}
+                                                  onChange={(e) => updateStudyTool(index, toolIndex, "description", e.target.value)}
+                                                  rows={2}
+                                                  className="resize-none"
+                                                />
+                                              </div>
+                                            )}
+                                          </>
+                                        )
+                                      })()}
                                     </div>
                                   ))}
                                 </div>
@@ -2317,71 +2425,84 @@ export function SemesterManagement() {
                                           <Trash2 className="h-3 w-3" />
                                         </Button>
                                       </div>
-                                      <div className="grid gap-3 md:grid-cols-2">
-                                        <div className="space-y-2">
-                                          <Label className="text-sm font-medium">Title *</Label>
-                                          <Input
-                                            placeholder="e.g., Previous Questions"
-                                            value={tool.title}
-                                            onChange={(e) => updateStudyTool(index, toolIndex, "title", e.target.value)}
-                                            className="h-8"
-                                          />
-                                        </div>
-                                        <div className="space-y-2">
-                                          <Label className="text-sm font-medium">Type</Label>
-                                          <Select
-                                            value={tool.type}
-                                            onValueChange={(value) => updateStudyTool(index, toolIndex, "type", value)}
-                                          >
-                                            <SelectTrigger className="h-8">
-                                              <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem value="previous_questions">Previous Questions</SelectItem>
-                                              <SelectItem value="exam_notes">Exam Notes</SelectItem>
-                                              <SelectItem value="syllabus">Syllabus</SelectItem>
-                                              <SelectItem value="mark_distribution">Mark Distribution</SelectItem>
-                                              <SelectItem value="reference_books">Reference Books</SelectItem>
-                                              <SelectItem value="assignments">Assignments</SelectItem>
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                        <div className="space-y-2">
-                                          <Label className="text-sm font-medium">Content URL</Label>
-                                          <Input
-                                            placeholder="https://..."
-                                            value={tool.content_url}
-                                            onChange={(e) => updateStudyTool(index, toolIndex, "content_url", e.target.value)}
-                                            className="h-8"
-                                          />
-                                        </div>
-                                        <div className="space-y-2">
-                                          <Label className="text-sm font-medium">Exam Type</Label>
-                                          <Select
-                                            value={tool.exam_type}
-                                            onValueChange={(value) => updateStudyTool(index, toolIndex, "exam_type", value)}
-                                          >
-                                            <SelectTrigger className="h-8">
-                                              <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem value="both">Both Exams</SelectItem>
-                                              <SelectItem value="midterm">Midterm Only</SelectItem>
-                                              <SelectItem value="final">Final Only</SelectItem>
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                      </div>
-                                      <div className="space-y-2">
-                                        <Label className="text-sm font-medium">Description</Label>
-                                        <Textarea
-                                          placeholder="Describe this study tool..."
-                                          value={tool.description || ""}
-                                          onChange={(e) => updateStudyTool(index, toolIndex, "description", e.target.value)}
-                                          rows={2}
-                                          className="resize-none"
-                                        />
-                                      </div>
+                                      {(() => {
+                                        const fieldConfig = getStudyToolFieldConfig(tool.type)
+                                        return (
+                                          <>
+                                            <div className="grid gap-3 md:grid-cols-2">
+                                              {fieldConfig.showTitle && (
+                                                <div className="space-y-2">
+                                                  <Label className="text-sm font-medium">Title *</Label>
+                                                  <Input
+                                                    placeholder={fieldConfig.titlePlaceholder}
+                                                    value={tool.title}
+                                                    onChange={(e) => updateStudyTool(index, toolIndex, "title", e.target.value)}
+                                                    className="h-8"
+                                                  />
+                                                </div>
+                                              )}
+                                              <div className="space-y-2">
+                                                <Label className="text-sm font-medium">Type</Label>
+                                                <Select
+                                                  value={tool.type}
+                                                  onValueChange={(value) => updateStudyTool(index, toolIndex, "type", value)}
+                                                >
+                                                  <SelectTrigger className="h-8">
+                                                    <SelectValue />
+                                                  </SelectTrigger>
+                                                  <SelectContent>
+                                                    <SelectItem value="previous_questions">Previous Questions</SelectItem>
+                                                    <SelectItem value="exam_note">Exam Notes</SelectItem>
+                                                    <SelectItem value="syllabus">Syllabus</SelectItem>
+                                                    <SelectItem value="mark_distribution">Mark Distribution</SelectItem>
+                                                  </SelectContent>
+                                                </Select>
+                                              </div>
+                                              {fieldConfig.showContentUrl && (
+                                                <div className="space-y-2">
+                                                  <Label className="text-sm font-medium">Content URL</Label>
+                                                  <Input
+                                                    placeholder="https://..."
+                                                    value={tool.content_url}
+                                                    onChange={(e) => updateStudyTool(index, toolIndex, "content_url", e.target.value)}
+                                                    className="h-8"
+                                                  />
+                                                </div>
+                                              )}
+                                              {fieldConfig.showExamType && (
+                                                <div className="space-y-2">
+                                                  <Label className="text-sm font-medium">Exam Type</Label>
+                                                  <Select
+                                                    value={tool.exam_type}
+                                                    onValueChange={(value) => updateStudyTool(index, toolIndex, "exam_type", value)}
+                                                  >
+                                                    <SelectTrigger className="h-8">
+                                                      <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                      <SelectItem value="both">Both Exams</SelectItem>
+                                                      <SelectItem value="midterm">Midterm Only</SelectItem>
+                                                      <SelectItem value="final">Final Only</SelectItem>
+                                                    </SelectContent>
+                                                  </Select>
+                                                </div>
+                                              )}
+                                            </div>
+                                            {fieldConfig.showDescription && (
+                                              <div className="space-y-2">
+                                                <Label className="text-sm font-medium">Description</Label>
+                                                <Textarea
+                                                  placeholder={fieldConfig.descriptionPlaceholder}
+                                                  value={tool.description || ""}
+                                                  onChange={(e) => updateStudyTool(index, toolIndex, "description", e.target.value)}
+                                                  rows={2}
+                                                  className="resize-none"
+                                                />
+                                              </div>
+                                            )}
+                                          </>
+                                        )
+                                      })()}
                                     </div>
                                   ))}
                                 </div>

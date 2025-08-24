@@ -1,7 +1,10 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { ChevronDown, ChevronRight, FileText, Play, BookOpen, Users, Loader2, AlertCircle } from "lucide-react"
+import {
+  ChevronDown, ChevronRight, FileText, Play, BookOpen, Users, Loader2, AlertCircle,
+  GraduationCap, ClipboardList, BarChart3, PenTool, FlaskConical, Library
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
@@ -57,12 +60,13 @@ const formatTopicTitle = (index: number, title: string, maxLength: number = 42):
 }
 
 interface ContentItem {
-  type: "slide" | "video" | "document"
+  type: "slide" | "video" | "document" | "syllabus"
   title: string
   url: string
   id: string
   topicTitle?: string
   courseTitle?: string
+  description?: string
 }
 
 interface FunctionalSidebarProps {
@@ -297,12 +301,13 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
   // Content selection handlers
   const handleContentClick = useCallback(
     (
-      type: "slide" | "video" | "document",
+      type: "slide" | "video" | "document" | "syllabus",
       title: string,
       url: string,
       id: string,
       topicTitle?: string,
       courseTitle?: string,
+      description?: string,
     ) => {
       onContentSelect({
         type,
@@ -311,6 +316,7 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
         id,
         topicTitle,
         courseTitle,
+        description,
       })
     },
     [onContentSelect],
@@ -320,15 +326,22 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
   const getStudyToolIcon = useCallback((type: string) => {
     switch (type) {
       case "previous_questions":
-        return <FileText className="h-4 w-4 text-blue-400" />
+        return <FileText className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
       case "exam_note":
-        return <BookOpen className="h-4 w-4 text-green-400" />
+      case "exam_notes":
+        return <BookOpen className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
       case "syllabus":
-        return <FileText className="h-4 w-4 text-purple-400" />
+        return <GraduationCap className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
       case "mark_distribution":
-        return <Users className="h-4 w-4 text-orange-400" />
+        return <BarChart3 className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400" />
+      case "assignment":
+        return <PenTool className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+      case "lab_manual":
+        return <FlaskConical className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
+      case "reference_book":
+        return <Library className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
       default:
-        return <FileText className="h-4 w-4 text-slate-400" />
+        return <FileText className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
     }
   }, [])
 
@@ -337,13 +350,20 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
       case "previous_questions":
         return "Previous Questions"
       case "exam_note":
+      case "exam_notes":
         return "Exam Notes"
       case "syllabus":
         return "Syllabus"
       case "mark_distribution":
         return "Mark Distribution"
+      case "assignment":
+        return "Assignment"
+      case "lab_manual":
+        return "Lab Manual"
+      case "reference_book":
+        return "Reference Book"
       default:
-        return type.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())
+        return type.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
     }
   }, [])
 
@@ -580,6 +600,7 @@ const CourseItem = React.memo(
       id: string,
       topicTitle?: string,
       courseTitle?: string,
+      description?: string,
     ) => void
     getStudyToolIcon: (type: string) => React.ReactNode
     getStudyToolLabel: (type: string) => string
@@ -705,31 +726,30 @@ const CourseItem = React.memo(
                         <Button
                           key={tool.id}
                           variant="ghost"
-                          className={`w-full justify-start text-left p-2 h-auto rounded-md transition-all duration-200 ${
+                          className={`w-full justify-start text-left px-2 py-1.5 h-auto rounded transition-colors ${
                             isSelected
-                              ? "bg-primary/10 border border-primary/20 shadow-sm"
-                              : "hover:bg-accent"
+                              ? "bg-primary/10 text-primary"
+                              : "hover:bg-accent/50"
                           }`}
-                          onClick={() =>
-                            tool.content_url &&
-                            onContentClick("document", tool.title, tool.content_url, tool.id, undefined, course.title)
-                          }
-                          disabled={!tool.content_url}
+                          onClick={() => {
+                            if (tool.type === "syllabus") {
+                              // For syllabus, use description as content and pass it via URL parameter
+                              onContentClick("syllabus", tool.title, `#syllabus-${tool.id}`, tool.id, undefined, course.title, tool.description)
+                            } else if (tool.content_url) {
+                              onContentClick("document", tool.title, tool.content_url, tool.id, undefined, course.title)
+                            }
+                          }}
+                          disabled={tool.type !== "syllabus" && !tool.content_url}
                         >
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 w-full">
                             {getStudyToolIcon(tool.type)}
-                            <span className={`text-xs ${
-                              isSelected ? "text-foreground font-medium" : "text-foreground"
+                            <span className={`text-xs truncate flex-1 ${
+                              isSelected ? "text-foreground font-medium" : "text-muted-foreground"
                             }`}>
-                              {getStudyToolLabel(tool.type)}
+                              {tool.title}
                             </span>
-                            {tool.exam_type !== "both" && (
-                              <Badge variant="outline" className="text-xs border-border text-muted-foreground">
-                                {tool.exam_type}
-                              </Badge>
-                            )}
                             {isSelected && (
-                              <div className="ml-auto w-2 h-2 bg-primary rounded-full"></div>
+                              <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0"></div>
                             )}
                           </div>
                         </Button>

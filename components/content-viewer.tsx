@@ -12,12 +12,13 @@ import { Badge } from "@/components/ui/badge"
 import { useIsMobile } from "@/components/ui/use-mobile"
 
 interface ContentItem {
-  type: "slide" | "video" | "document"
+  type: "slide" | "video" | "document" | "syllabus"
   title: string
   url: string
   id: string
   topicTitle?: string
   courseTitle?: string
+  description?: string // For syllabus content
 }
 
 interface ContentViewerProps {
@@ -45,7 +46,13 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
   const isMobile = useIsMobile()
 
   useEffect(() => {
-    setIframeLoading(true)
+    // Don't show loading for syllabus content since it doesn't use iframe
+    if (content.type !== "syllabus") {
+      setIframeLoading(true)
+    } else {
+      setIframeLoading(false)
+    }
+
     setIframeError(false)
     setZoomLevel(100)
     setIsRotated(0)
@@ -61,7 +68,7 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
         clearInterval(viewTimeRef.current)
       }
     }
-  }, [content.url])
+  }, [content.url, content.type])
 
   const handleIframeLoad = () => {
     setIframeLoading(false)
@@ -331,6 +338,8 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
         return <FileText className={`${iconSize} text-blue-400 flex-shrink-0`} />
       case "document":
         return <BookOpen className={`${iconSize} text-green-400 flex-shrink-0`} />
+      case "syllabus":
+        return <FileText className={`${iconSize} text-purple-400 flex-shrink-0`} />
       default:
         return <FileText className={`${iconSize} text-slate-400 flex-shrink-0`} />
     }
@@ -425,12 +434,13 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
       ${isFullscreen ? 'fixed inset-0 z-50 rounded-none' : ''}
       ${isMobile ? 'mobile-content-viewer' : ''}
     `}>
-      {/* Content Header */}
-      <div className={`
-        absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 via-black/40 to-transparent
-        ${isMobile ? 'p-2 sm:p-3' : 'p-3 sm:p-4 lg:p-5'}
-        ${isFullscreen && isMobile ? 'pt-safe-top' : ''}
-      `}>
+      {/* Content Header - Hidden for syllabus */}
+      {content.type !== "syllabus" && (
+        <div className={`
+          absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 via-black/40 to-transparent
+          ${isMobile ? 'p-2 sm:p-3' : 'p-3 sm:p-4 lg:p-5'}
+          ${isFullscreen && isMobile ? 'pt-safe-top' : ''}
+        `}>
         <div className="flex items-start justify-between text-white gap-2 sm:gap-3">
           <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
             {getContentIcon()}
@@ -615,6 +625,7 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
           </div>
         </div>
       </div>
+      )}
 
       {/* Loading overlay */}
       {iframeLoading && (
@@ -742,7 +753,122 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
           transition: 'transform 0.3s ease-in-out'
         }}
       >
-        {content.type === "video" ? (
+
+        {content.type === "syllabus" ? (
+          <div className={`
+            w-full h-full bg-white dark:bg-gray-900
+            overflow-y-auto
+            ${isMobile ? 'p-4' : 'p-6 md:p-8'}
+          `}>
+            <div className="max-w-4xl mx-auto">
+              {/* Clean Professional Header */}
+              <div className="mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="mt-1">
+                    <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+                      {content.title}
+                    </h1>
+                    <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
+                      {content.courseTitle}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Clean Content Area */}
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 md:p-8">
+                {content.description ? (
+                  <div className="prose prose-gray dark:prose-invert max-w-none">
+                    {content.description.split('\n').map((line, index) => {
+                      const trimmedLine = line.trim()
+
+                      // Empty line - add spacing
+                      if (trimmedLine === '') {
+                        return <div key={index} className="h-3"></div>
+                      }
+
+                      // Headings (# ## ###)
+                      if (trimmedLine.match(/^#{1,3}\s+/)) {
+                        const level = (trimmedLine.match(/^#+/) || [''])[0].length
+                        const text = trimmedLine.replace(/^#+\s*/, '')
+
+                        if (level === 1) {
+                          return (
+                            <h2 key={index} className="text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 mb-3 first:mt-0">
+                              {text}
+                            </h2>
+                          )
+                        } else if (level === 2) {
+                          return (
+                            <h3 key={index} className="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-5 mb-2">
+                              {text}
+                            </h3>
+                          )
+                        } else {
+                          return (
+                            <h4 key={index} className="text-base font-medium text-gray-700 dark:text-gray-300 mt-4 mb-2">
+                              {text}
+                            </h4>
+                          )
+                        }
+                      }
+
+                      // List items (- * •)
+                      if (trimmedLine.match(/^[-*•]\s+/)) {
+                        const text = trimmedLine.replace(/^[-*•]\s+/, '')
+                        return (
+                          <div key={index} className="flex items-start gap-2 mb-1 ml-4">
+                            <span className="text-blue-600 dark:text-blue-400 mt-1.5">•</span>
+                            <span className="text-gray-700 dark:text-gray-300">{text}</span>
+                          </div>
+                        )
+                      }
+
+                      // Bold text (**text**)
+                      if (trimmedLine.includes('**')) {
+                        const parts = trimmedLine.split(/(\*\*[^*]+\*\*)/)
+                        return (
+                          <p key={index} className="text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
+                            {parts.map((part, partIndex) => {
+                              if (part.startsWith('**') && part.endsWith('**')) {
+                                return (
+                                  <strong key={partIndex} className="font-semibold text-gray-900 dark:text-gray-100">
+                                    {part.slice(2, -2)}
+                                  </strong>
+                                )
+                              }
+                              return part
+                            })}
+                          </p>
+                        )
+                      }
+
+                      // Regular paragraphs
+                      return (
+                        <p key={index} className="text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
+                          {trimmedLine}
+                        </p>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                      No Content Available
+                    </h3>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Please add syllabus content in the admin panel.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : content.type === "video" ? (
           <iframe
             ref={iframeRef}
             src={embedUrl}

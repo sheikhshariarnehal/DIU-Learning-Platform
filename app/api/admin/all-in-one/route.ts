@@ -177,13 +177,23 @@ export async function POST(request: NextRequest) {
         const studyToolPromises = course.studyTools
           .filter(tool => tool.title && tool.type)
           .map(tool => 
-            db.from("study_tools").insert([{
-              title: tool.title,
-              type: tool.type,
-              content_url: tool.content_url || "",
-              course_id: courseData.id,
-              exam_type: tool.exam_type || "both"
-            }])
+            (async () => {
+              // Try inserting with description first
+              const toolData: any = {
+                title: tool.title,
+                type: tool.type,
+                content_url: tool.content_url || null,
+                course_id: courseData.id,
+                exam_type: tool.exam_type || "both"
+              }
+
+              // Only add description if it has a value
+              if (tool.description) {
+                toolData.description = tool.description
+              }
+
+              return db.from("study_tools").insert([toolData])
+            })()
           )
 
         await Promise.all(studyToolPromises)
