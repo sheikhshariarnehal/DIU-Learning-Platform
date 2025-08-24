@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bell, Sun, User, Download, Maximize, ExternalLink, Moon } from "lucide-react"
+import { Bell, Sun, User, Download, Maximize, Moon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { FunctionalSidebar } from "@/components/functional-sidebar"
@@ -294,71 +294,42 @@ export default function HomePage() {
             <div className="flex-none bg-background">
               {selectedContent ? (
                 <>
-                  {/* Content Viewer - Mobile optimized with YouTube-like aspect ratio */}
+                  {/* Content Viewer - Clean Mobile Design */}
                   <div className="relative w-full" style={{ aspectRatio: '16/9' }}>
-                    <div className="absolute inset-0 rounded-none overflow-hidden shadow-lg border-b border-border">
+                    <div className="absolute inset-0 overflow-hidden bg-black">
                       <ContentViewer content={selectedContent} isLoading={isLoading} />
                     </div>
                   </div>
 
-                  {/* Content Info - Mobile */}
-                  <div className="bg-card/95 backdrop-blur-sm px-3 py-3 border-b border-border/50">
-                    <div className="flex flex-col gap-2">
-                      {/* Content Title and Info */}
-                      <div className="flex items-start gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm leading-tight line-clamp-2 mb-1 text-foreground">
-                            {selectedContent.title}
-                          </h3>
-                          {selectedContent.topicTitle && (
-                            <p className="text-xs text-muted-foreground truncate mb-1">
-                              {selectedContent.topicTitle}
-                            </p>
-                          )}
-                          {selectedContent.courseTitle && (
-                            <p className="text-xs text-muted-foreground/80 truncate">
-                              {selectedContent.courseTitle}
-                            </p>
-                          )}
-                        </div>
-                        <Badge
-                          variant="secondary"
-                          className={`text-xs font-medium flex-shrink-0 ${
-                            selectedContent.type === "video"
-                              ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                              : selectedContent.type === "slide"
-                                ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                                : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                          }`}
-                        >
-                          {selectedContent.type === "slide"
-                            ? "Slides"
-                            : selectedContent.type === "video"
-                              ? "Video"
-                              : "Doc"}
-                        </Badge>
+                  {/* Content Info - Minimal Mobile Design */}
+                  <div className="bg-background px-4 py-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-sm text-foreground truncate">
+                          {selectedContent.title}
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                          {selectedContent.topicTitle || selectedContent.courseTitle}
+                        </p>
                       </div>
-
-
+                      <div className={`w-2 h-2 rounded-full ml-3 flex-shrink-0 ${
+                        selectedContent.type === "video"
+                          ? "bg-red-500"
+                          : selectedContent.type === "slide"
+                            ? "bg-blue-500"
+                            : "bg-green-500"
+                      }`}></div>
                     </div>
                   </div>
                 </>
               ) : (
-                <div className="flex items-center justify-center h-64 p-4 bg-card/50">
-                  <div className="text-center max-w-sm animate-slide-up">
-                    {/* Logo */}
-                    <div className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-primary-lg">
-                      <span className="text-primary-foreground font-bold text-lg">DIU</span>
+                <div className="flex items-center justify-center h-48 bg-background">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="text-muted-foreground font-semibold text-xl">DIU</span>
                     </div>
-
-                    {/* Title */}
-                    <h2 className="text-lg font-bold bg-gradient-to-r from-primary via-primary/90 to-primary/80 bg-clip-text text-transparent mb-3 leading-tight">
-                      DIU CSE Learning Platform
-                    </h2>
-
-                    {/* Description */}
-                    <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
-                      Select content from the courses below
+                    <p className="text-muted-foreground text-sm">
+                      Select content from courses below
                     </p>
                   </div>
                 </div>
