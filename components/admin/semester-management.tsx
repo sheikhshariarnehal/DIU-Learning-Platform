@@ -124,6 +124,7 @@ export function SemesterManagement() {
   const [editingSemester, setEditingSemester] = useState<string | null>(null)
   const [expandedCourse, setExpandedCourse] = useState<number | null>(null)
   const [expandedTopic, setExpandedTopic] = useState<{ courseIndex: number; topicIndex: number } | null>(null)
+  const [expandedStudyTool, setExpandedStudyTool] = useState<{ courseIndex: number; toolIndex: number } | null>(null)
 
   // Form data for create/edit
   const [formData, setFormData] = useState<AllInOneData>({
@@ -232,6 +233,7 @@ export function SemesterManagement() {
     setEditingSemester(null)
     setExpandedCourse(null)
     setExpandedTopic(null)
+    setExpandedStudyTool(null)
     setViewMode('create')
   }
 
@@ -258,6 +260,9 @@ export function SemesterManagement() {
       }
       setFormData(data)
       setEditingSemester(semesterId)
+      setExpandedCourse(null)
+      setExpandedTopic(null)
+      setExpandedStudyTool(null)
       setViewMode('edit')
     } catch (error) {
       console.error('Error loading semester:', error)
@@ -626,7 +631,10 @@ export function SemesterManagement() {
           : course
       )
     }))
-  }, [formData.semester])
+    // Auto-expand the new study tool
+    const newToolIndex = formData.courses[courseIndex].studyTools.length
+    setExpandedStudyTool({ courseIndex, toolIndex: newToolIndex })
+  }, [formData.semester, formData.courses])
 
   // Helper function to determine which fields should be shown based on study tool type
   const getStudyToolFieldConfig = (type: string) => {
@@ -1751,25 +1759,48 @@ export function SemesterManagement() {
                                   <p className="text-sm text-muted-foreground">No study tools added yet</p>
                                 </div>
                               ) : (
-                                <div className="space-y-3">
+                                <div className="space-y-2">
                                   {course.studyTools.map((tool, toolIndex) => (
-                                    <div key={toolIndex} className="p-3 border rounded-lg space-y-3">
-                                      <div className="flex items-center justify-between">
-                                        <Badge variant="outline" className="text-xs">Tool {toolIndex + 1}</Badge>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => removeStudyTool(index, toolIndex)}
-                                          className="text-destructive hover:text-destructive h-6 w-6 p-0"
-                                        >
-                                          <Trash2 className="h-3 w-3" />
-                                        </Button>
-                                      </div>
-                                      {(() => {
-                                        const fieldConfig = getStudyToolFieldConfig(tool.type)
-                                        return (
-                                          <>
-                                            <div className="grid gap-3 md:grid-cols-2">
+                                    <Card key={toolIndex} className="border-l-2 border-l-blue-400">
+                                      <CardHeader className="pb-2">
+                                        <div className="flex items-center justify-between">
+                                          <div
+                                            className="flex items-center gap-2 cursor-pointer flex-1"
+                                            onClick={() => setExpandedStudyTool(
+                                              expandedStudyTool?.courseIndex === index && expandedStudyTool?.toolIndex === toolIndex
+                                                ? null
+                                                : { courseIndex: index, toolIndex }
+                                            )}
+                                          >
+                                            <Badge variant="secondary" className="text-xs">Tool {toolIndex + 1}</Badge>
+                                            <span className="text-sm font-medium">
+                                              {tool.title || `${tool.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} ${toolIndex + 1}`}
+                                            </span>
+                                            <div className="ml-auto">
+                                              {expandedStudyTool?.courseIndex === index && expandedStudyTool?.toolIndex === toolIndex ? (
+                                                <X className="h-3 w-3" />
+                                              ) : (
+                                                <Plus className="h-3 w-3" />
+                                              )}
+                                            </div>
+                                          </div>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => removeStudyTool(index, toolIndex)}
+                                            className="text-destructive hover:text-destructive h-6 w-6 p-0"
+                                          >
+                                            <Trash2 className="h-3 w-3" />
+                                          </Button>
+                                        </div>
+                                      </CardHeader>
+                                      {expandedStudyTool?.courseIndex === index && expandedStudyTool?.toolIndex === toolIndex && (
+                                        <CardContent className="space-y-4">
+                                          {(() => {
+                                            const fieldConfig = getStudyToolFieldConfig(tool.type)
+                                            return (
+                                              <>
+                                                <div className="grid gap-3 md:grid-cols-2">
                                               {fieldConfig.showTitle && (
                                                 <div className="space-y-2">
                                                   <Label className="text-sm font-medium">Title *</Label>
@@ -1840,10 +1871,12 @@ export function SemesterManagement() {
                                                 />
                                               </div>
                                             )}
-                                          </>
-                                        )
-                                      })()}
-                                    </div>
+                                              </>
+                                            )
+                                          })()}
+                                        </CardContent>
+                                      )}
+                                    </Card>
                                   ))}
                                 </div>
                               )}
@@ -2411,25 +2444,48 @@ export function SemesterManagement() {
                                   <p className="text-sm text-muted-foreground">No study tools added yet</p>
                                 </div>
                               ) : (
-                                <div className="space-y-3">
+                                <div className="space-y-2">
                                   {course.studyTools.map((tool, toolIndex) => (
-                                    <div key={toolIndex} className="p-3 border rounded-lg space-y-3">
-                                      <div className="flex items-center justify-between">
-                                        <Badge variant="outline" className="text-xs">Tool {toolIndex + 1}</Badge>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => removeStudyTool(index, toolIndex)}
-                                          className="text-destructive hover:text-destructive h-6 w-6 p-0"
-                                        >
-                                          <Trash2 className="h-3 w-3" />
-                                        </Button>
-                                      </div>
-                                      {(() => {
-                                        const fieldConfig = getStudyToolFieldConfig(tool.type)
-                                        return (
-                                          <>
-                                            <div className="grid gap-3 md:grid-cols-2">
+                                    <Card key={toolIndex} className="border-l-2 border-l-blue-400">
+                                      <CardHeader className="pb-2">
+                                        <div className="flex items-center justify-between">
+                                          <div
+                                            className="flex items-center gap-2 cursor-pointer flex-1"
+                                            onClick={() => setExpandedStudyTool(
+                                              expandedStudyTool?.courseIndex === index && expandedStudyTool?.toolIndex === toolIndex
+                                                ? null
+                                                : { courseIndex: index, toolIndex }
+                                            )}
+                                          >
+                                            <Badge variant="secondary" className="text-xs">Tool {toolIndex + 1}</Badge>
+                                            <span className="text-sm font-medium">
+                                              {tool.title || `${tool.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} ${toolIndex + 1}`}
+                                            </span>
+                                            <div className="ml-auto">
+                                              {expandedStudyTool?.courseIndex === index && expandedStudyTool?.toolIndex === toolIndex ? (
+                                                <X className="h-3 w-3" />
+                                              ) : (
+                                                <Plus className="h-3 w-3" />
+                                              )}
+                                            </div>
+                                          </div>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => removeStudyTool(index, toolIndex)}
+                                            className="text-destructive hover:text-destructive h-6 w-6 p-0"
+                                          >
+                                            <Trash2 className="h-3 w-3" />
+                                          </Button>
+                                        </div>
+                                      </CardHeader>
+                                      {expandedStudyTool?.courseIndex === index && expandedStudyTool?.toolIndex === toolIndex && (
+                                        <CardContent className="space-y-4">
+                                          {(() => {
+                                            const fieldConfig = getStudyToolFieldConfig(tool.type)
+                                            return (
+                                              <>
+                                                <div className="grid gap-3 md:grid-cols-2">
                                               {fieldConfig.showTitle && (
                                                 <div className="space-y-2">
                                                   <Label className="text-sm font-medium">Title *</Label>
@@ -2500,10 +2556,12 @@ export function SemesterManagement() {
                                                 />
                                               </div>
                                             )}
-                                          </>
-                                        )
-                                      })()}
-                                    </div>
+                                              </>
+                                            )
+                                          })()}
+                                        </CardContent>
+                                      )}
+                                    </Card>
                                   ))}
                                 </div>
                               )}
