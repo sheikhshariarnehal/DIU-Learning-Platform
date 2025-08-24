@@ -13,12 +13,14 @@ export async function GET() {
         title,
         course_code,
         teacher_name,
+        is_highlighted,
         semester:semesters (
           id,
           title
         )
       `,
     )
+    .order("is_highlighted", { ascending: false })
     .order("created_at", { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

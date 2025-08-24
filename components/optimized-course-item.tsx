@@ -89,7 +89,8 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
   return (
     <div className="space-y-1">
       {/* Course Header */}
-      <div className="bg-slate-800/90 backdrop-blur-sm rounded-lg p-3 sm:p-4 hover:bg-slate-750 transition-all duration-200 border border-slate-700/50 shadow-lg">
+      <div className="bg-slate-800/90 backdrop-blur-sm rounded-lg border border-slate-700/50 shadow-lg hover:bg-slate-750 transition-all duration-200">
+        <div className={`p-3 sm:p-4 rounded-lg ${course.is_highlighted ? 'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/30' : ''}`}>
         <Button
           variant="ghost"
           className="w-full justify-start text-left p-0 h-auto hover:bg-transparent touch-manipulation"
@@ -131,6 +132,7 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
             </div>
           </div>
         </Button>
+        </div>
       </div>
 
       {/* Course Content */}

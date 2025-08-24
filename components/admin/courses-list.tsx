@@ -13,6 +13,7 @@ export async function CoursesList() {
       semesters(title, section),
       topics(count)
     `)
+    .order("is_highlighted", { ascending: false })
     .order("created_at", { ascending: false })
 
   if (error) {
@@ -46,7 +47,7 @@ export async function CoursesList() {
           </TableHeader>
           <TableBody>
             {courses.map((course) => (
-              <TableRow key={course.id}>
+              <TableRow key={course.id} className={course.is_highlighted ? 'bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/20' : ''}>
                 <TableCell className="font-medium">{course.title}</TableCell>
                 <TableCell>
                   <Badge variant="outline">{course.course_code}</Badge>
@@ -94,7 +95,8 @@ export async function CoursesList() {
         {/* Mobile Card View */}
         <div className="lg:hidden space-y-4">
           {courses.map((course) => (
-            <div key={course.id} className="bg-card border border-border rounded-lg p-4 shadow-modern">
+            <div key={course.id} className="bg-card border border-border rounded-lg shadow-modern">
+              <div className={`p-4 rounded-lg ${course.is_highlighted ? 'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/20' : ''}`}>
               <div className="space-y-3">
                 {/* Header */}
                 <div className="flex items-start justify-between">
@@ -148,6 +150,7 @@ export async function CoursesList() {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
+              </div>
               </div>
             </div>
           ))}

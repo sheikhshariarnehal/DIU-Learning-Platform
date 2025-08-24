@@ -43,9 +43,10 @@ CREATE TABLE IF NOT EXISTS courses (
     credits INTEGER DEFAULT 3,
     description TEXT,
     semester_id UUID NOT NULL REFERENCES semesters(id) ON DELETE CASCADE,
+    is_highlighted BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    
+
     -- Constraints
     CONSTRAINT courses_title_check CHECK (length(title) >= 1),
     CONSTRAINT courses_code_check CHECK (length(course_code) >= 1),
@@ -53,6 +54,10 @@ CREATE TABLE IF NOT EXISTS courses (
     CONSTRAINT courses_credits_check CHECK (credits > 0 AND credits <= 10),
     CONSTRAINT courses_email_check CHECK (teacher_email IS NULL OR teacher_email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 );
+
+-- Add comment and index for course highlighting
+COMMENT ON COLUMN courses.is_highlighted IS 'Indicates if the course should be highlighted/featured in the user interface';
+CREATE INDEX IF NOT EXISTS idx_courses_is_highlighted ON courses(is_highlighted) WHERE is_highlighted = true;
 
 -- ============================================================================
 -- 3. TOPICS TABLE

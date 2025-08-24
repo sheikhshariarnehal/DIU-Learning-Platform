@@ -7,6 +7,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       .from("courses")
       .select("*")
       .eq("semester_id", params.id)
+      .order("is_highlighted", { ascending: false })
       .order("created_at", { ascending: true })
 
     if (error) {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronDown, ChevronRight, FileText, Play, BookOpen, Users, Search, Clock } from "lucide-react"
+import { ChevronDown, ChevronRight, FileText, Play, BookOpen, Users, Search, Clock, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
@@ -80,6 +80,7 @@ export function Sidebar({ onContentSelect }: SidebarProps) {
       .from("courses")
       .select("*")
       .eq("semester_id", semesterId)
+      .order("is_highlighted", { ascending: false }) // Highlighted courses first
       .order("created_at", { ascending: true })
 
     if (error) {
@@ -342,11 +343,12 @@ export function Sidebar({ onContentSelect }: SidebarProps) {
                 <Card key={course.id} className="overflow-hidden">
                   <CardContent className="p-0">
                     {/* Course Header */}
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-left p-4 h-auto hover:bg-muted/50 rounded-none"
-                      onClick={() => toggleCourse(course.id)}
-                    >
+                    <div className={`${course.is_highlighted ? 'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/30' : ''}`}>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-left p-4 h-auto hover:bg-muted/50 rounded-none"
+                        onClick={() => toggleCourse(course.id)}
+                      >
                       <div className="flex items-center gap-3 w-full">
                         {expandedCourses.has(course.id) ? (
                           <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -354,7 +356,12 @@ export function Sidebar({ onContentSelect }: SidebarProps) {
                           <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                         )}
                         <div className="flex-1 min-w-0 space-y-2">
-                          <div className="font-medium text-sm truncate">{course.title}</div>
+                          <div className="flex items-center gap-2">
+                            <div className="font-medium text-sm truncate flex-1">{course.title}</div>
+                            {course.is_highlighted && (
+                              <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                            )}
+                          </div>
                           <div className="text-xs text-muted-foreground">({course.course_code})</div>
 
                           {courseData[course.id] && (
@@ -372,6 +379,7 @@ export function Sidebar({ onContentSelect }: SidebarProps) {
                         </div>
                       </div>
                     </Button>
+                    </div>
 
                     {/* Course Content */}
                     {expandedCourses.has(course.id) && courseData[course.id] && (

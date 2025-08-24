@@ -1,15 +1,15 @@
 "use client"
 
-import React from "react"
+import type React from "react"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
 import { AdminHeader } from "@/components/admin/admin-header"
 import { ThemeProvider } from "@/components/theme-provider"
 
-export default function AdminLayout({
-  children,
-}: {
+interface AdminLayoutClientProps {
   children: React.ReactNode
-}) {
+}
+
+export function AdminLayoutClient({ children }: AdminLayoutClientProps) {
   // Mock user data for now
   const mockUser = {
     id: "1",

@@ -20,6 +20,14 @@ interface ContentItem {
   topicTitle?: string
   courseTitle?: string
   description?: string
+  courseCode?: string
+  teacherName?: string
+  semesterInfo?: {
+    id: string
+    title: string
+    section: string
+    is_active: boolean
+  }
 }
 
 export default function HomePage() {
@@ -35,23 +43,50 @@ export default function HomePage() {
     setMounted(true)
   }, [])
 
-  // Initialize with default content if available
+  // Initialize with highlighted course syllabus if available
   useEffect(() => {
-    const initializeDefaultContent = async () => {
+    const initializeHighlightedSyllabus = async () => {
       try {
-        const response = await fetch("/api/content/default")
-        if (response.ok) {
-          const defaultContent = await response.json()
+        setIsLoading(true)
+
+        // First try to load highlighted course syllabus
+        const highlightedResponse = await fetch("/api/content/highlighted-syllabus")
+        if (highlightedResponse.ok) {
+          const highlightedContent = await highlightedResponse.json()
+          if (highlightedContent && highlightedContent.type === "syllabus") {
+            setSelectedContent(highlightedContent)
+            toast({
+              title: "✨ Featured Course Loaded",
+              description: `Showing syllabus for ${highlightedContent.courseTitle}`,
+              duration: 4000,
+            })
+            return
+          }
+        } else if (highlightedResponse.status === 404) {
+          console.log("No highlighted course syllabus found, falling back to default content")
+        }
+
+        // Fallback to default content if no highlighted syllabus
+        const defaultResponse = await fetch("/api/content/default")
+        if (defaultResponse.ok) {
+          const defaultContent = await defaultResponse.json()
           if (defaultContent) {
             setSelectedContent(defaultContent)
           }
         }
       } catch (error) {
-        console.error("Failed to load default content:", error)
+        console.error("Failed to load initial content:", error)
+        toast({
+          title: "Loading Error",
+          description: "Failed to load initial content",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
       }
     }
 
-    initializeDefaultContent()
+    initializeHighlightedSyllabus()
   }, [])
 
   // Mobile layout doesn't need sidebar state management

@@ -41,7 +41,8 @@ import {
   GraduationCap,
   Play,
   Link,
-  Upload
+  Upload,
+  Star
 } from "lucide-react"
 
 // Enhanced interfaces for semester management
@@ -68,6 +69,7 @@ interface CourseData {
   teacher_email?: string
   credits?: number
   description?: string
+  is_highlighted?: boolean
   topics: TopicData[]
   studyTools: StudyToolData[]
 }
@@ -337,6 +339,34 @@ export function SemesterManagement() {
     }
   }
 
+  const handleToggleCourseHighlight = async (courseId: string, currentHighlightStatus: boolean) => {
+    try {
+      const response = await fetch(`/api/admin/courses/${courseId}/toggle-highlight`, {
+        method: 'PATCH'
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to toggle course highlight status')
+      }
+
+      const result = await response.json()
+      toast.success(result.data.message)
+
+      // Update the local state
+      setSemesters(prev => prev.map(semester => ({
+        ...semester,
+        courses: semester.courses?.map(course =>
+          course.id === courseId
+            ? { ...course, is_highlighted: result.data.is_highlighted }
+            : course
+        ) || []
+      })))
+    } catch (error) {
+      console.error('Error toggling course highlight:', error)
+      toast.error('Failed to toggle course highlight status')
+    }
+  }
+
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
@@ -397,6 +427,40 @@ export function SemesterManagement() {
       )
     }))
   }, [])
+
+  // Real-time course highlighting toggle
+  const toggleCourseHighlight = useCallback(async (courseIndex: number) => {
+    const course = formData.courses[courseIndex]
+
+    // If course doesn't have an ID yet (new course), just update local state
+    if (!course.id) {
+      const newHighlightStatus = !course.is_highlighted
+      updateCourse(courseIndex, "is_highlighted", newHighlightStatus)
+      toast.success(`✨ Course ${newHighlightStatus ? 'highlighted' : 'unhighlighted'} locally (will save when you submit the form)`)
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/admin/courses/${course.id}/toggle-highlight`, {
+        method: 'PATCH'
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to toggle course highlighting: ${response.status}`)
+      }
+
+      const result = await response.json()
+
+      // Update local state with the new highlighting status
+      updateCourse(courseIndex, "is_highlighted", result.data.is_highlighted)
+
+      toast.success(result.data.message)
+    } catch (error) {
+      console.error('Error toggling course highlight:', error)
+      toast.error('Failed to update course highlighting')
+    }
+  }, [formData.courses, updateCourse])
 
   // Topic management functions
   const addTopic = useCallback((courseIndex: number) => {
@@ -860,6 +924,7 @@ export function SemesterManagement() {
         ...formData,
         courses: formData.courses.map(course => ({
           ...course,
+          is_highlighted: course.is_highlighted || false, // Ensure is_highlighted is included
           studyTools: course.studyTools.map(tool => ({
             ...tool,
             content_url: tool.content_url?.trim() || null,
@@ -1456,6 +1521,10 @@ export function SemesterManagement() {
                               <h4 className="font-medium">
                                 {course.title || `Course ${index + 1}`}
                               </h4>
+                              {/* Highlighting indicator */}
+                              {course.is_highlighted && (
+                                <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                              )}
                               {/* Content completeness indicators */}
                               <div className="flex items-center gap-1 ml-2">
                                 {course.topics.length > 0 && (
@@ -1541,6 +1610,24 @@ export function SemesterManagement() {
                                 onChange={(e) => updateCourse(index, "description", e.target.value)}
                                 rows={3}
                                 className="resize-none"
+                              />
+                            </div>
+
+                            {/* Course Highlighting Toggle */}
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Star className={`h-4 w-4 ${course.is_highlighted ? 'text-amber-500' : 'text-gray-400'}`} />
+                                <div>
+                                  <Label className="text-sm font-medium">Feature Course</Label>
+                                  <p className="text-xs text-muted-foreground">
+                                    Add small indicator for students
+                                    {!course.id && <span className="text-orange-500"> (Local only - save to persist)</span>}
+                                  </p>
+                                </div>
+                              </div>
+                              <Switch
+                                checked={course.is_highlighted || false}
+                                onCheckedChange={() => toggleCourseHighlight(index)}
                               />
                             </div>
                             {/* Topics Section */}
@@ -2140,6 +2227,10 @@ export function SemesterManagement() {
                               <h4 className="font-medium">
                                 {course.title || `Course ${index + 1}`}
                               </h4>
+                              {/* Highlighting indicator */}
+                              {course.is_highlighted && (
+                                <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                              )}
                               {/* Content completeness indicators */}
                               <div className="flex items-center gap-1 ml-2">
                                 {course.topics.length > 0 && (
@@ -2225,6 +2316,24 @@ export function SemesterManagement() {
                                 onChange={(e) => updateCourse(index, "description", e.target.value)}
                                 rows={3}
                                 className="resize-none"
+                              />
+                            </div>
+
+                            {/* Course Highlighting Toggle */}
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Star className={`h-4 w-4 ${course.is_highlighted ? 'text-amber-500' : 'text-gray-400'}`} />
+                                <div>
+                                  <Label className="text-sm font-medium">Feature Course</Label>
+                                  <p className="text-xs text-muted-foreground">
+                                    Add small indicator for students
+                                    {!course.id && <span className="text-orange-500"> (Local only - save to persist)</span>}
+                                  </p>
+                                </div>
+                              </div>
+                              <Switch
+                                checked={course.is_highlighted || false}
+                                onCheckedChange={() => toggleCourseHighlight(index)}
                               />
                             </div>
 

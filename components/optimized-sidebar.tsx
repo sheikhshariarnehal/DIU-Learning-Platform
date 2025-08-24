@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { ChevronDown, ChevronRight, FileText, Play, BookOpen, Users, Search } from "lucide-react"
+import { ChevronDown, ChevronRight, FileText, Play, BookOpen, Users, Search, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"

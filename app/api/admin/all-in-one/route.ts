@@ -19,6 +19,7 @@ interface CourseData {
   teacher_email?: string
   credits?: number
   description?: string
+  is_highlighted?: boolean
   topics: TopicData[]
   studyTools: StudyToolData[]
 }
@@ -107,6 +108,10 @@ export async function POST(request: NextRequest) {
           title: course.title,
           course_code: course.course_code,
           teacher_name: course.teacher_name,
+          teacher_email: course.teacher_email || null,
+          credits: course.credits || 3,
+          description: course.description || null,
+          is_highlighted: course.is_highlighted || false,
           semester_id: semesterData.id
         }
 

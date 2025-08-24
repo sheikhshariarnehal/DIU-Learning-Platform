@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
 import {
   ChevronDown, ChevronRight, FileText, Play, BookOpen, Users, Loader2, AlertCircle,
-  GraduationCap, ClipboardList, BarChart3, PenTool, FlaskConical, Library
+  GraduationCap, ClipboardList, BarChart3, PenTool, FlaskConical, Library, Star
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -67,6 +67,14 @@ interface ContentItem {
   topicTitle?: string
   courseTitle?: string
   description?: string
+  courseCode?: string
+  teacherName?: string
+  semesterInfo?: {
+    id: string
+    title: string
+    section: string
+    is_active: boolean
+  }
 }
 
 interface FunctionalSidebarProps {
@@ -160,6 +168,7 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
           .from("courses")
           .select("*")
           .eq("semester_id", semesterId)
+          .order("is_highlighted", { ascending: false }) // Highlighted courses first
           .order("created_at", { ascending: true })
         if (error) throw error
         return data || []
@@ -612,7 +621,8 @@ const CourseItem = React.memo(
     return (
       <div className={`${isMobile ? 'space-y-2' : 'space-y-2'}`}>
         {/* Course Header - Simple Mobile Design */}
-        <div className={`${isMobile ? 'bg-card rounded-lg p-3 border border-border/20' : 'bg-card rounded-lg p-3 hover:bg-accent/50 transition-colors border border-border'}`}>
+        <div className={`${isMobile ? 'bg-card rounded-lg border border-border/20' : 'bg-card rounded-lg hover:bg-accent/50 transition-colors border border-border'}`}>
+          <div className={`p-3 rounded-lg ${course.is_highlighted ? 'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/30' : ''}`}>
           <Button
             variant="ghost"
             className={`w-full justify-start text-left p-0 h-auto hover:bg-transparent ${isMobile ? 'min-h-[48px]' : ''}`}
@@ -633,9 +643,14 @@ const CourseItem = React.memo(
                 {isMobile ? (
                   /* Mobile Layout - Simple and Clean */
                   <div>
-                    <h4 className="font-medium text-sm text-foreground leading-tight">
-                      {course.title}
-                    </h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium text-sm text-foreground leading-tight flex-1">
+                        {course.title}
+                      </h4>
+                      {course.is_highlighted && (
+                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                      )}
+                    </div>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs text-muted-foreground font-medium">
                         {course.course_code}
@@ -649,8 +664,13 @@ const CourseItem = React.memo(
                 ) : (
                   /* Desktop Layout */
                   <div>
-                    <div className="font-medium text-sm text-foreground truncate">
-                      {course.title}
+                    <div className="flex items-center gap-2">
+                      <div className="font-medium text-sm text-foreground truncate flex-1">
+                        {course.title}
+                      </div>
+                      {course.is_highlighted && (
+                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                      )}
                     </div>
                     {!compactMode && (
                       <>
@@ -689,6 +709,7 @@ const CourseItem = React.memo(
               </div>
             </div>
           </Button>
+          </div>
         </div>
 
         {/* Course Content */}

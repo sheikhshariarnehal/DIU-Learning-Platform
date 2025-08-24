@@ -19,6 +19,14 @@ interface ContentItem {
   topicTitle?: string
   courseTitle?: string
   description?: string // For syllabus content
+  courseCode?: string
+  teacherName?: string
+  semesterInfo?: {
+    id: string
+    title: string
+    section: string
+    is_active: boolean
+  }
 }
 
 interface ContentViewerProps {
@@ -763,17 +771,50 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
             <div className="max-w-4xl mx-auto">
               {/* Clean Professional Header */}
               <div className="mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
-                <div className="flex items-start gap-3 mb-3">
+                <div className="flex items-start gap-3 mb-4">
                   <div className="mt-1">
-                    <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    <FileText className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
                       {content.title}
                     </h1>
                     <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
                       {content.courseTitle}
                     </p>
+
+                    {/* Course Details */}
+                    {(content.courseCode || content.teacherName || content.semesterInfo) && (
+                      <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
+                        {content.courseCode && (
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">Code:</span>
+                            <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">
+                              {content.courseCode}
+                            </span>
+                          </div>
+                        )}
+                        {content.teacherName && (
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">Instructor:</span>
+                            <span>{content.teacherName}</span>
+                          </div>
+                        )}
+                        {content.semesterInfo && (
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">Semester:</span>
+                            <span>{content.semesterInfo.title} ({content.semesterInfo.section})</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Featured Course Badge */}
+                <div className="flex items-center gap-2">
+                  <div className="px-3 py-1 bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/30 text-purple-700 dark:text-purple-300 text-sm font-medium rounded-full">
+                    ✨ Featured Course
                   </div>
                 </div>
               </div>
