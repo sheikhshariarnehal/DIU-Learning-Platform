@@ -366,69 +366,107 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
   }
 
   return (
-    <div className="h-full flex flex-col bg-background">
-      {/* Header */}
-      <div className={`${isMobile ? 'p-3' : 'p-4'} border-b border-border`}>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-foreground`}>
-            Course Content
-          </h3>
-          {isMobile && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCompactMode(!compactMode)}
-              className="h-8 w-8 p-0"
-            >
-              {compactMode ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </Button>
-          )}
-        </div>
+    <div className={`h-full flex flex-col bg-background ${isMobile ? 'mobile-scroll-container' : ''}`}>
+      {/* Header - Simplified for Mobile */}
+      <div className={`${isMobile ? 'px-4 py-3 bg-background border-b border-border/30' : 'p-4 border-b border-border'}`}>
+        {/* Mobile: Simple header without title */}
+        {isMobile ? (
+          <div>
+            {/* Simplified Semester Selection for Mobile */}
+            <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+              <SelectTrigger className="h-11 bg-card border-border/50 text-foreground rounded-lg shadow-sm">
+                <SelectValue placeholder="Select Semester">
+                  {selectedSemester && (() => {
+                    const selectedSem = semesters.find(s => s.id === selectedSemester)
+                    return selectedSem ? (
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-sm font-medium truncate">
+                          {selectedSem.title} {selectedSem.section && `(${selectedSem.section})`}
+                        </span>
+                        {(selectedSem.is_active ?? true) && (
+                          <div className="w-2 h-2 bg-green-500 rounded-full ml-2 flex-shrink-0"></div>
+                        )}
+                      </div>
+                    ) : null
+                  })()}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border/50 rounded-lg shadow-lg">
+                {semesters.map((semester) => (
+                  <SelectItem
+                    key={semester.id}
+                    value={semester.id}
+                    className="text-foreground hover:bg-accent/50 py-3 px-4 rounded-md mx-1"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">
+                          {semester.title}
+                        </span>
+                        {semester.section && (
+                          <span className="text-xs text-muted-foreground">
+                            Section: {semester.section}
+                          </span>
+                        )}
+                      </div>
+                      {(semester.is_active ?? true) && (
+                        <div className="w-2 h-2 bg-green-500 rounded-full ml-2"></div>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : (
+          /* Desktop Header */
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-foreground">Course Content</h3>
+            </div>
 
-        {/* Semester Selection */}
-        <Select value={selectedSemester} onValueChange={setSelectedSemester}>
-          <SelectTrigger className={`bg-card border-border text-foreground ${isMobile ? 'h-10 text-sm' : 'h-11'}`}>
-            <SelectValue placeholder={isMobile ? "Select Semester" : "Choose your semester"}>
-              {selectedSemester && (() => {
-                const selectedSem = semesters.find(s => s.id === selectedSemester)
-                return selectedSem ? (
-                  <div className="flex items-center gap-2">
-                    <span>{selectedSem.title} {selectedSem.section && `(${selectedSem.section})`}</span>
-                    {(selectedSem.is_active ?? true) && (
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
-                        Active
+            {/* Desktop Semester Selection */}
+            <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+              <SelectTrigger className="bg-card border-border text-foreground h-11">
+                <SelectValue placeholder="Choose your semester">
+                  {selectedSemester && (() => {
+                    const selectedSem = semesters.find(s => s.id === selectedSemester)
+                    return selectedSem ? (
+                      <div className="flex items-center gap-2">
+                        <span>{selectedSem.title} {selectedSem.section && `(${selectedSem.section})`}</span>
+                        {(selectedSem.is_active ?? true) && (
+                          <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                            Active
+                          </span>
+                        )}
+                      </div>
+                    ) : null
+                  })()}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border">
+                {semesters.map((semester) => (
+                  <SelectItem
+                    key={semester.id}
+                    value={semester.id}
+                    className="text-foreground hover:bg-accent"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span>
+                        {semester.title} {semester.section && `(${semester.section})`}
                       </span>
-                    )}
-                  </div>
-                ) : null
-              })()}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent className="bg-card border-border">
-            {semesters.map((semester) => (
-              <SelectItem
-                key={semester.id}
-                value={semester.id}
-                className={`text-foreground hover:bg-accent ${isMobile ? 'text-sm py-2' : ''}`}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span>
-                    {semester.title} {semester.section && `(${semester.section})`}
-                  </span>
-                  {(semester.is_active ?? true) && (
-                    <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
-                      Active
-                    </span>
-                  )}
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+                      {(semester.is_active ?? true) && (
+                        <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                          Active
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       {/* Error Display */}
@@ -442,15 +480,17 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
       )}
 
       {/* Course List */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className={`flex-1 ${isMobile ? 'mobile-scroll-container' : ''}`}>
         <div
-          className={`${isMobile ? 'p-2' : 'p-4'} space-y-${isMobile ? '2' : '3'}`}
+          className={`${isMobile ? 'px-4 py-3 space-y-2' : 'p-4 space-y-3'}`}
           onTouchStart={(e) => {
-            setTouchStartY(e.touches[0].clientY)
-            setIsScrolling(false)
+            if (isMobile) {
+              setTouchStartY(e.touches[0].clientY)
+              setIsScrolling(false)
+            }
           }}
           onTouchMove={(e) => {
-            if (touchStartY !== null) {
+            if (isMobile && touchStartY !== null) {
               const deltaY = Math.abs(e.touches[0].clientY - touchStartY)
               if (deltaY > 10) {
                 setIsScrolling(true)
@@ -458,8 +498,10 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
             }
           }}
           onTouchEnd={() => {
-            setTouchStartY(null)
-            setTimeout(() => setIsScrolling(false), 100)
+            if (isMobile) {
+              setTouchStartY(null)
+              setTimeout(() => setIsScrolling(false), 100)
+            }
           }}
         >
           {filteredCourses.length === 0 ? (
@@ -547,47 +589,71 @@ const CourseItem = React.memo(
     isScrolling?: boolean
   }) => {
     return (
-      <div className={isMobile ? 'space-y-1' : 'space-y-2'}>
-        {/* Course Header */}
-        <div className={`bg-card rounded-lg ${isMobile ? 'p-2' : 'p-3'} hover:bg-accent/50 transition-colors border border-border touch-manipulation`}>
+      <div className={`${isMobile ? 'space-y-2' : 'space-y-2'}`}>
+        {/* Course Header - Simple Mobile Design */}
+        <div className={`${isMobile ? 'bg-card rounded-lg p-3 border border-border/20' : 'bg-card rounded-lg p-3 hover:bg-accent/50 transition-colors border border-border'}`}>
           <Button
             variant="ghost"
-            className={`w-full justify-start text-left p-0 h-auto hover:bg-transparent ${isMobile ? 'min-h-[44px]' : ''}`}
+            className={`w-full justify-start text-left p-0 h-auto hover:bg-transparent ${isMobile ? 'min-h-[48px]' : ''}`}
             onClick={() => !isScrolling && onToggleCourse(course.id)}
           >
-            <div className="flex items-center gap-2 w-full">
-              {expandedCourses.has(course.id) ? (
-                <ChevronDown className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} shrink-0 text-muted-foreground`} />
-              ) : (
-                <ChevronRight className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} shrink-0 text-muted-foreground`} />
-              )}
-              <div className="flex-1 min-w-0">
-                <div className={`font-medium ${isMobile ? 'text-sm' : 'text-sm'} text-foreground truncate`}>
-                  {course.title}
-                </div>
-                {!compactMode && (
-                  <>
-                    <div className="text-xs text-muted-foreground">({course.course_code})</div>
-                    <div className="text-xs text-muted-foreground">{course.teacher_name}</div>
-                  </>
+            <div className="flex items-start gap-3 w-full">
+              {/* Chevron Icon */}
+              <div className="flex-shrink-0 mt-1">
+                {expandedCourses.has(course.id) ? (
+                  <ChevronDown className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-muted-foreground`} />
+                ) : (
+                  <ChevronRight className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-muted-foreground`} />
                 )}
+              </div>
 
-                {courseData && !courseData.isLoading && !compactMode && (
-                  <div className={`flex gap-1 mt-2 ${isMobile ? 'flex-wrap' : ''}`}>
-                    <Badge variant="secondary" className={`${isMobile ? 'text-xs px-1.5 py-0.5' : 'text-xs'} bg-secondary text-secondary-foreground`}>
-                      {courseData.topics.length} Topics
-                    </Badge>
-                    {!isMobile && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground ml-2">
-                        {Object.values(courseData.videos).flat().length > 0 && (
-                          <span>{Object.values(courseData.videos).flat().length} Video{Object.values(courseData.videos).flat().length > 1 ? 's' : ''}</span>
-                        )}
-                        {Object.values(courseData.videos).flat().length > 0 && Object.values(courseData.slides).flat().length > 0 && (
-                          <span className="text-muted-foreground/60">•</span>
-                        )}
-                        {Object.values(courseData.slides).flat().length > 0 && (
-                          <span>{Object.values(courseData.slides).flat().length} Slide{Object.values(courseData.slides).flat().length > 1 ? 's' : ''}</span>
-                        )}
+              {/* Course Content */}
+              <div className="flex-1 min-w-0">
+                {isMobile ? (
+                  /* Mobile Layout - Simple and Clean */
+                  <div>
+                    <h4 className="font-medium text-sm text-foreground leading-tight">
+                      {course.title}
+                    </h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-muted-foreground font-medium">
+                        {course.course_code}
+                      </span>
+                      <span className="text-xs text-muted-foreground/60">•</span>
+                      <span className="text-xs text-muted-foreground truncate">
+                        {course.teacher_name}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  /* Desktop Layout */
+                  <div>
+                    <div className="font-medium text-sm text-foreground truncate">
+                      {course.title}
+                    </div>
+                    {!compactMode && (
+                      <>
+                        <div className="text-xs text-muted-foreground">({course.course_code})</div>
+                        <div className="text-xs text-muted-foreground">{course.teacher_name}</div>
+                      </>
+                    )}
+
+                    {courseData && !courseData.isLoading && !compactMode && (
+                      <div className="flex gap-1 mt-2">
+                        <Badge variant="secondary" className="text-xs bg-secondary text-secondary-foreground">
+                          {courseData.topics.length} Topics
+                        </Badge>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground ml-2">
+                          {Object.values(courseData.videos).flat().length > 0 && (
+                            <span>{Object.values(courseData.videos).flat().length} Video{Object.values(courseData.videos).flat().length > 1 ? 's' : ''}</span>
+                          )}
+                          {Object.values(courseData.videos).flat().length > 0 && Object.values(courseData.slides).flat().length > 0 && (
+                            <span className="text-muted-foreground/60">•</span>
+                          )}
+                          {Object.values(courseData.slides).flat().length > 0 && (
+                            <span>{Object.values(courseData.slides).flat().length} Slide{Object.values(courseData.slides).flat().length > 1 ? 's' : ''}</span>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -606,13 +672,13 @@ const CourseItem = React.memo(
 
         {/* Course Content */}
         {expandedCourses.has(course.id) && courseData && !courseData.isLoading && (
-          <div className="ml-4 space-y-2">
+          <div className={`${isMobile ? 'ml-4 space-y-2' : 'ml-4 space-y-2'}`}>
             {/* Study Tools Section */}
             {courseData.studyTools.length > 0 && (
               <div>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-left p-2 h-auto hover:bg-accent rounded-md"
+                  className={`w-full justify-start text-left ${isMobile ? 'p-2 h-auto hover:bg-accent/30 rounded-md' : 'p-2 h-auto hover:bg-accent rounded-md'}`}
                   onClick={() => onToggleStudyTools(course.id)}
                 >
                   <div className="flex items-center gap-2">
@@ -622,10 +688,12 @@ const CourseItem = React.memo(
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     )}
                     <BookOpen className="h-4 w-4 text-primary" />
-                    <span className="text-sm text-foreground">Study Resources</span>
-                    <Badge variant="secondary" className="text-xs bg-secondary text-secondary-foreground ml-auto">
+                    <span className="text-sm text-foreground flex-1">
+                      Study Resources
+                    </span>
+                    <span className="text-xs text-muted-foreground">
                       {courseData.studyTools.length}
-                    </Badge>
+                    </span>
                   </div>
                 </Button>
 
@@ -677,20 +745,20 @@ const CourseItem = React.memo(
               <div className="min-w-0">
                 <Button
                   variant="ghost"
-                  className={`w-full justify-start text-left ${isMobile ? 'p-2 min-h-[44px]' : 'p-2'} h-auto hover:bg-accent rounded-md touch-manipulation`}
+                  className={`w-full justify-start text-left ${isMobile ? 'p-2 h-auto hover:bg-accent/30 rounded-md' : 'p-2 h-auto hover:bg-accent rounded-md'} touch-manipulation`}
                   onClick={() => !isScrolling && onToggleTopics(course.id)}
                 >
                   <div className="flex items-center gap-2">
                     {expandedTopics.has(course.id) ? (
-                      <ChevronDown className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-muted-foreground`} />
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     ) : (
-                      <ChevronRight className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-muted-foreground`} />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     )}
-                    <FileText className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-muted-foreground`} />
-                    <span className={`${isMobile ? 'text-sm font-medium' : 'text-sm'} text-foreground`}>Topics</span>
-                    <Badge variant="secondary" className={`${isMobile ? 'text-xs px-1.5 py-0.5' : 'text-xs'} bg-secondary text-secondary-foreground ml-auto`}>
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-foreground flex-1">Topics</span>
+                    <span className="text-xs text-muted-foreground">
                       {courseData.topics.length}
-                    </Badge>
+                    </span>
                   </div>
                 </Button>
 
@@ -734,7 +802,7 @@ const CourseItem = React.memo(
                           {expandedTopicItems.has(topic.id) && (
                             <div className={`${isMobile ? 'ml-4' : 'ml-6'} space-y-1 topic-content-enter-active mt-2`}>
                               {/* Videos */}
-                              {topicVideos.map((video: Video, videoIndex: number) => {
+                              {topicVideos.map((video: Video) => {
                                 const isSelected = selectedContentId === video.id
                                 return (
                                   <Button
@@ -769,7 +837,7 @@ const CourseItem = React.memo(
                               })}
 
                               {/* Slides */}
-                              {topicSlides.map((slide: Slide, slideIndex: number) => {
+                              {topicSlides.map((slide: Slide) => {
                                 const isSelected = selectedContentId === slide.id
                                 return (
                                   <Button

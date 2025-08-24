@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bell, Sun, User, Download, Maximize, ExternalLink, Moon, Menu, X } from "lucide-react"
+import { Bell, Sun, User, Download, Maximize, ExternalLink, Moon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { FunctionalSidebar } from "@/components/functional-sidebar"
@@ -24,7 +24,6 @@ interface ContentItem {
 export default function HomePage() {
   const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const { toast } = useToast()
   const isMobile = useIsMobile()
@@ -54,12 +53,7 @@ export default function HomePage() {
     initializeDefaultContent()
   }, [])
 
-  // Close sidebar when switching from mobile to desktop
-  useEffect(() => {
-    if (!isMobile) {
-      setSidebarOpen(false)
-    }
-  }, [isMobile])
+  // Mobile layout doesn't need sidebar state management
 
   const handleContentSelect = async (content: ContentItem) => {
     setIsLoading(true)
@@ -78,10 +72,7 @@ export default function HomePage() {
 
       setSelectedContent(content)
 
-      // Close sidebar on mobile after selection
-      if (isMobile) {
-        setSidebarOpen(false)
-      }
+      // Mobile layout doesn't need sidebar closing
 
       toast({
         title: "Content Loaded",
@@ -217,21 +208,8 @@ export default function HomePage() {
       <header className="border-b border-border/50 sticky top-0 z-50 backdrop-blur-sm bg-background/95 shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
-            {/* Left Section - Logo and Mobile Menu */}
+            {/* Left Section - Logo */}
             <div className="flex items-center gap-3 lg:gap-4">
-              {/* Mobile Menu Button */}
-              {isMobile && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="hover-lift focus-ring mr-2 h-10 w-10 touch-optimized-button"
-                  aria-label={sidebarOpen ? "Close course menu" : "Open course menu"}
-                >
-                  {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                </Button>
-              )}
-
               {/* Logo Section */}
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-lg flex items-center justify-center bg-primary/10 border border-primary/20">
@@ -308,172 +286,228 @@ export default function HomePage() {
       </header>
 
       {/* Main Content */}
-      <div className="flex h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)] overflow-hidden">
-        {/* Content Area */}
-        <div className="flex-1 flex flex-col bg-background min-w-0 relative">
-          {selectedContent ? (
-            <>
-              {/* Content Viewer - Enhanced mobile padding */}
-              <div className="flex-1 p-0.5 sm:p-1 md:p-3 lg:p-4 xl:p-6 overflow-hidden">
-                <div className="h-full rounded-md sm:rounded-lg md:rounded-xl overflow-hidden shadow-md sm:shadow-lg md:shadow-modern-lg border border-border animate-fade-in">
-                  <ContentViewer content={selectedContent} isLoading={isLoading} />
-                </div>
-              </div>
-
-              {/* Bottom Controls - Enhanced for mobile */}
-              <div className="bg-card/95 backdrop-blur-sm px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 border-t border-border/50 shadow-lg">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
-                  {/* Content Info */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0 flex-1">
-                    <Badge
-                      variant="secondary"
-                      className={`text-xs font-medium w-fit ${
-                        selectedContent.type === "video"
-                          ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                          : selectedContent.type === "slide"
-                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                            : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                      }`}
-                    >
-                      {selectedContent.type === "slide"
-                        ? "Slide Presentation"
-                        : selectedContent.type === "video"
-                          ? "Video Content"
-                          : "Document"}
-                    </Badge>
-                    {selectedContent.courseTitle && (
-                      <span className="text-muted-foreground text-xs sm:text-sm truncate max-w-[200px] sm:max-w-none">
-                        {selectedContent.courseTitle}
-                        {selectedContent.topicTitle && ` • ${selectedContent.topicTitle}`}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Action Buttons - Responsive layout */}
-                  <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleDownload}
-                      className="flex-1 sm:flex-none text-xs sm:text-sm h-8 sm:h-9 touch-manipulation min-w-0"
-                      disabled={isLoading}
-                    >
-                      <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
-                      <span className="hidden xs:inline truncate">
-                        {selectedContent.type === "video" ? "Watch" : "Download"}
-                      </span>
-                      <span className="xs:hidden">
-                        {selectedContent.type === "video" ? "▶" : "Download"}
-                      </span>
-                    </Button>
-                    {!isMobile && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleFullscreen}
-                        className="flex-1 sm:flex-none text-xs sm:text-sm h-8 sm:h-9 touch-manipulation"
-                        disabled={isLoading}
-                      >
-                        <Maximize className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                        <span className="hidden sm:inline">Fullscreen</span>
-                        <span className="sm:hidden">Full</span>
-                      </Button>
-                    )}
-
-                  </div>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="flex items-center justify-center h-full p-4 sm:p-6 lg:p-8">
-              <div className="text-center max-w-sm sm:max-w-md lg:max-w-lg animate-slide-up">
-                {/* Logo */}
-                <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 gradient-primary rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-primary-lg transform hover:scale-105 transition-transform duration-300">
-                  <span className="text-primary-foreground font-bold text-xl sm:text-2xl lg:text-3xl">DIU</span>
-                </div>
-
-                {/* Title */}
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-primary via-primary/90 to-primary/80 bg-clip-text text-transparent mb-4 leading-tight">
-                  Welcome to DIU CSE Learning Platform
-                </h2>
-
-                {/* Description */}
-                <p className="text-muted-foreground mb-6 text-sm sm:text-base lg:text-lg leading-relaxed">
-                  Access your course materials, watch video lectures, and study with interactive content
-                </p>
-
-                {/* Features */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-xs sm:text-sm">
-                  <div className="flex flex-col items-center p-3 bg-card/50 rounded-lg border border-border/50">
-                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-2">
-                      <span className="text-blue-600 dark:text-blue-400 text-sm">📊</span>
+      <div className={`${isMobile ? 'flex flex-col h-[calc(100vh-3.5rem)]' : 'flex h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)] overflow-hidden'}`}>
+        {/* Mobile Layout: Content at top, sidebar below */}
+        {isMobile ? (
+          <>
+            {/* Content Area - Mobile (YouTube-like aspect ratio) */}
+            <div className="flex-none bg-background">
+              {selectedContent ? (
+                <>
+                  {/* Content Viewer - Mobile optimized with YouTube-like aspect ratio */}
+                  <div className="relative w-full" style={{ aspectRatio: '16/9' }}>
+                    <div className="absolute inset-0 rounded-none overflow-hidden shadow-lg border-b border-border">
+                      <ContentViewer content={selectedContent} isLoading={isLoading} />
                     </div>
-                    <span className="text-muted-foreground">Slides</span>
                   </div>
-                  <div className="flex flex-col items-center p-3 bg-card/50 rounded-lg border border-border/50">
-                    <div className="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-2">
-                      <span className="text-red-600 dark:text-red-400 text-sm">🎥</span>
+
+                  {/* Content Info - Mobile */}
+                  <div className="bg-card/95 backdrop-blur-sm px-3 py-3 border-b border-border/50">
+                    <div className="flex flex-col gap-2">
+                      {/* Content Title and Info */}
+                      <div className="flex items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-sm leading-tight line-clamp-2 mb-1 text-foreground">
+                            {selectedContent.title}
+                          </h3>
+                          {selectedContent.topicTitle && (
+                            <p className="text-xs text-muted-foreground truncate mb-1">
+                              {selectedContent.topicTitle}
+                            </p>
+                          )}
+                          {selectedContent.courseTitle && (
+                            <p className="text-xs text-muted-foreground/80 truncate">
+                              {selectedContent.courseTitle}
+                            </p>
+                          )}
+                        </div>
+                        <Badge
+                          variant="secondary"
+                          className={`text-xs font-medium flex-shrink-0 ${
+                            selectedContent.type === "video"
+                              ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                              : selectedContent.type === "slide"
+                                ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                                : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                          }`}
+                        >
+                          {selectedContent.type === "slide"
+                            ? "Slides"
+                            : selectedContent.type === "video"
+                              ? "Video"
+                              : "Doc"}
+                        </Badge>
+                      </div>
+
+
                     </div>
-                    <span className="text-muted-foreground">Videos</span>
                   </div>
-                  <div className="flex flex-col items-center p-3 bg-card/50 rounded-lg border border-border/50">
-                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-2">
-                      <span className="text-green-600 dark:text-green-400 text-sm">📚</span>
+                </>
+              ) : (
+                <div className="flex items-center justify-center h-64 p-4 bg-card/50">
+                  <div className="text-center max-w-sm animate-slide-up">
+                    {/* Logo */}
+                    <div className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-primary-lg">
+                      <span className="text-primary-foreground font-bold text-lg">DIU</span>
                     </div>
-                    <span className="text-muted-foreground">Documents</span>
+
+                    {/* Title */}
+                    <h2 className="text-lg font-bold bg-gradient-to-r from-primary via-primary/90 to-primary/80 bg-clip-text text-transparent mb-3 leading-tight">
+                      DIU CSE Learning Platform
+                    </h2>
+
+                    {/* Description */}
+                    <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
+                      Select content from the courses below
+                    </p>
                   </div>
                 </div>
+              )}
+            </div>
 
-                {/* Mobile CTA Button */}
-                {isMobile && (
-                  <Button
-                    onClick={() => setSidebarOpen(true)}
-                    className="w-full h-14 text-base font-medium bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 touch-optimized-button mobile-course-item"
-                    aria-label="Open course browser"
-                  >
-                    <Menu className="h-6 w-6 mr-3" />
-                    Browse Courses
-                  </Button>
-                )}
-
-                {/* Desktop hint */}
-                {!isMobile && (
-                  <div className="text-xs text-muted-foreground/70 mt-4">
-                    Use the sidebar to navigate through semesters and courses
+            {/* Functional Sidebar - Mobile (below content) */}
+            <div className="flex-1 bg-card border-t border-border overflow-hidden">
+              <FunctionalSidebar
+                onContentSelect={handleContentSelect}
+                selectedContentId={selectedContent?.id}
+              />
+            </div>
+          </>
+        ) : (
+          /* Desktop Layout: Side-by-side */
+          <>
+            {/* Content Area - Desktop */}
+            <div className="flex-1 flex flex-col bg-background min-w-0 relative">
+              {selectedContent ? (
+                <>
+                  {/* Content Viewer - Desktop */}
+                  <div className="flex-1 p-0.5 sm:p-1 md:p-3 lg:p-4 xl:p-6 overflow-hidden">
+                    <div className="h-full rounded-md sm:rounded-lg md:rounded-xl overflow-hidden shadow-md sm:shadow-lg md:shadow-modern-lg border border-border animate-fade-in">
+                      <ContentViewer content={selectedContent} isLoading={isLoading} />
+                    </div>
                   </div>
-                )}
+
+                  {/* Bottom Controls - Desktop */}
+                  <div className="bg-card/95 backdrop-blur-sm px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 border-t border-border/50 shadow-lg">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
+                      {/* Content Info */}
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0 flex-1">
+                        <Badge
+                          variant="secondary"
+                          className={`text-xs font-medium w-fit ${
+                            selectedContent.type === "video"
+                              ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                              : selectedContent.type === "slide"
+                                ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                                : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                          }`}
+                        >
+                          {selectedContent.type === "slide"
+                            ? "Slide Presentation"
+                            : selectedContent.type === "video"
+                              ? "Video Content"
+                              : "Document"}
+                        </Badge>
+                        {selectedContent.courseTitle && (
+                          <span className="text-muted-foreground text-xs sm:text-sm truncate max-w-[200px] sm:max-w-none">
+                            {selectedContent.courseTitle}
+                            {selectedContent.topicTitle && ` • ${selectedContent.topicTitle}`}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Action Buttons - Desktop */}
+                      <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleDownload}
+                          className="flex-1 sm:flex-none text-xs sm:text-sm h-8 sm:h-9 touch-manipulation min-w-0"
+                          disabled={isLoading}
+                        >
+                          <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
+                          <span className="hidden xs:inline truncate">
+                            {selectedContent.type === "video" ? "Watch" : "Download"}
+                          </span>
+                          <span className="xs:hidden">
+                            {selectedContent.type === "video" ? "▶" : "Download"}
+                          </span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleFullscreen}
+                          className="flex-1 sm:flex-none text-xs sm:text-sm h-8 sm:h-9 touch-manipulation"
+                          disabled={isLoading}
+                        >
+                          <Maximize className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                          <span className="hidden sm:inline">Fullscreen</span>
+                          <span className="sm:hidden">Full</span>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center justify-center h-full p-4 sm:p-6 lg:p-8">
+                  <div className="text-center max-w-sm sm:max-w-md lg:max-w-lg animate-slide-up">
+                    {/* Logo */}
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 gradient-primary rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-primary-lg transform hover:scale-105 transition-transform duration-300">
+                      <span className="text-primary-foreground font-bold text-xl sm:text-2xl lg:text-3xl">DIU</span>
+                    </div>
+
+                    {/* Title */}
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-primary via-primary/90 to-primary/80 bg-clip-text text-transparent mb-4 leading-tight">
+                      Welcome to DIU CSE Learning Platform
+                    </h2>
+
+                    {/* Description */}
+                    <p className="text-muted-foreground mb-6 text-sm sm:text-base lg:text-lg leading-relaxed">
+                      Access your course materials, watch video lectures, and study with interactive content
+                    </p>
+
+                    {/* Features */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-xs sm:text-sm">
+                      <div className="flex flex-col items-center p-3 bg-card/50 rounded-lg border border-border/50">
+                        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-2">
+                          <span className="text-blue-600 dark:text-blue-400 text-sm">📊</span>
+                        </div>
+                        <span className="text-muted-foreground">Slides</span>
+                      </div>
+                      <div className="flex flex-col items-center p-3 bg-card/50 rounded-lg border border-border/50">
+                        <div className="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-2">
+                          <span className="text-red-600 dark:text-red-400 text-sm">🎥</span>
+                        </div>
+                        <span className="text-muted-foreground">Videos</span>
+                      </div>
+                      <div className="flex flex-col items-center p-3 bg-card/50 rounded-lg border border-border/50">
+                        <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-2">
+                          <span className="text-green-600 dark:text-green-400 text-sm">📚</span>
+                        </div>
+                        <span className="text-muted-foreground">Documents</span>
+                      </div>
+                    </div>
+
+                    {/* Desktop hint */}
+                    <div className="text-xs text-muted-foreground/70 mt-4">
+                      Use the sidebar to navigate through semesters and courses
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Sidebar - Desktop (right side) */}
+            <div className="relative w-80 lg:w-96 xl:w-[28rem] bg-card/95 backdrop-blur-sm border-l border-border flex-shrink-0">
+              <div className="h-full bg-card">
+                <FunctionalSidebar
+                  onContentSelect={handleContentSelect}
+                  selectedContentId={selectedContent?.id}
+                />
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Sidebar - Right side for desktop, overlay for mobile */}
-        <div
-          className={`
-            ${isMobile ? "fixed inset-y-0 left-0 z-40" : "relative"}
-            ${isMobile && !sidebarOpen ? "-translate-x-full" : "translate-x-0"}
-            transition-transform duration-300 ease-in-out
-            ${isMobile ? "w-[90vw] max-w-sm top-14" : "w-80 lg:w-96 xl:w-[28rem]"}
-            bg-card/95 backdrop-blur-sm ${isMobile ? "border-r shadow-2xl" : "border-l"} border-border flex-shrink-0
-            ${isMobile ? "mobile-sidebar" : ""}
-          `}
-        >
-          {/* Mobile overlay */}
-          {isMobile && sidebarOpen && (
-            <div
-              className="fixed inset-0 bg-black/60 z-30 backdrop-blur-sm transition-opacity duration-300"
-              onClick={() => setSidebarOpen(false)}
-              onTouchStart={(e) => e.preventDefault()}
-            />
-          )}
-
-          <div className="relative z-40 h-full bg-card">
-            <FunctionalSidebar
-              onContentSelect={handleContentSelect}
-              selectedContentId={selectedContent?.id}
-            />
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
       <Toaster />
