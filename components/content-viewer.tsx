@@ -770,57 +770,24 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
           `}>
             <div className="max-w-4xl mx-auto">
               {/* Clean Professional Header */}
-              <div className="mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="mt-1">
-                    <FileText className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              <div className="mb-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <div className="flex-1">
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
-                      {content.title}
+                  <div>
+                    <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                      Syllabus
                     </h1>
-                    <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">
                       {content.courseTitle}
                     </p>
-
-                    {/* Course Details */}
-                    {(content.courseCode || content.teacherName || content.semesterInfo) && (
-                      <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
-                        {content.courseCode && (
-                          <div className="flex items-center gap-1">
-                            <span className="font-medium">Code:</span>
-                            <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">
-                              {content.courseCode}
-                            </span>
-                          </div>
-                        )}
-                        {content.teacherName && (
-                          <div className="flex items-center gap-1">
-                            <span className="font-medium">Instructor:</span>
-                            <span>{content.teacherName}</span>
-                          </div>
-                        )}
-                        {content.semesterInfo && (
-                          <div className="flex items-center gap-1">
-                            <span className="font-medium">Semester:</span>
-                            <span>{content.semesterInfo.title} ({content.semesterInfo.section})</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Featured Course Badge */}
-                <div className="flex items-center gap-2">
-                  <div className="px-3 py-1 bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/30 text-purple-700 dark:text-purple-300 text-sm font-medium rounded-full">
-                    ✨ Featured Course
                   </div>
                 </div>
               </div>
 
-              {/* Clean Content Area */}
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 md:p-8">
+              {/* Syllabus Content */}
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-6 md:p-8 shadow-sm">
                 {content.description ? (
                   <div className="prose prose-gray dark:prose-invert max-w-none">
                     {content.description.split('\n').map((line, index) => {
@@ -838,19 +805,19 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
 
                         if (level === 1) {
                           return (
-                            <h2 key={index} className="text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 mb-3 first:mt-0">
+                            <h2 key={index} className="text-lg font-semibold text-gray-900 dark:text-white mt-8 mb-4 first:mt-0 pb-2 border-b border-gray-200 dark:border-gray-700">
                               {text}
                             </h2>
                           )
                         } else if (level === 2) {
                           return (
-                            <h3 key={index} className="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-5 mb-2">
+                            <h3 key={index} className="text-base font-medium text-gray-800 dark:text-gray-200 mt-6 mb-3">
                               {text}
                             </h3>
                           )
                         } else {
                           return (
-                            <h4 key={index} className="text-base font-medium text-gray-700 dark:text-gray-300 mt-4 mb-2">
+                            <h4 key={index} className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-4 mb-2">
                               {text}
                             </h4>
                           )
@@ -861,9 +828,9 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
                       if (trimmedLine.match(/^[-*•]\s+/)) {
                         const text = trimmedLine.replace(/^[-*•]\s+/, '')
                         return (
-                          <div key={index} className="flex items-start gap-2 mb-1 ml-4">
-                            <span className="text-blue-600 dark:text-blue-400 mt-1.5">•</span>
-                            <span className="text-gray-700 dark:text-gray-300">{text}</span>
+                          <div key={index} className="flex items-start gap-3 mb-2 pl-4">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-blue-400 mt-2 flex-shrink-0"></div>
+                            <span className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{text}</span>
                           </div>
                         )
                       }
@@ -889,7 +856,7 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
 
                       // Regular paragraphs
                       return (
-                        <p key={index} className="text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
+                        <p key={index} className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-3">
                           {trimmedLine}
                         </p>
                       )
