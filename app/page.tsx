@@ -155,9 +155,27 @@ export default function HomePage() {
     return () => clearTimeout(timer)
   }, [mounted, selectedContent, toast])
 
-  // Initialize with highlighted course syllabus if available
+  // Initialize with highlighted course syllabus if available (only if no shareable URL)
   useEffect(() => {
     const initializeHighlightedSyllabus = async () => {
+      // Skip if content is already selected (from shareable URL)
+      if (selectedContent) {
+        console.log("Skipping default content load - content already selected")
+        return
+      }
+
+      // Check if we're processing a shareable URL
+      const urlParams = new URLSearchParams(window.location.search)
+      const sharePath = urlParams.get('share_path')
+      const currentUrl = window.location.href
+      const hasShareableUrl = sharePath ||
+        /\/(video|slide|study-tool)\/[a-f0-9-]{36}/i.test(currentUrl)
+
+      if (hasShareableUrl) {
+        console.log("Skipping default content load - shareable URL detected")
+        return
+      }
+
       try {
         setIsLoading(true)
 
@@ -198,8 +216,12 @@ export default function HomePage() {
       }
     }
 
-    initializeHighlightedSyllabus()
-  }, [])
+    if (mounted) {
+      // Add a delay to ensure shareable URL processing happens first
+      const timer = setTimeout(initializeHighlightedSyllabus, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [mounted, selectedContent, toast])
 
   // Mobile layout doesn't need sidebar state management
 
