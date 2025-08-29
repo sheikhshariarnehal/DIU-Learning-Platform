@@ -103,13 +103,16 @@ export async function CoursesList() {
                    shadow-[0_4px_12px_-2px_rgba(59,130,246,0.2),0_8px_24px_-4px_rgba(59,130,246,0.1)]
                    hover:shadow-[0_12px_32px_-4px_rgba(59,130,246,0.3),0_8px_24px_-8px_rgba(59,130,246,0.15)]
                    hover:border-blue-300/70 hover:-translate-y-1
-                   dark:from-blue-950/20 dark:to-indigo-950/10`
-                : 'border-border hover:shadow-lg'
+                   dark:bg-gradient-to-br dark:from-slate-900/90 dark:via-blue-950/50 dark:to-indigo-950/40
+                   dark:border-blue-400/60 dark:shadow-[0_6px_16px_-4px_rgba(59,130,246,0.4),0_12px_32px_-8px_rgba(0,0,0,0.5)]
+                   dark:hover:shadow-[0_16px_40px_-8px_rgba(59,130,246,0.5),0_20px_48px_-12px_rgba(0,0,0,0.6)]
+                   dark:hover:border-blue-400/80 dark:hover:glow-primary-soft`
+                : 'border-border hover:shadow-lg dark:hover:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.3)]'
             }`}>
               <div className="p-6 rounded-lg relative">
                 {/* Subtle top accent line for highlighted courses */}
                 {course.is_highlighted && (
-                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400/40 to-transparent"></div>
+                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400/40 to-transparent dark:via-blue-400/60"></div>
                 )}
 
                 <div className="space-y-4">
@@ -118,12 +121,12 @@ export async function CoursesList() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className={`font-bold text-xl truncate tracking-tight ${
-                          course.is_highlighted ? 'text-slate-800 dark:text-white' : ''
+                          course.is_highlighted ? 'text-slate-800 dark:text-slate-100' : ''
                         }`}>
                           {course.title}
                         </h3>
                         {course.is_highlighted && (
-                          <Star className="h-5 w-5 text-amber-500 fill-amber-500 drop-shadow-sm" />
+                          <Star className="h-5 w-5 text-amber-500 fill-amber-500 drop-shadow-sm dark:drop-shadow-[0_2px_4px_rgba(245,158,11,0.4)]" />
                         )}
                       </div>
                       <div className="flex items-center gap-3 mt-2">
@@ -133,7 +136,10 @@ export async function CoursesList() {
                             course.is_highlighted
                               ? `bg-gradient-to-r from-blue-100 to-blue-50 text-blue-800
                                  border border-blue-200/60 shadow-sm hover:shadow-md transition-shadow
-                                 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800`
+                                 dark:bg-gradient-to-r dark:from-blue-900/60 dark:to-blue-800/40
+                                 dark:text-blue-200 dark:border-blue-600/40
+                                 dark:shadow-[0_2px_8px_-2px_rgba(59,130,246,0.3)]
+                                 dark:hover:shadow-[0_4px_12px_-2px_rgba(59,130,246,0.4)]`
                               : ''
                           }`}
                         >
@@ -141,7 +147,7 @@ export async function CoursesList() {
                         </Badge>
                         <span className={`text-sm font-medium ${
                           course.is_highlighted
-                            ? 'text-slate-700 dark:text-gray-300'
+                            ? 'text-slate-700 dark:text-slate-300'
                             : 'text-muted-foreground'
                         }`}>
                           by {course.teacher_name}

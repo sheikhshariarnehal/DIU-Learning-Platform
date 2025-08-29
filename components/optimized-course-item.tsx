@@ -97,9 +97,16 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
              shadow-[0_4px_12px_-2px_rgba(59,130,246,0.2),0_8px_24px_-4px_rgba(59,130,246,0.1)]
              hover:shadow-[0_12px_32px_-4px_rgba(59,130,246,0.3),0_8px_24px_-8px_rgba(59,130,246,0.15)]
              hover:border-blue-300/70 hover:-translate-y-1
-             dark:from-blue-950/30 dark:to-indigo-950/20 dark:border-l-blue-400`
+             dark:bg-gradient-to-br dark:from-slate-900/90 dark:via-blue-950/50 dark:to-indigo-950/40
+             dark:border-blue-400/60 dark:border-l-blue-400
+             dark:shadow-[0_6px_16px_-4px_rgba(59,130,246,0.4),0_12px_32px_-8px_rgba(0,0,0,0.5)]
+             dark:hover:shadow-[0_16px_40px_-8px_rgba(59,130,246,0.5),0_20px_48px_-12px_rgba(0,0,0,0.6)]
+             dark:hover:border-blue-400/80 dark:hover:glow-primary-soft`
           : `bg-slate-800/90 backdrop-blur-sm border-slate-700/50
-             shadow-lg hover:shadow-xl hover:bg-slate-750`
+             shadow-lg hover:shadow-xl hover:bg-slate-750
+             dark:bg-slate-900/95 dark:border-slate-600/50
+             dark:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.4)]
+             dark:hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.5)]`
         }
       `}>
         <div className="p-3 sm:p-4">
@@ -123,12 +130,12 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
                 {/* Course Title */}
                 <div className={`font-bold text-sm sm:text-lg truncate mb-2 tracking-tight ${
                   course.is_highlighted
-                    ? 'text-slate-800 dark:text-white'
-                    : 'text-white'
+                    ? 'text-slate-800 dark:text-slate-100'
+                    : 'text-white dark:text-slate-200'
                 }`}>
                   {course.title}
                   {course.is_highlighted && (
-                    <Star className="inline-block ml-2 h-4 w-4 text-amber-500 fill-amber-500 drop-shadow-sm" />
+                    <Star className="inline-block ml-2 h-4 w-4 text-amber-500 fill-amber-500 drop-shadow-sm dark:drop-shadow-[0_2px_4px_rgba(245,158,11,0.4)]" />
                   )}
                 </div>
 
@@ -140,16 +147,20 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
                       course.is_highlighted
                         ? `bg-gradient-to-r from-blue-100 to-blue-50 text-blue-800
                            border border-blue-200/60 shadow-sm hover:shadow-md transition-shadow
-                           dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800`
-                        : 'bg-slate-700/80 text-slate-300 border-slate-600'
+                           dark:bg-gradient-to-r dark:from-blue-900/60 dark:to-blue-800/40
+                           dark:text-blue-200 dark:border-blue-600/40
+                           dark:shadow-[0_2px_8px_-2px_rgba(59,130,246,0.3)]
+                           dark:hover:shadow-[0_4px_12px_-2px_rgba(59,130,246,0.4)]`
+                        : `bg-slate-700/80 text-slate-300 border-slate-600
+                           dark:bg-slate-800/80 dark:text-slate-400 dark:border-slate-500`
                     }`}
                   >
                     {course.course_code}
                   </Badge>
                   <div className={`text-sm font-medium ${
                     course.is_highlighted
-                      ? 'text-slate-700 dark:text-gray-400'
-                      : 'text-slate-500'
+                      ? 'text-slate-700 dark:text-slate-300'
+                      : 'text-slate-500 dark:text-slate-400'
                   }`}>
                     {course.teacher_name}
                   </div>
@@ -158,28 +169,32 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
                 {/* Course Stats */}
                 {courseData && (
                   <div className={`flex flex-wrap gap-3 mt-3 ${
-                    course.is_highlighted ? 'p-3 rounded-lg bg-gradient-to-r from-slate-50/60 to-blue-50/40 border border-slate-200/40' : ''
+                    course.is_highlighted
+                      ? `p-3 rounded-lg bg-gradient-to-r from-slate-50/60 to-blue-50/40 border border-slate-200/40
+                         dark:bg-gradient-to-r dark:from-slate-800/60 dark:to-blue-900/30
+                         dark:border-slate-700/40 dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.3)]`
+                      : ''
                   }`}>
                     <div className="flex items-center gap-2">
                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
                         course.is_highlighted
-                          ? 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm'
-                          : 'bg-slate-600'
+                          ? 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm dark:shadow-blue-500/30'
+                          : 'bg-slate-600 dark:bg-slate-700'
                       }`}>
                         <BookOpen className="h-3 w-3 text-white" />
                       </div>
                       <div>
                         <span className={`text-sm font-bold leading-none ${
                           course.is_highlighted
-                            ? 'text-blue-800 dark:text-gray-200'
-                            : 'text-slate-300'
+                            ? 'text-blue-800 dark:text-blue-200'
+                            : 'text-slate-300 dark:text-slate-400'
                         }`}>
                           {courseData.length}
                         </span>
                         <p className={`text-xs font-medium ${
                           course.is_highlighted
-                            ? 'text-blue-600 dark:text-gray-400'
-                            : 'text-slate-400'
+                            ? 'text-blue-600 dark:text-blue-400'
+                            : 'text-slate-400 dark:text-slate-500'
                         }`}>
                           Topics
                         </p>
@@ -194,23 +209,23 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
                         <div className="flex items-center gap-2">
                           <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
                             course.is_highlighted
-                              ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-sm'
-                              : 'bg-slate-600'
+                              ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-sm dark:shadow-emerald-500/30'
+                              : 'bg-slate-600 dark:bg-slate-700'
                           }`}>
                             <Calendar className="h-3 w-3 text-white" />
                           </div>
                           <div>
                             <span className={`text-sm font-bold leading-none ${
                               course.is_highlighted
-                                ? 'text-emerald-800 dark:text-gray-200'
-                                : 'text-slate-300'
+                                ? 'text-emerald-800 dark:text-emerald-200'
+                                : 'text-slate-300 dark:text-slate-400'
                             }`}>
                               {totalSlides}
                             </span>
                             <p className={`text-xs font-medium ${
                               course.is_highlighted
-                                ? 'text-emerald-600 dark:text-gray-400'
-                                : 'text-slate-400'
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : 'text-slate-400 dark:text-slate-500'
                             }`}>
                               Slides
                             </p>

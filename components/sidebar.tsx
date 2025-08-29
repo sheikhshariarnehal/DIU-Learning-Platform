@@ -348,8 +348,11 @@ export function Sidebar({ onContentSelect }: SidebarProps) {
                        shadow-[0_2px_8px_-2px_rgba(59,130,246,0.15),0_4px_16px_-4px_rgba(59,130,246,0.1)]
                        hover:shadow-[0_8px_25px_-5px_rgba(59,130,246,0.25),0_8px_16px_-8px_rgba(59,130,246,0.15)]
                        hover:border-blue-300/70 hover:-translate-y-0.5
-                       dark:from-blue-950/20 dark:to-indigo-950/10`
-                    : 'hover:shadow-md'
+                       dark:bg-gradient-to-br dark:from-slate-900/80 dark:via-blue-950/40 dark:to-indigo-950/30
+                       dark:border-blue-400/60 dark:shadow-[0_4px_12px_-2px_rgba(59,130,246,0.3),0_8px_24px_-4px_rgba(0,0,0,0.4)]
+                       dark:hover:shadow-[0_8px_25px_-5px_rgba(59,130,246,0.4),0_12px_32px_-8px_rgba(0,0,0,0.5)]
+                       dark:hover:border-blue-400/80 dark:hover:glow-primary-soft`
+                    : 'hover:shadow-md dark:hover:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.3)]'
                 }`}>
                   <CardContent className="p-0">
                     {/* Course Header */}
@@ -372,18 +375,21 @@ export function Sidebar({ onContentSelect }: SidebarProps) {
                         <div className="flex-1 min-w-0 space-y-2">
                           <div className="flex items-center gap-2">
                             <div className={`font-bold text-sm truncate flex-1 tracking-tight ${
-                              course.is_highlighted ? 'text-slate-800 dark:text-white' : ''
+                              course.is_highlighted ? 'text-slate-800 dark:text-slate-100' : ''
                             }`}>
                               {course.title}
                             </div>
                             {course.is_highlighted && (
-                              <Star className="h-4 w-4 text-amber-500 fill-amber-500 drop-shadow-sm" />
+                              <Star className="h-4 w-4 text-amber-500 fill-amber-500 drop-shadow-sm dark:drop-shadow-[0_2px_4px_rgba(245,158,11,0.4)]" />
                             )}
                           </div>
                           <div className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold ${
                             course.is_highlighted
-                              ? 'bg-gradient-to-r from-blue-100 to-blue-50 text-blue-800 border border-blue-200/60 shadow-sm dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800'
-                              : 'text-muted-foreground bg-muted/50'
+                              ? `bg-gradient-to-r from-blue-100 to-blue-50 text-blue-800 border border-blue-200/60 shadow-sm
+                                 dark:bg-gradient-to-r dark:from-blue-900/60 dark:to-blue-800/40
+                                 dark:text-blue-200 dark:border-blue-600/40
+                                 dark:shadow-[0_2px_8px_-2px_rgba(59,130,246,0.3)]`
+                              : 'text-muted-foreground bg-muted/50 dark:bg-muted/30 dark:text-muted-foreground'
                           }`}>
                             {course.course_code}
                           </div>

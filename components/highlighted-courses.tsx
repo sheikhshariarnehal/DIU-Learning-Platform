@@ -125,12 +125,16 @@ export function HighlightedCourses({ onCourseSelect, className = "" }: Highlight
                   hover:shadow-[0_8px_25px_-5px_rgba(59,130,246,0.25),0_8px_16px_-8px_rgba(59,130,246,0.15)]
                   hover:border-blue-300/70 hover:-translate-y-1
                   transition-all duration-500 ease-out
-                  dark:from-blue-950/20 dark:to-indigo-950/10 dark:border-l-blue-400"
+                  dark:bg-gradient-to-br dark:from-slate-900/90 dark:via-blue-950/40 dark:to-indigo-950/30
+                  dark:border-blue-400/60 dark:border-l-blue-400
+                  dark:shadow-[0_4px_12px_-2px_rgba(59,130,246,0.3),0_8px_24px_-4px_rgba(0,0,0,0.4)]
+                  dark:hover:shadow-[0_12px_32px_-4px_rgba(59,130,246,0.4),0_16px_40px_-8px_rgba(0,0,0,0.5)]
+                  dark:hover:border-blue-400/80 dark:hover:glow-primary-soft"
                 onClick={() => onCourseSelect?.(course.id)}
               >
                 <CardContent className="p-0 relative">
                   {/* Subtle top accent line */}
-                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400/40 to-transparent"></div>
+                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400/40 to-transparent dark:via-blue-400/60"></div>
 
                   <div className="p-6">
                     <div className="flex items-start justify-between">
@@ -138,7 +142,7 @@ export function HighlightedCourses({ onCourseSelect, className = "" }: Highlight
                         {/* Course Title and Code */}
                         <div className="flex items-start gap-3 mb-4">
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-xl text-slate-800 dark:text-white leading-tight mb-2 tracking-tight">
+                            <h3 className="font-bold text-xl text-slate-800 dark:text-slate-100 leading-tight mb-2 tracking-tight">
                               {course.title}
                             </h3>
                             <div className="flex items-center gap-3">
@@ -148,13 +152,16 @@ export function HighlightedCourses({ onCourseSelect, className = "" }: Highlight
                                   bg-gradient-to-r from-blue-100 to-blue-50
                                   text-blue-800 border border-blue-200/60
                                   shadow-sm hover:shadow-md transition-shadow
-                                  dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800"
+                                  dark:bg-gradient-to-r dark:from-blue-900/60 dark:to-blue-800/40
+                                  dark:text-blue-200 dark:border-blue-600/40
+                                  dark:shadow-[0_2px_8px_-2px_rgba(59,130,246,0.3)]
+                                  dark:hover:shadow-[0_4px_12px_-2px_rgba(59,130,246,0.4)]"
                               >
                                 {course.course_code}
                               </Badge>
                               <div className="flex items-center gap-1.5">
-                                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full"></div>
-                                <span className="text-sm text-slate-600 dark:text-gray-400 font-medium">
+                                <div className="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-500 rounded-full"></div>
+                                <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">
                                   {course.semester.title} • {course.semester.section}
                                 </span>
                               </div>
@@ -163,47 +170,62 @@ export function HighlightedCourses({ onCourseSelect, className = "" }: Highlight
                         </div>
 
                         {/* Instructor Information */}
-                        <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-gradient-to-r from-slate-50 to-blue-50/50 border border-slate-200/60">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+                        <div className="flex items-center gap-3 mb-4 p-3 rounded-xl
+                          bg-gradient-to-r from-slate-50 to-blue-50/50 border border-slate-200/60
+                          dark:bg-gradient-to-r dark:from-slate-800/60 dark:to-blue-900/30
+                          dark:border-slate-700/60 dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.3)]">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-xl flex items-center justify-center
+                            shadow-lg shadow-blue-500/25 dark:shadow-blue-500/40">
                             <User className="h-5 w-5 text-white" />
                           </div>
                           <div className="flex-1">
-                            <p className="text-sm font-bold text-slate-800 dark:text-white leading-tight">
+                            <p className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
                               {course.teacher_name}
                             </p>
-                            <p className="text-xs text-slate-600 dark:text-gray-400 font-medium">
+                            <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
                               Course Instructor
                             </p>
                           </div>
-                          <div className="w-2 h-2 bg-green-400 rounded-full shadow-sm"></div>
+                          <div className="w-2 h-2 bg-green-400 dark:bg-green-500 rounded-full shadow-sm dark:shadow-green-500/30"></div>
                         </div>
 
                         {/* Course Stats */}
                         <div className="grid grid-cols-2 gap-3 mb-4">
-                          <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/40">
-                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+                          <div className="flex items-center gap-2 p-3 rounded-lg
+                            bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/40
+                            dark:bg-gradient-to-br dark:from-blue-900/40 dark:to-blue-800/20
+                            dark:border-blue-700/40 dark:shadow-[0_2px_8px_-2px_rgba(59,130,246,0.2)]">
+                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center
+                              shadow-sm dark:shadow-blue-500/30">
                               <BookOpen className="h-4 w-4 text-white" />
                             </div>
                             <div>
-                              <p className="text-lg font-bold text-blue-800 leading-none">8</p>
-                              <p className="text-xs font-medium text-blue-600">Topics</p>
+                              <p className="text-lg font-bold text-blue-800 dark:text-blue-200 leading-none">8</p>
+                              <p className="text-xs font-medium text-blue-600 dark:text-blue-400">Topics</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200/40">
-                            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
+                          <div className="flex items-center gap-2 p-3 rounded-lg
+                            bg-gradient-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200/40
+                            dark:bg-gradient-to-br dark:from-emerald-900/40 dark:to-emerald-800/20
+                            dark:border-emerald-700/40 dark:shadow-[0_2px_8px_-2px_rgba(16,185,129,0.2)]">
+                            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center
+                              shadow-sm dark:shadow-emerald-500/30">
                               <Calendar className="h-4 w-4 text-white" />
                             </div>
                             <div>
-                              <p className="text-lg font-bold text-emerald-800 leading-none">10</p>
-                              <p className="text-xs font-medium text-emerald-600">Slides</p>
+                              <p className="text-lg font-bold text-emerald-800 dark:text-emerald-200 leading-none">10</p>
+                              <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Slides</p>
                             </div>
                           </div>
                         </div>
 
                         {/* Description */}
                         {course.description && (
-                          <div className="p-4 rounded-xl bg-gradient-to-r from-slate-50/80 to-white border border-slate-200/50">
-                            <p className="text-sm text-slate-700 dark:text-gray-400 line-clamp-2 leading-relaxed font-medium">
+                          <div className="p-4 rounded-xl
+                            bg-gradient-to-r from-slate-50/80 to-white border border-slate-200/50
+                            dark:bg-gradient-to-r dark:from-slate-800/60 dark:to-slate-700/40
+                            dark:border-slate-600/40 dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.3)]">
+                            <p className="text-sm text-slate-700 dark:text-slate-300 line-clamp-2 leading-relaxed font-medium">
                               {course.description}
                             </p>
                           </div>
@@ -213,11 +235,21 @@ export function HighlightedCourses({ onCourseSelect, className = "" }: Highlight
                       {/* Action Indicator */}
                       <div className="flex flex-col items-center gap-3 ml-6">
                         <div className="relative">
-                          <div className="w-4 h-4 bg-gradient-to-br from-amber-400 via-orange-400 to-orange-500 rounded-full shadow-lg shadow-orange-500/30"></div>
-                          <div className="absolute inset-0 w-4 h-4 bg-gradient-to-br from-amber-400 via-orange-400 to-orange-500 rounded-full animate-ping opacity-20"></div>
+                          <div className="w-4 h-4 bg-gradient-to-br from-amber-400 via-orange-400 to-orange-500 rounded-full
+                            shadow-lg shadow-orange-500/30 dark:shadow-orange-500/50"></div>
+                          <div className="absolute inset-0 w-4 h-4 bg-gradient-to-br from-amber-400 via-orange-400 to-orange-500
+                            rounded-full animate-ping opacity-20 dark:opacity-30"></div>
                         </div>
-                        <div className="p-2 rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/40 group-hover:bg-gradient-to-br group-hover:from-blue-100 group-hover:to-indigo-100 transition-all duration-300">
-                          <ChevronRight className="h-5 w-5 text-blue-600 group-hover:text-blue-700 group-hover:translate-x-0.5 transition-all duration-300" />
+                        <div className="p-2 rounded-full
+                          bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/40
+                          group-hover:bg-gradient-to-br group-hover:from-blue-100 group-hover:to-indigo-100
+                          dark:bg-gradient-to-br dark:from-blue-900/40 dark:to-indigo-900/30
+                          dark:border-blue-600/40 dark:group-hover:from-blue-800/60 dark:group-hover:to-indigo-800/50
+                          dark:shadow-[0_2px_8px_-2px_rgba(59,130,246,0.3)]
+                          transition-all duration-300">
+                          <ChevronRight className="h-5 w-5 text-blue-600 dark:text-blue-400
+                            group-hover:text-blue-700 dark:group-hover:text-blue-300
+                            group-hover:translate-x-0.5 transition-all duration-300" />
                         </div>
                       </div>
                     </div>
