@@ -79,13 +79,16 @@ export default function HomePage() {
         try {
           setIsLoading(true)
 
-          // Fetch content data from API (using simplified endpoint for testing)
+          // Fetch content data from API (using simplified endpoints)
           let apiEndpoint
           if (parsedUrl.type === 'slide') {
             apiEndpoint = `/api/slides-simple/${parsedUrl.id}`
           } else if (parsedUrl.type === 'video') {
             apiEndpoint = `/api/videos-simple/${parsedUrl.id}`
+          } else if (parsedUrl.type === 'study-tool') {
+            apiEndpoint = `/api/study-tools-simple/${parsedUrl.id}`
           } else {
+            // Fallback to regular API
             apiEndpoint = `/api/${parsedUrl.type === 'study-tool' ? 'study-tools' : `${parsedUrl.type}s`}/${parsedUrl.id}`
           }
           console.log("API Endpoint:", apiEndpoint)
