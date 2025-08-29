@@ -437,19 +437,26 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
 
   return (
     <div className={`
-      content-viewer-container h-full bg-white dark:bg-slate-900 rounded-lg overflow-hidden
+      content-viewer-container h-full bg-white dark:bg-[#35374B] rounded-lg overflow-hidden
       shadow-lg sm:shadow-2xl relative transition-all duration-300
+      dark:shadow-[0_8px_25px_-5px_rgba(53,55,75,0.4),0_16px_40px_-8px_rgba(53,55,75,0.3)]
       ${isFullscreen ? 'fixed inset-0 z-50 rounded-none' : ''}
       ${isMobile ? 'mobile-content-viewer' : ''}
     `}>
       {/* Content Header - Hidden for syllabus */}
       {content.type !== "syllabus" && (
         <div className={`
-          absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 via-black/40 to-transparent
+          absolute top-0 left-0 right-0 z-20
+          bg-gradient-to-b from-black/0 via-black/0 to-transparent
+          hover:from-black/80 hover:via-black/60 hover:to-transparent
+          dark:hover:from-gray-900/90 dark:hover:via-gray-900/70 dark:hover:to-transparent
+          transition-all duration-300 ease-in-out
           ${isMobile ? 'p-2 sm:p-3' : 'p-3 sm:p-4 lg:p-5'}
           ${isFullscreen && isMobile ? 'pt-safe-top' : ''}
+          group
         `}>
-        <div className="flex items-start justify-between text-white gap-2 sm:gap-3">
+        <div className="flex items-start justify-between text-white opacity-0 group-hover:opacity-100
+          transition-opacity duration-300 ease-in-out gap-2 sm:gap-3">
           <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
             {getContentIcon()}
             <div className="min-w-0 flex-1">
@@ -473,13 +480,7 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
             </div>
           </div>
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            {/* View Time - Hidden on mobile in header, shown in mobile controls */}
-            {!isMobile && (
-              <div className="hidden sm:flex items-center gap-1 text-white/80 text-xs">
-                <Clock className="h-3 w-3" />
-                <span>{formatTime(viewTime)}</span>
-              </div>
-            )}
+
 
             <Badge
               variant="secondary"
@@ -722,9 +723,10 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
               )}
             </ul>
             <div className="space-y-3">
-              <Alert className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-left">
-                <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                <AlertDescription className="text-yellow-800 dark:text-yellow-300 text-sm">
+              <Alert className="bg-yellow-50 dark:bg-gradient-to-r dark:from-[#78A083]/20 dark:to-[#50727B]/10
+                border-yellow-200 dark:border-[#78A083]/40 text-left">
+                <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-[#78A083]" />
+                <AlertDescription className="text-yellow-800 dark:text-slate-200 text-sm">
                   Try refreshing or opening the content in a new tab.
                 </AlertDescription>
               </Alert>
@@ -763,31 +765,29 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
       >
 
         {content.type === "syllabus" ? (
-          <div className={`
-            w-full h-full bg-white dark:bg-gray-900
-            overflow-y-auto
-            ${isMobile ? 'p-4' : 'p-6 md:p-8'}
-          `}>
+          <div className="w-full h-full bg-white dark:bg-gray-800 overflow-y-auto
+            px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 lg:px-12 lg:py-12">
             <div className="max-w-4xl mx-auto">
-              {/* Clean Professional Header */}
-              <div className="mb-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                      Syllabus
-                    </h1>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      {content.courseTitle}
-                    </p>
-                  </div>
+              {/* Responsive Professional Header */}
+              <div className="mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-200 dark:border-gray-700">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-white
+                  mb-1 leading-tight">
+                  {content.courseTitle}
+                </h1>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2
+                  text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                  {content.courseCode && (
+                    <span className="font-medium">{content.courseCode}</span>
+                  )}
+                  {content.teacherName && (
+                    <span className="text-xs sm:text-sm">Instructor: {content.teacherName}</span>
+                  )}
                 </div>
               </div>
 
-              {/* Syllabus Content */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-6 md:p-8 shadow-sm">
+              {/* Responsive Syllabus Content */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700
+                shadow-sm p-4 sm:p-6 md:p-8 lg:p-10">
                 {content.description ? (
                   <div className="prose prose-gray dark:prose-invert max-w-none">
                     {content.description.split('\n').map((line, index) => {
@@ -805,19 +805,23 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
 
                         if (level === 1) {
                           return (
-                            <h2 key={index} className="text-lg font-semibold text-gray-900 dark:text-white mt-8 mb-4 first:mt-0 pb-2 border-b border-gray-200 dark:border-gray-700">
+                            <h2 key={index} className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 dark:text-white
+                              mt-6 sm:mt-8 mb-3 sm:mb-4 first:mt-0 pb-2 sm:pb-3 border-b border-gray-200 dark:border-gray-600
+                              leading-tight">
                               {text}
                             </h2>
                           )
                         } else if (level === 2) {
                           return (
-                            <h3 key={index} className="text-base font-medium text-gray-800 dark:text-gray-200 mt-6 mb-3">
+                            <h3 key={index} className="text-base sm:text-lg lg:text-xl font-medium text-gray-800 dark:text-gray-200
+                              mt-4 sm:mt-6 mb-2 sm:mb-3 leading-tight">
                               {text}
                             </h3>
                           )
                         } else {
                           return (
-                            <h4 key={index} className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-4 mb-2">
+                            <h4 key={index} className="text-sm sm:text-base lg:text-lg font-medium text-gray-700 dark:text-gray-300
+                              mt-3 sm:mt-4 mb-1 sm:mb-2 leading-tight">
                               {text}
                             </h4>
                           )
@@ -828,9 +832,12 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
                       if (trimmedLine.match(/^[-*•]\s+/)) {
                         const text = trimmedLine.replace(/^[-*•]\s+/, '')
                         return (
-                          <div key={index} className="flex items-start gap-3 mb-2 pl-4">
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-blue-400 mt-2 flex-shrink-0"></div>
-                            <span className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{text}</span>
+                          <div key={index} className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-600 dark:bg-blue-400
+                              mt-2 sm:mt-2.5 flex-shrink-0"></div>
+                            <span className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+                              {text}
+                            </span>
                           </div>
                         )
                       }
@@ -839,7 +846,7 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
                       if (trimmedLine.includes('**')) {
                         const parts = trimmedLine.split(/(\*\*[^*]+\*\*)/)
                         return (
-                          <p key={index} className="text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
+                          <p key={index} className="text-gray-700 dark:text-gray-200 leading-relaxed mb-3">
                             {parts.map((part, partIndex) => {
                               if (part.startsWith('**') && part.endsWith('**')) {
                                 return (
@@ -856,19 +863,23 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
 
                       // Regular paragraphs
                       return (
-                        <p key={index} className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-3">
+                        <p key={index} className="text-sm sm:text-base text-gray-700 dark:text-gray-300
+                          leading-relaxed mb-3 sm:mb-4">
                           {trimmedLine}
                         </p>
                       )
                     })}
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  <div className="text-center py-8 sm:py-12 lg:py-16">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl
+                      bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                      <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400 dark:text-gray-500" />
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">
                       No Content Available
                     </h3>
-                    <p className="text-gray-500 dark:text-gray-400">
+                    <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 px-4">
                       Please add syllabus content in the admin panel.
                     </p>
                   </div>
@@ -912,7 +923,8 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
       {/* Floating Controls (when main controls are hidden) */}
       {isFullscreen && !showControls && !isMobile && (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-30">
-          <div className="bg-black/80 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2">
+          <div className="bg-black/80 dark:bg-[#35374B]/90 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2
+            dark:shadow-[0_4px_12px_-2px_rgba(53,55,75,0.6)] dark:border dark:border-[#50727B]/30">
             <Button
               variant="ghost"
               size="sm"
@@ -960,7 +972,9 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
             variant="ghost"
             size="sm"
             onClick={toggleFullscreen}
-            className="bg-black/50 text-white hover:bg-black/70 p-2 rounded-full touch-manipulation"
+            className="bg-black/50 dark:bg-[#35374B]/80 text-white hover:bg-black/70 dark:hover:bg-[#344955]/90
+              p-2 rounded-full touch-manipulation dark:shadow-[0_2px_8px_-2px_rgba(53,55,75,0.5)]
+              dark:border dark:border-[#50727B]/30"
           >
             <ExternalLink className="h-4 w-4 rotate-180" />
           </Button>

@@ -342,17 +342,17 @@ export function Sidebar({ onContentSelect }: SidebarProps) {
               return (
                 <Card key={course.id} className={`overflow-hidden transition-all duration-500 ease-out ${
                   course.is_highlighted
-                    ? `border-l-4 border-l-blue-500 dark:border-l-blue-400
+                    ? `border-l-4 border-l-blue-500 dark:border-l-[#50727B]
                        bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20
                        border border-blue-200/60
                        shadow-[0_2px_8px_-2px_rgba(59,130,246,0.15),0_4px_16px_-4px_rgba(59,130,246,0.1)]
                        hover:shadow-[0_8px_25px_-5px_rgba(59,130,246,0.25),0_8px_16px_-8px_rgba(59,130,246,0.15)]
                        hover:border-blue-300/70 hover:-translate-y-0.5
-                       dark:bg-gradient-to-br dark:from-slate-900/80 dark:via-blue-950/40 dark:to-indigo-950/30
-                       dark:border-blue-400/60 dark:shadow-[0_4px_12px_-2px_rgba(59,130,246,0.3),0_8px_24px_-4px_rgba(0,0,0,0.4)]
-                       dark:hover:shadow-[0_8px_25px_-5px_rgba(59,130,246,0.4),0_12px_32px_-8px_rgba(0,0,0,0.5)]
-                       dark:hover:border-blue-400/80 dark:hover:glow-primary-soft`
-                    : 'hover:shadow-md dark:hover:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.3)]'
+                       dark:bg-gradient-to-br dark:from-[#35374B]/90 dark:via-[#344955]/60 dark:to-[#50727B]/30
+                       dark:border-[#50727B]/60 dark:shadow-[0_4px_12px_-2px_rgba(80,114,123,0.4),0_8px_24px_-4px_rgba(53,55,75,0.5)]
+                       dark:hover:shadow-[0_8px_25px_-5px_rgba(80,114,123,0.5),0_12px_32px_-8px_rgba(53,55,75,0.6)]
+                       dark:hover:border-[#50727B]/80 dark:hover:shadow-[0_0_30px_rgba(80,114,123,0.3)]`
+                    : 'hover:shadow-md dark:hover:shadow-[0_4px_12px_-2px_rgba(53,55,75,0.4)]'
                 }`}>
                   <CardContent className="p-0">
                     {/* Course Header */}
@@ -386,10 +386,10 @@ export function Sidebar({ onContentSelect }: SidebarProps) {
                           <div className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold ${
                             course.is_highlighted
                               ? `bg-gradient-to-r from-blue-100 to-blue-50 text-blue-800 border border-blue-200/60 shadow-sm
-                                 dark:bg-gradient-to-r dark:from-blue-900/60 dark:to-blue-800/40
-                                 dark:text-blue-200 dark:border-blue-600/40
-                                 dark:shadow-[0_2px_8px_-2px_rgba(59,130,246,0.3)]`
-                              : 'text-muted-foreground bg-muted/50 dark:bg-muted/30 dark:text-muted-foreground'
+                                 dark:bg-gradient-to-r dark:from-[#50727B]/60 dark:to-[#344955]/80
+                                 dark:text-[#78A083] dark:border-[#50727B]/40
+                                 dark:shadow-[0_2px_8px_-2px_rgba(80,114,123,0.4)]`
+                              : 'text-muted-foreground bg-muted/50 dark:bg-[#344955]/30 dark:text-muted-foreground'
                           }`}>
                             {course.course_code}
                           </div>

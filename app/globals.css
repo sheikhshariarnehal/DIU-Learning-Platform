@@ -104,52 +104,53 @@
   }
 
   .dark {
-    /* Dark Mode - Modern Professional Theme */
-    --background: 222 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222 84% 6%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 84% 6%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 84% 4.9%;
-    --secondary: 217 32% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 32% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217 32% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Dark Mode - Modern Sophisticated Palette */
+    --background: 215 15% 15%; /* Based on #35374B */
+    --foreground: 180 8% 92%;
+    --card: 215 15% 18%; /* Slightly lighter than background */
+    --card-foreground: 180 8% 92%;
+    --popover: 215 15% 18%;
+    --popover-foreground: 180 8% 92%;
+    --primary: 195 35% 46%; /* Based on #50727B */
+    --primary-foreground: 215 15% 15%;
+    --secondary: 195 20% 25%; /* Based on #344955 */
+    --secondary-foreground: 180 8% 92%;
+    --muted: 195 20% 25%;
+    --muted-foreground: 180 8% 70%;
+    --accent: 120 15% 55%; /* Based on #78A083 */
+    --accent-foreground: 215 15% 15%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 32% 17.5%;
-    --input: 217 32% 17.5%;
-    --ring: 217 91% 60%;
+    --destructive-foreground: 180 8% 92%;
+    --border: 195 20% 25%;
+    --input: 195 20% 25%;
+    --ring: 195 35% 46%;
 
-    /* Professional dark theme depth system */
-    --shadow-dark-xs: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-    --shadow-dark-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
-    --shadow-dark-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
-    --shadow-dark-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
-    --shadow-dark-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
-    --shadow-dark-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.5);
-    --shadow-dark-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.3);
+    /* Professional dark theme depth system with new palette */
+    --shadow-dark-xs: 0 1px 2px 0 rgb(53 55 75 / 0.4);
+    --shadow-dark-sm: 0 1px 3px 0 rgb(53 55 75 / 0.5), 0 1px 2px -1px rgb(53 55 75 / 0.5);
+    --shadow-dark-md: 0 4px 6px -1px rgb(53 55 75 / 0.5), 0 2px 4px -2px rgb(53 55 75 / 0.5);
+    --shadow-dark-lg: 0 10px 15px -3px rgb(53 55 75 / 0.5), 0 4px 6px -4px rgb(53 55 75 / 0.5);
+    --shadow-dark-xl: 0 20px 25px -5px rgb(53 55 75 / 0.5), 0 8px 10px -6px rgb(53 55 75 / 0.5);
+    --shadow-dark-2xl: 0 25px 50px -12px rgb(53 55 75 / 0.6);
+    --shadow-dark-inner: inset 0 2px 4px 0 rgb(53 55 75 / 0.4);
 
-    /* Dark surface elevation system */
-    --surface-dark-1: 222 84% 6%;
-    --surface-dark-2: 217 32% 8%;
-    --surface-dark-3: 217 32% 10%;
-    --surface-dark-4: 217 32% 12%;
-    --surface-dark-5: 217 32% 14%;
+    /* Dark surface elevation system with new palette */
+    --surface-dark-1: 215 15% 18%; /* Slightly lighter than background */
+    --surface-dark-2: 195 20% 22%; /* Teal influence */
+    --surface-dark-3: 195 20% 25%; /* Secondary color */
+    --surface-dark-4: 195 25% 28%; /* More teal */
+    --surface-dark-5: 195 25% 32%; /* Lightest surface */
 
-    /* Professional dark gradients */
-    --gradient-dark-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(221 83% 53%) 100%);
-    --gradient-dark-surface: linear-gradient(135deg, hsl(222 84% 6%) 0%, hsl(217 32% 8%) 100%);
-    --gradient-dark-elevated: linear-gradient(135deg, hsl(217 32% 8%) 0%, hsl(217 32% 10%) 100%);
+    /* Professional dark gradients with new palette */
+    --gradient-dark-primary: linear-gradient(135deg, hsl(195 35% 46%) 0%, hsl(195 30% 40%) 100%);
+    --gradient-dark-surface: linear-gradient(135deg, hsl(215 15% 18%) 0%, hsl(195 20% 22%) 100%);
+    --gradient-dark-elevated: linear-gradient(135deg, hsl(195 20% 25%) 0%, hsl(195 25% 28%) 100%);
+    --gradient-dark-accent: linear-gradient(135deg, hsl(120 15% 55%) 0%, hsl(120 20% 50%) 100%);
 
-    /* Dark borders */
-    --border-dark-light: 217 32% 20%;
-    --border-dark-medium: 217 32% 17.5%;
-    --border-dark-strong: 217 32% 15%;
+    /* Dark borders with new palette */
+    --border-dark-light: 195 20% 30%;
+    --border-dark-medium: 195 20% 25%;
+    --border-dark-strong: 195 20% 20%;
 
     --chart-1: 217 91% 60%;
     --chart-2: 160 60% 45%;
