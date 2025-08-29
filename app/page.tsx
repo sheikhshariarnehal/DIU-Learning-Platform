@@ -80,17 +80,28 @@ export default function HomePage() {
           setIsLoading(true)
 
           // Fetch content data from API (using simplified endpoint for testing)
-          const apiEndpoint = parsedUrl.type === 'slide'
-            ? `/api/slides-simple/${parsedUrl.id}`
-            : `/api/${parsedUrl.type === 'study-tool' ? 'study-tools' : `${parsedUrl.type}s`}/${parsedUrl.id}`
+          let apiEndpoint
+          if (parsedUrl.type === 'slide') {
+            apiEndpoint = `/api/slides-simple/${parsedUrl.id}`
+          } else if (parsedUrl.type === 'video') {
+            apiEndpoint = `/api/videos-simple/${parsedUrl.id}`
+          } else {
+            apiEndpoint = `/api/${parsedUrl.type === 'study-tool' ? 'study-tools' : `${parsedUrl.type}s`}/${parsedUrl.id}`
+          }
           console.log("API Endpoint:", apiEndpoint)
 
           const response = await fetch(apiEndpoint)
           console.log("API Response status:", response.status)
+          console.log("API Response headers:", Object.fromEntries(response.headers.entries()))
 
           if (response.ok) {
             const contentData = await response.json()
             console.log("Content Data:", contentData)
+
+            if (!contentData || !contentData.id) {
+              console.error("Invalid content data received:", contentData)
+              throw new Error("Invalid content data received from API")
+            }
 
             // Convert API response to ContentItem format
             const content: ContentItem = {
@@ -122,11 +133,23 @@ export default function HomePage() {
             console.error("Error details:", errorData)
 
             if (response.status === 404) {
+              console.log("Content not found, redirecting to browse page")
               toast({
                 title: "Content Not Found",
-                description: "The requested content could not be found. It may have been moved or deleted.",
+                description: "The requested content could not be found. Redirecting to browse available content...",
                 variant: "destructive",
               })
+
+              // Redirect to appropriate browse page based on content type
+              setTimeout(() => {
+                if (parsedUrl.type === 'slide') {
+                  window.location.href = '/browse-slides'
+                } else if (parsedUrl.type === 'video') {
+                  window.location.href = '/browse-videos'
+                } else {
+                  window.location.href = '/test-api'
+                }
+              }, 2000)
             } else {
               toast({
                 title: "Error Loading Content",
@@ -226,12 +249,17 @@ export default function HomePage() {
   // Mobile layout doesn't need sidebar state management
 
   const handleContentSelect = async (content: ContentItem) => {
+    console.log("=== CONTENT SELECTION DEBUG ===")
+    console.log("Selected content:", content)
+    console.log("Content type:", content.type)
+    console.log("Content ID:", content.id)
+
     setIsLoading(true)
     try {
       // Log content access for analytics (both internal and Vercel Analytics)
       await trackContentEvent({
         contentId: content.id,
-        contentType: content.type === "document" ? "slide" : content.type,
+        contentType: content.type === "document" ? "slide" : content.type as any,
         action: "view",
         metadata: {
           title: content.title,
@@ -241,6 +269,7 @@ export default function HomePage() {
       })
 
       // Set the selected content to display in the viewer
+      console.log("Setting selected content...")
       setSelectedContent(content)
 
       // Generate shareable URL and update the browser URL without navigation
@@ -248,8 +277,13 @@ export default function HomePage() {
                          content.type === "syllabus" ? "study-tool" : content.type
       const shareUrl = generateSimpleShareUrl(contentType, content.id)
 
+      console.log("Generated share URL:", shareUrl)
+      console.log("Updating browser URL...")
+
       // Update URL without navigation (replace current history entry)
       updateUrlWithoutNavigation(shareUrl)
+
+      console.log("URL updated successfully")
 
       toast({
         title: "Content Loaded",
@@ -300,7 +334,8 @@ export default function HomePage() {
       // Log download action (both internal and Vercel Analytics)
       await trackDownloadEvent({
         contentId: selectedContent.id,
-        contentType: selectedContent.type === "document" ? "slide" : selectedContent.type,
+        contentType: selectedContent.type === "document" ? "slide" :
+                    selectedContent.type === "syllabus" ? "study-tool" : selectedContent.type as any,
         metadata: {
           title: selectedContent.title,
           topicTitle: selectedContent.topicTitle,

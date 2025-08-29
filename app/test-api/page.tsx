@@ -36,6 +36,19 @@ export default function TestApiPage() {
     setLoading(false)
   }
 
+  const testVideoApi = async () => {
+    setLoading(true)
+    const testId = "test-video-123" // You can change this to a real video ID
+    try {
+      const response = await fetch(`/api/videos-simple/${testId}`)
+      const data = await response.json()
+      addResult({ test: 'Video API Test (Simple)', status: response.status, data })
+    } catch (error) {
+      addResult({ test: 'Video API Test (Simple)', error: error.toString() })
+    }
+    setLoading(false)
+  }
+
   const testSimpleApi = async () => {
     setLoading(true)
     try {
@@ -60,6 +73,18 @@ export default function TestApiPage() {
     setLoading(false)
   }
 
+  const testAllVideos = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/videos-list')
+      const data = await response.json()
+      addResult({ test: 'List All Videos', status: response.status, data })
+    } catch (error) {
+      addResult({ test: 'List All Videos', error: error.toString() })
+    }
+    setLoading(false)
+  }
+
   const clearResults = () => {
     setResults([])
   }
@@ -79,8 +104,14 @@ export default function TestApiPage() {
           <Button onClick={testSlideApi} disabled={loading}>
             Test Slide API (Simple)
           </Button>
+          <Button onClick={testVideoApi} disabled={loading}>
+            Test Video API (Simple)
+          </Button>
           <Button onClick={testAllSlides} disabled={loading}>
             List All Slides
+          </Button>
+          <Button onClick={testAllVideos} disabled={loading}>
+            List All Videos
           </Button>
           <Button onClick={clearResults} variant="outline">
             Clear Results
