@@ -1,8 +1,10 @@
 "use client"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { FileText, Video, Pencil, Trash2 } from "lucide-react"
+import { FileText, Video, Pencil, Trash2, Share2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ShareButton } from "@/components/share-button"
+import { generateShareUrl } from "@/lib/share-utils"
 
 type Item = {
   id: string
@@ -44,6 +46,13 @@ export function ContentList({ content, type, loading, onEdit, onDelete }: Props)
               <Button size="sm" variant="outline" onClick={() => window.open(c.url, "_blank")}>
                 View
               </Button>
+              <ShareButton
+                url={generateShareUrl(type, c.id)}
+                title={`${c.title} - ${c.topic.course.title}`}
+                description={`${type === 'slide' ? 'View slides' : 'Watch video'} from ${c.topic.course.title} course`}
+                size="sm"
+                variant="outline"
+              />
               <Button size="sm" variant="secondary" onClick={() => onEdit(c)}>
                 <Pencil className="h-4 w-4" />
               </Button>

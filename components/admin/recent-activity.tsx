@@ -1,58 +1,71 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Calendar, BookOpen, FileText, Play } from "lucide-react"
 
-export async function RecentActivity() {
-  // Get recent items from different tables
-  const [{ data: recentSemesters }, { data: recentCourses }, { data: recentTopics }, { data: recentSlides }] =
-    await Promise.all([
-      supabase.from("semesters").select("*").order("created_at", { ascending: false }).limit(2),
-      supabase.from("courses").select("*").order("created_at", { ascending: false }).limit(2),
-      supabase.from("topics").select("*").order("created_at", { ascending: false }).limit(2),
-      supabase.from("slides").select("*").order("created_at", { ascending: false }).limit(2),
-    ])
+export function RecentActivity() {
+  const [activities, setActivities] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const activities = [
-    ...(recentSemesters || []).map((item) => ({
-      id: item.id,
-      type: "semester",
-      title: `New semester "${item.title}" created`,
-      time: item.created_at,
-      icon: Calendar,
-    })),
-    ...(recentCourses || []).map((item) => ({
-      id: item.id,
-      type: "course",
-      title: `New course "${item.title}" added`,
-      time: item.created_at,
-      icon: BookOpen,
-    })),
-    ...(recentTopics || []).map((item) => ({
-      id: item.id,
-      type: "topic",
-      title: `New topic "${item.title}" created`,
-      time: item.created_at,
-      icon: FileText,
-    })),
-    ...(recentSlides || []).map((item) => ({
-      id: item.id,
-      type: "slide",
-      title: `New slide "${item.title}" uploaded`,
-      time: item.created_at,
-      icon: Play,
-    })),
-  ]
-    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-    .slice(0, 5)
+  useEffect(() => {
+    async function fetchRecentActivity() {
+      try {
+        // Get recent items from different tables
+        const [{ data: recentSemesters }, { data: recentCourses }, { data: recentTopics }, { data: recentSlides }] =
+          await Promise.all([
+            supabase.from("semesters").select("*").order("created_at", { ascending: false }).limit(2),
+            supabase.from("courses").select("*").order("created_at", { ascending: false }).limit(2),
+            supabase.from("topics").select("*").order("created_at", { ascending: false }).limit(2),
+            supabase.from("slides").select("*").order("created_at", { ascending: false }).limit(2),
+          ])
 
-  if (activities.length === 0) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">No recent activity</p>
-      </div>
-    )
-  }
+        const activityData = [
+          ...(recentSemesters || []).map((item) => ({
+            id: item.id,
+            type: "semester",
+            title: `New semester "${item.title}" created`,
+            time: item.created_at,
+            icon: Calendar,
+          })),
+          ...(recentCourses || []).map((item) => ({
+            id: item.id,
+            type: "course",
+            title: `New course "${item.title}" added`,
+            time: item.created_at,
+            icon: BookOpen,
+          })),
+          ...(recentTopics || []).map((item) => ({
+            id: item.id,
+            type: "topic",
+            title: `New topic "${item.title}" created`,
+            time: item.created_at,
+            icon: FileText,
+          })),
+          ...(recentSlides || []).map((item) => ({
+            id: item.id,
+            type: "slide",
+            title: `New slide "${item.title}" uploaded`,
+            time: item.created_at,
+            icon: Play,
+          })),
+        ]
+          .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+          .slice(0, 5)
+
+        setActivities(activityData)
+      } catch (error) {
+        console.error("Error fetching recent activity:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchRecentActivity()
+  }, [])
 
   const getActivityColor = (type: string) => {
     switch (type) {
@@ -67,6 +80,31 @@ export async function RecentActivity() {
       default:
         return "bg-gray-100 text-gray-800"
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="flex items-center space-x-4">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <div className="space-y-2 flex-1">
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+            <Skeleton className="h-5 w-12" />
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  if (activities.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">No recent activity</p>
+      </div>
+    )
   }
 
   return (

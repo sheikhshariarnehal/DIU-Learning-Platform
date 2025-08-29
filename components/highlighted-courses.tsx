@@ -119,12 +119,10 @@ export function HighlightedCourses({ onCourseSelect, className = "" }: Highlight
               <Card
                 key={course.id}
                 className="group cursor-pointer relative overflow-hidden
-                  bg-white dark:bg-gray-800
-                  border border-gray-200 dark:border-gray-700
                   border-l-4 border-l-blue-500 dark:border-l-blue-400
-                  shadow-sm hover:shadow-md
+                  bg-gradient-to-br from-blue-50/50 to-indigo-50/30 dark:from-blue-950/20 dark:to-indigo-950/10
+                  shadow-sm hover:shadow-lg hover:-translate-y-1
                   hover:border-gray-300 dark:hover:border-gray-600
-                  hover:-translate-y-0.5
                   transition-all duration-300 ease-out"
                 onClick={() => onCourseSelect?.(course.id)}
               >

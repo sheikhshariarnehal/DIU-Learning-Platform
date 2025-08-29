@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
 import {
   ChevronDown, ChevronRight, FileText, Play, BookOpen, Users, Loader2, AlertCircle,
-  GraduationCap, ClipboardList, BarChart3, PenTool, FlaskConical, Library, Star
+  GraduationCap, ClipboardList, BarChart3, PenTool, FlaskConical, Library, Star, Share2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -14,6 +14,8 @@ import { supabase } from "@/lib/supabase"
 import type { Database } from "@/lib/supabase"
 import { ProfessionalTopicTitle } from "@/components/ui/professional-topic-title"
 import { useIsMobile } from "@/components/ui/use-mobile"
+import { ShareButton } from "@/components/share-button"
+import { generateShareUrl } from "@/lib/share-utils"
 import React from "react"
 
 type Semester = Database["public"]["Tables"]["semesters"]["Row"]

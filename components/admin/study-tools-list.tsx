@@ -6,8 +6,10 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Edit, Trash2, FileText, BookOpen, Users, ExternalLink, Search } from "lucide-react"
+import { Edit, Trash2, FileText, BookOpen, Users, ExternalLink, Search, Share2 } from "lucide-react"
 import { EditStudyToolDialog } from "@/components/admin/edit-study-tool-dialog"
+import { ShareButton } from "@/components/share-button"
+import { generateShareUrl } from "@/lib/share-utils"
 
 interface StudyTool {
   id: string
@@ -259,6 +261,13 @@ export function StudyToolsList({ onRefresh }: StudyToolsListProps) {
                       </a>
                     </Button>
                   )}
+                  <ShareButton
+                    url={generateShareUrl('study-tool', tool.id)}
+                    title={`${tool.title} - ${tool.course.title}`}
+                    description={`${tool.type.replace('_', ' ').toUpperCase()} for ${tool.course.title} course`}
+                    size="sm"
+                    variant="ghost"
+                  />
                   <Button variant="ghost" size="sm" onClick={() => handleEdit(tool)}>
                     <Edit className="h-4 w-4" />
                   </Button>

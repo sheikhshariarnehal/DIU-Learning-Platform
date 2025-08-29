@@ -90,70 +90,61 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
     <div className="space-y-1">
       {/* Course Header */}
       <div className={`
-        rounded-xl border transition-all duration-500 ease-out relative overflow-hidden
+        group relative overflow-hidden rounded-xl border transition-all duration-300 ease-out cursor-pointer
+        hover:shadow-lg hover:-translate-y-1
         ${course.is_highlighted
-          ? `bg-white dark:bg-gray-800
-             border border-gray-200 dark:border-gray-700
-             border-l-4 border-l-blue-500 dark:border-l-blue-400
-             shadow-sm hover:shadow-md
-             hover:border-gray-300 dark:hover:border-gray-600 hover:-translate-y-0.5`
-          : `bg-slate-800/90 backdrop-blur-sm border-slate-700/50
-             shadow-lg hover:shadow-xl hover:bg-slate-750
-             dark:bg-[#35374B]/95 dark:border-[#344955]/50
-             dark:shadow-[0_4px_12px_-2px_rgba(53,55,75,0.5)]
-             dark:hover:shadow-[0_8px_24px_-4px_rgba(53,55,75,0.6)]`
+          ? `border-l-4 border-l-blue-500 dark:border-l-blue-400
+             bg-gradient-to-br from-blue-50/50 to-indigo-50/30 dark:from-blue-950/20 dark:to-indigo-950/10
+             shadow-sm hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600`
+          : `border-l-4 border-l-transparent hover:border-l-primary/20
+             bg-card hover:bg-muted/50 shadow-sm hover:shadow-md`
         }
       `}>
-        <div className="p-3 sm:p-4">
+        {/* Gradient overlay for highlighted courses */}
+        {course.is_highlighted && (
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 pointer-events-none" />
+        )}
+
+        <div className="relative p-4 sm:p-6">
           <Button
             variant="ghost"
             className="w-full justify-start text-left p-0 h-auto hover:bg-transparent touch-manipulation"
             onClick={handleToggle}
           >
-            <div className="flex items-center gap-3 w-full">
-              {isExpanded ? (
-                <ChevronDown className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 transition-transform duration-200 ${
-                  course.is_highlighted ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'
-                }`} />
-              ) : (
-                <ChevronRight className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 transition-transform duration-200 ${
-                  course.is_highlighted ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'
-                }`} />
-              )}
+            <div className="flex items-start gap-4 w-full">
+              {/* Course Icon */}
+              <div className={`rounded-lg flex items-center justify-center shrink-0 w-12 h-12 ${
+                course.is_highlighted
+                  ? 'bg-blue-600 dark:bg-blue-500'
+                  : 'bg-primary'
+              }`}>
+                <BookOpen className="h-6 w-6 text-white" />
+              </div>
 
               <div className="flex-1 min-w-0">
-                {/* Course Title */}
-                <div className={`font-bold text-sm sm:text-lg truncate mb-2 tracking-tight ${
-                  course.is_highlighted
-                    ? 'text-gray-900 dark:text-white'
-                    : 'text-white dark:text-slate-200'
-                }`}>
-                  {course.title}
+                {/* Course Title and Status */}
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="font-semibold text-lg text-foreground leading-tight tracking-tight truncate">
+                    {course.title}
+                  </h3>
                   {course.is_highlighted && (
-                    <Star className="inline-block ml-2 h-4 w-4 text-yellow-500 fill-yellow-500" />
+                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 shrink-0" />
                   )}
                 </div>
 
                 {/* Course Code and Instructor */}
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
                   <Badge
-                    variant={course.is_highlighted ? "secondary" : "outline"}
-                    className={`text-xs font-medium w-fit px-2.5 py-1 ${
-                      course.is_highlighted
-                        ? `bg-blue-100 text-blue-800 border-blue-200
-                           dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800`
-                        : `bg-slate-700/80 text-slate-300 border-slate-600
-                           dark:bg-[#344955]/80 dark:text-slate-400 dark:border-[#35374B]`
-                    }`}
+                    variant={course.is_highlighted ? "default" : "secondary"}
+                    className="text-xs font-medium w-fit"
                   >
                     {course.course_code}
                   </Badge>
-                  <div className={`text-sm font-medium ${
-                    course.is_highlighted
-                      ? 'text-gray-700 dark:text-gray-300'
-                      : 'text-slate-500 dark:text-slate-400'
-                  }`}>
-                    {course.teacher_name}
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground">
+                      {course.teacher_name}
+                    </span>
                   </div>
                 </div>
 
@@ -225,22 +216,16 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
                   </div>
                 )}
 
-                {isLoading && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <Loader2 className={`h-3 w-3 sm:h-4 sm:w-4 animate-spin ${
-                      course.is_highlighted
-                        ? 'text-blue-600 dark:text-blue-400'
-                        : 'text-slate-400'
-                    }`} />
-                    <span className={`text-xs sm:text-sm ${
-                      course.is_highlighted
-                        ? 'text-gray-600 dark:text-gray-400'
-                        : 'text-slate-400'
-                    }`}>
-                      Loading content...
-                    </span>
-                  </div>
-                )}
+                {/* Expand/Collapse Indicator */}
+                <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground">
+                  {isExpanded ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                  <span>{isExpanded ? "Hide" : "Show"} content</span>
+                  {isLoading && <Loader2 className="h-3 w-3 animate-spin ml-2" />}
+                </div>
               </div>
             </div>
           </Button>
@@ -249,16 +234,28 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
 
       {/* Course Content */}
       {isExpanded && courseData && (
-        <div className="ml-2 sm:ml-4 space-y-2 animate-fade-in">
+        <div className="mt-4 px-4 sm:px-6 pb-4 space-y-3 animate-in slide-in-from-top-2 duration-300">
           {courseData.map((topic: any, index: number) => (
-            <TopicItem
+            <div
               key={topic.id}
-              topic={topic}
-              index={index}
-              courseTitle={course.title}
-              onContentSelect={onContentSelect}
-              selectedContentId={selectedContentId}
-            />
+              className="p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors cursor-pointer touch-manipulation"
+              onClick={() => onContentSelect?.(topic)}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <BookOpen className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm sm:text-base truncate text-foreground">
+                    {topic.title}
+                  </p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    {topic.slides?.length || 0} slides • {topic.videos?.length || 0} videos
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              </div>
+            </div>
           ))}
         </div>
       )}

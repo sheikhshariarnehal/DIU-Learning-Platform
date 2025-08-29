@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Bell, Sun, User, Download, Maximize, Moon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -11,6 +12,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { useIsMobile } from "@/components/ui/use-mobile"
 import { useTheme } from "next-themes"
 import { trackContentEvent, trackDownloadEvent, trackError } from "@/lib/analytics"
+import { generateSimpleShareUrl, parseSimpleShareUrl, updateUrlWithoutNavigation } from "@/lib/simple-share-utils"
 
 interface ContentItem {
   type: "slide" | "video" | "document" | "syllabus"
@@ -37,11 +39,121 @@ export default function HomePage() {
   const { toast } = useToast()
   const isMobile = useIsMobile()
   const { theme, setTheme } = useTheme()
+  const router = useRouter()
 
   // Ensure component is mounted before accessing theme
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Load content if URL contains shareable route
+  useEffect(() => {
+    const loadContentFromUrl = async () => {
+      if (!mounted) return
+
+      // Skip if content is already selected (to avoid conflicts)
+      if (selectedContent) return
+
+      // Check for share_path parameter (from middleware rewrite)
+      const urlParams = new URLSearchParams(window.location.search)
+      const sharePath = urlParams.get('share_path')
+
+      console.log("URL Params:", urlParams.toString())
+      console.log("Share path from params:", sharePath)
+      console.log("Window location:", window.location.href)
+      console.log("Window pathname:", window.location.pathname)
+
+      let urlToCheck = window.location.href
+      if (sharePath) {
+        // Use the original shareable path
+        urlToCheck = `${window.location.origin}${sharePath}`
+        console.log("Using share path:", urlToCheck)
+      }
+
+      console.log("Final URL to check:", urlToCheck)
+
+      const parsedUrl = parseSimpleShareUrl(urlToCheck)
+      console.log("Parsed URL:", parsedUrl)
+
+      if (parsedUrl) {
+        try {
+          setIsLoading(true)
+
+          // Fetch content data from API (using simplified endpoint for testing)
+          const apiEndpoint = parsedUrl.type === 'slide'
+            ? `/api/slides-simple/${parsedUrl.id}`
+            : `/api/${parsedUrl.type === 'study-tool' ? 'study-tools' : `${parsedUrl.type}s`}/${parsedUrl.id}`
+          console.log("API Endpoint:", apiEndpoint)
+
+          const response = await fetch(apiEndpoint)
+          console.log("API Response status:", response.status)
+
+          if (response.ok) {
+            const contentData = await response.json()
+            console.log("Content Data:", contentData)
+
+            // Convert API response to ContentItem format
+            const content: ContentItem = {
+              id: contentData.id,
+              type: parsedUrl.type === 'study-tool' ?
+                    (contentData.studyToolType === 'syllabus' ? 'syllabus' : 'document') :
+                    parsedUrl.type as "slide" | "video",
+              title: contentData.title,
+              url: contentData.url,
+              topicTitle: contentData.topic?.title || undefined,
+              courseTitle: contentData.topic?.course.title || contentData.course?.title,
+              description: contentData.description,
+            }
+
+            console.log("Setting content:", content)
+            setSelectedContent(content)
+
+            // Update the browser URL to show the shareable URL (without query params)
+            const shareUrl = generateSimpleShareUrl(parsedUrl.type, parsedUrl.id)
+            updateUrlWithoutNavigation(shareUrl)
+
+            toast({
+              title: "Content Loaded",
+              description: `Now viewing: ${content.title}`,
+            })
+          } else {
+            console.error("API Error:", response.status, response.statusText)
+            const errorData = await response.text()
+            console.error("Error details:", errorData)
+
+            if (response.status === 404) {
+              toast({
+                title: "Content Not Found",
+                description: "The requested content could not be found. It may have been moved or deleted.",
+                variant: "destructive",
+              })
+            } else {
+              toast({
+                title: "Error Loading Content",
+                description: `Failed to load content: ${response.status}`,
+                variant: "destructive",
+              })
+            }
+          }
+        } catch (error) {
+          console.error("Error loading content from URL:", error)
+          toast({
+            title: "Error",
+            description: "Failed to load content from URL",
+            variant: "destructive",
+          })
+        } finally {
+          setIsLoading(false)
+        }
+      } else {
+        console.log("No shareable URL detected")
+      }
+    }
+
+    // Add a small delay to ensure everything is mounted
+    const timer = setTimeout(loadContentFromUrl, 100)
+    return () => clearTimeout(timer)
+  }, [mounted, selectedContent, toast])
 
   // Initialize with highlighted course syllabus if available
   useEffect(() => {
@@ -106,9 +218,16 @@ export default function HomePage() {
         },
       })
 
+      // Set the selected content to display in the viewer
       setSelectedContent(content)
 
-      // Mobile layout doesn't need sidebar closing
+      // Generate shareable URL and update the browser URL without navigation
+      const contentType = content.type === "document" ? "slide" :
+                         content.type === "syllabus" ? "study-tool" : content.type
+      const shareUrl = generateSimpleShareUrl(contentType, content.id)
+
+      // Update URL without navigation (replace current history entry)
+      updateUrlWithoutNavigation(shareUrl)
 
       toast({
         title: "Content Loaded",

@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Edit, Trash2, FileText, BookOpen, Users, ExternalLink } from "lucide-react"
+import { Edit, Trash2, FileText, BookOpen, Users, ExternalLink, Share2 } from "lucide-react"
 import { EditStudyToolDialog } from "@/components/admin/edit-study-tool-dialog"
+import { ShareButton } from "@/components/share-button"
+import { generateShareUrl } from "@/lib/share-utils"
 
 interface StudyTool {
   id: string
@@ -182,6 +184,13 @@ export function CourseStudyTools({ courseId }: CourseStudyToolsProps) {
                 </a>
               </Button>
             )}
+            <ShareButton
+              url={generateShareUrl('study-tool', tool.id)}
+              title={`${tool.title} - Study Tool`}
+              description={`${tool.type.replace('_', ' ').toUpperCase()} study material`}
+              size="sm"
+              variant="ghost"
+            />
             <Button variant="ghost" size="sm" onClick={() => handleEdit(tool)}>
               <Edit className="h-3 w-3" />
             </Button>

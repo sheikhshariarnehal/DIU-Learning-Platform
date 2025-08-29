@@ -1,6 +1,71 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { createClient } from "@/lib/supabase"
 
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const id = params.id
+    const supabase = createClient()
+
+    const { data, error } = await supabase
+      .from("slides")
+      .select(`
+        id,
+        title,
+        google_drive_url,
+        description,
+        file_size,
+        order_index,
+        topic_id,
+        created_at,
+        updated_at,
+        topic:topics (
+          id,
+          title,
+          course:courses (
+            id,
+            title,
+            course_code,
+            teacher_name,
+            semester:semesters (
+              id,
+              title,
+              section
+            )
+          )
+        )
+      `)
+      .eq("id", id)
+      .single()
+
+    if (error) {
+      if (error.code === "PGRST116") {
+        return NextResponse.json({ error: "Slide not found" }, { status: 404 })
+      }
+      console.error("[slides] GET error:", error.message)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      ...data,
+      url: data.google_drive_url,
+      type: "slide",
+      topic: {
+        ...data.topic,
+        course: {
+          ...data.topic.course,
+          semester: {
+            ...data.topic.course.semester,
+            name: data.topic.course.semester?.title || ""
+          },
+        },
+      },
+    })
+  } catch (err) {
+    console.error("[slides] GET error:", err)
+    return NextResponse.json({ error: "Failed to fetch slide" }, { status: 500 })
+  }
+}
+
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await req.json()
