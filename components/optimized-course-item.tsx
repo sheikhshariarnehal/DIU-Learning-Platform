@@ -92,16 +92,11 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
       <div className={`
         rounded-xl border transition-all duration-500 ease-out relative overflow-hidden
         ${course.is_highlighted
-          ? `bg-gradient-to-br from-white via-blue-50/40 to-indigo-50/30
-             border border-blue-200/60 border-l-4 border-l-blue-500
-             shadow-[0_4px_12px_-2px_rgba(59,130,246,0.2),0_8px_24px_-4px_rgba(59,130,246,0.1)]
-             hover:shadow-[0_12px_32px_-4px_rgba(59,130,246,0.3),0_8px_24px_-8px_rgba(59,130,246,0.15)]
-             hover:border-blue-300/70 hover:-translate-y-1
-             dark:bg-gradient-to-br dark:from-[#35374B] dark:via-[#344955]/80 dark:to-[#50727B]/40
-             dark:border-[#50727B]/60 dark:border-l-[#50727B]
-             dark:shadow-[0_6px_16px_-4px_rgba(80,114,123,0.5),0_12px_32px_-8px_rgba(53,55,75,0.6)]
-             dark:hover:shadow-[0_16px_40px_-8px_rgba(80,114,123,0.7),0_20px_48px_-12px_rgba(53,55,75,0.7)]
-             dark:hover:border-[#50727B]/80 dark:hover:shadow-[0_0_40px_rgba(80,114,123,0.4)]`
+          ? `bg-white dark:bg-gray-800
+             border border-gray-200 dark:border-gray-700
+             border-l-4 border-l-blue-500 dark:border-l-blue-400
+             shadow-sm hover:shadow-md
+             hover:border-gray-300 dark:hover:border-gray-600 hover:-translate-y-0.5`
           : `bg-slate-800/90 backdrop-blur-sm border-slate-700/50
              shadow-lg hover:shadow-xl hover:bg-slate-750
              dark:bg-[#35374B]/95 dark:border-[#344955]/50
@@ -130,12 +125,12 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
                 {/* Course Title */}
                 <div className={`font-bold text-sm sm:text-lg truncate mb-2 tracking-tight ${
                   course.is_highlighted
-                    ? 'text-slate-800 dark:text-slate-100'
+                    ? 'text-gray-900 dark:text-white'
                     : 'text-white dark:text-slate-200'
                 }`}>
                   {course.title}
                   {course.is_highlighted && (
-                    <Star className="inline-block ml-2 h-4 w-4 text-amber-500 fill-amber-500 drop-shadow-sm dark:drop-shadow-[0_2px_4px_rgba(245,158,11,0.4)]" />
+                    <Star className="inline-block ml-2 h-4 w-4 text-yellow-500 fill-yellow-500" />
                   )}
                 </div>
 
@@ -143,14 +138,10 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
                   <Badge
                     variant={course.is_highlighted ? "secondary" : "outline"}
-                    className={`text-xs font-semibold w-fit px-3 py-1.5 ${
+                    className={`text-xs font-medium w-fit px-2.5 py-1 ${
                       course.is_highlighted
-                        ? `bg-gradient-to-r from-blue-100 to-blue-50 text-blue-800
-                           border border-blue-200/60 shadow-sm hover:shadow-md transition-shadow
-                           dark:bg-gradient-to-r dark:from-[#50727B]/60 dark:to-[#344955]/80
-                           dark:text-[#78A083] dark:border-[#50727B]/40
-                           dark:shadow-[0_2px_8px_-2px_rgba(80,114,123,0.4)]
-                           dark:hover:shadow-[0_4px_12px_-2px_rgba(80,114,123,0.5)]`
+                        ? `bg-blue-100 text-blue-800 border-blue-200
+                           dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800`
                         : `bg-slate-700/80 text-slate-300 border-slate-600
                            dark:bg-[#344955]/80 dark:text-slate-400 dark:border-[#35374B]`
                     }`}
@@ -159,7 +150,7 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
                   </Badge>
                   <div className={`text-sm font-medium ${
                     course.is_highlighted
-                      ? 'text-slate-700 dark:text-slate-300'
+                      ? 'text-gray-700 dark:text-gray-300'
                       : 'text-slate-500 dark:text-slate-400'
                   }`}>
                     {course.teacher_name}
@@ -170,15 +161,13 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
                 {courseData && (
                   <div className={`flex flex-wrap gap-3 mt-3 ${
                     course.is_highlighted
-                      ? `p-3 rounded-lg bg-gradient-to-r from-slate-50/60 to-blue-50/40 border border-slate-200/40
-                         dark:bg-gradient-to-r dark:from-[#344955]/60 dark:to-[#50727B]/30
-                         dark:border-[#50727B]/40 dark:shadow-[0_2px_8px_-2px_rgba(53,55,75,0.4)]`
+                      ? `p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600`
                       : ''
                   }`}>
                     <div className="flex items-center gap-2">
                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
                         course.is_highlighted
-                          ? 'bg-gradient-to-br from-[#50727B] to-[#344955] shadow-sm dark:shadow-[#50727B]/40'
+                          ? 'bg-blue-600 dark:bg-blue-500'
                           : 'bg-slate-600 dark:bg-[#344955]'
                       }`}>
                         <BookOpen className="h-3 w-3 text-white" />
@@ -186,14 +175,14 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
                       <div>
                         <span className={`text-sm font-bold leading-none ${
                           course.is_highlighted
-                            ? 'text-blue-800 dark:text-slate-100'
+                            ? 'text-blue-900 dark:text-blue-100'
                             : 'text-slate-300 dark:text-slate-400'
                         }`}>
                           {courseData.length}
                         </span>
                         <p className={`text-xs font-medium ${
                           course.is_highlighted
-                            ? 'text-blue-600 dark:text-slate-300'
+                            ? 'text-blue-700 dark:text-blue-300'
                             : 'text-slate-400 dark:text-slate-500'
                         }`}>
                           Topics
@@ -209,7 +198,7 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
                         <div className="flex items-center gap-2">
                           <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
                             course.is_highlighted
-                              ? 'bg-gradient-to-br from-[#78A083] to-[#50727B] shadow-sm dark:shadow-[#78A083]/40'
+                              ? 'bg-green-600 dark:bg-green-500'
                               : 'bg-slate-600 dark:bg-[#344955]'
                           }`}>
                             <Calendar className="h-3 w-3 text-white" />
@@ -217,14 +206,14 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
                           <div>
                             <span className={`text-sm font-bold leading-none ${
                               course.is_highlighted
-                                ? 'text-emerald-800 dark:text-slate-100'
+                                ? 'text-green-900 dark:text-green-100'
                                 : 'text-slate-300 dark:text-slate-400'
                             }`}>
                               {totalSlides}
                             </span>
                             <p className={`text-xs font-medium ${
                               course.is_highlighted
-                                ? 'text-emerald-600 dark:text-slate-300'
+                                ? 'text-green-700 dark:text-green-300'
                                 : 'text-slate-400 dark:text-slate-500'
                             }`}>
                               Slides

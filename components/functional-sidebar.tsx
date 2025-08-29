@@ -622,7 +622,7 @@ const CourseItem = React.memo(
       <div className={`${isMobile ? 'space-y-2' : 'space-y-2'}`}>
         {/* Course Header - Simple Mobile Design */}
         <div className={`${isMobile ? 'bg-card rounded-lg border border-border/20' : 'bg-card rounded-lg hover:bg-accent/50 transition-colors border border-border'}`}>
-          <div className={`p-3 rounded-lg ${course.is_highlighted ? 'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/30' : ''}`}>
+          <div className={`p-3 rounded-lg ${course.is_highlighted ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : ''}`}>
           <Button
             variant="ghost"
             className={`w-full justify-start text-left p-0 h-auto hover:bg-transparent ${isMobile ? 'min-h-[48px]' : ''}`}
