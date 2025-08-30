@@ -10,18 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useTheme } from "next-themes"
-import { Bell, Settings, User, Moon, Sun } from "lucide-react"
-
-interface AdminUser {
-  id: string
-  email: string
-  full_name: string
-  role: "super_admin" | "admin" | "moderator"
-  is_active: boolean
-  last_login: string | null
-  created_at: string
-  updated_at: string
-}
+import { useAuth, type AdminUser } from "@/contexts/auth-context"
+import { Bell, Settings, User, Moon, Sun, LogOut } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface AdminHeaderProps {
   user: AdminUser
@@ -29,6 +20,13 @@ interface AdminHeaderProps {
 
 export function AdminHeader({ user }: AdminHeaderProps) {
   const { theme, setTheme } = useTheme()
+  const { logout } = useAuth()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await logout()
+    router.push("/admin/login")
+  }
 
   return (
     <header className="bg-card border-b border-border px-6 py-4">
@@ -65,10 +63,18 @@ export function AdminHeader({ user }: AdminHeaderProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                {user.email}
+              </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

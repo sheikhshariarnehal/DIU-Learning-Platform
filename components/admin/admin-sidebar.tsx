@@ -25,16 +25,7 @@ import {
   TestTube,
 } from "lucide-react"
 
-interface AdminUser {
-  id: string
-  email: string
-  full_name: string
-  role: "super_admin" | "admin" | "moderator"
-  is_active: boolean
-  last_login: string | null
-  created_at: string
-  updated_at: string
-}
+import { type AdminUser } from "@/contexts/auth-context"
 
 interface AdminSidebarProps {
   user: AdminUser
