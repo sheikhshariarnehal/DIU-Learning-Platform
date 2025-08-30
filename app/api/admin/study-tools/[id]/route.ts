@@ -108,10 +108,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   return NextResponse.json({
     ...data,
-    course: {
-      ...data.course,
-      semester: { name: data.course.semester?.title ?? "" },
-    },
+    course: data.course && data.course[0] ? {
+      ...data.course[0],
+      semester: { name: data.course[0].semester?.[0]?.title ?? "" },
+    } : null,
   })
 }
 

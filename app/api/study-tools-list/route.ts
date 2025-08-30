@@ -12,16 +12,11 @@ export async function GET() {
       .select(`
         id,
         title,
-        google_drive_url,
-        description,
-        study_tool_type,
-        topic:topics (
+        content_url,
+        type,
+        course:courses (
           id,
-          title,
-          course:courses (
-            id,
-            title
-          )
+          title
         )
       `)
       .limit(10)

@@ -62,7 +62,7 @@ const formatTopicTitle = (index: number, title: string, maxLength: number = 42):
 }
 
 interface ContentItem {
-  type: "slide" | "video" | "document" | "syllabus"
+  type: "slide" | "video" | "document" | "syllabus" | "study-tool"
   title: string
   url: string
   id: string
@@ -312,7 +312,7 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
   // Content selection handlers
   const handleContentClick = useCallback(
     (
-      type: "slide" | "video" | "document" | "syllabus",
+      type: "slide" | "video" | "document" | "syllabus" | "study-tool",
       title: string,
       url: string,
       id: string,
@@ -759,7 +759,7 @@ const CourseItem = React.memo(
                               // For syllabus, use description as content and pass it via URL parameter
                               onContentClick("syllabus", tool.title, `#syllabus-${tool.id}`, tool.id, undefined, course.title, tool.description)
                             } else if (tool.content_url) {
-                              onContentClick("document", tool.title, tool.content_url, tool.id, undefined, course.title)
+                              onContentClick("study-tool", tool.title, tool.content_url, tool.id, undefined, course.title)
                             }
                           }}
                           disabled={tool.type !== "syllabus" && !tool.content_url}

@@ -14,7 +14,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     console.log("Querying study_tools table...")
     const { data, error } = await supabase
       .from("study_tools")
-      .select("id, title, google_drive_url, description")
+      .select("id, title, content_url, type")
       .eq("id", id)
       .single()
 
@@ -43,8 +43,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const response = {
       id: data.id,
       title: data.title,
-      url: data.google_drive_url,
-      description: data.description,
+      url: data.content_url,
+      description: data.type || "",
       type: "document"
     }
 

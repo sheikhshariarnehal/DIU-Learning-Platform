@@ -31,10 +31,10 @@ export async function GET() {
   // Map semester.title -> name so the UI gets {semester:{name}}
   const mapped = (data ?? []).map((tool) => ({
     ...tool,
-    course: {
-      ...tool.course,
-      semester: { name: tool.course.semester?.title ?? "" },
-    },
+    course: tool.course && tool.course[0] ? {
+      ...tool.course[0],
+      semester: { name: tool.course[0].semester?.[0]?.title ?? "" },
+    } : null,
   }))
 
   return NextResponse.json(mapped)
@@ -104,9 +104,9 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     ...data,
-    course: { 
-      ...data.course, 
-      semester: { name: data.course.semester?.title ?? "" } 
-    },
+    course: data.course && data.course[0] ? {
+      ...data.course[0],
+      semester: { name: data.course[0].semester?.[0]?.title ?? "" }
+    } : null,
   })
 }

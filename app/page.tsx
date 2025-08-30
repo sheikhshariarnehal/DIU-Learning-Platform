@@ -15,7 +15,7 @@ import { trackContentEvent, trackDownloadEvent, trackError } from "@/lib/analyti
 import { generateSimpleShareUrl, parseSimpleShareUrl, updateUrlWithoutNavigation } from "@/lib/simple-share-utils"
 
 interface ContentItem {
-  type: "slide" | "video" | "document" | "syllabus"
+  type: "slide" | "video" | "document" | "syllabus" | "study-tool"
   title: string
   url: string
   id: string
@@ -110,12 +110,14 @@ export default function HomePage() {
             const content: ContentItem = {
               id: contentData.id,
               type: parsedUrl.type === 'study-tool' ?
-                    (contentData.studyToolType === 'syllabus' ? 'syllabus' : 'document') :
+                    (contentData.studyToolType === 'syllabus' ? 'syllabus' : 'study-tool') :
                     parsedUrl.type as "slide" | "video",
               title: contentData.title,
               url: contentData.url,
-              topicTitle: contentData.topic?.title || undefined,
-              courseTitle: contentData.topic?.course.title || contentData.course?.title,
+              topicTitle: parsedUrl.type === 'study-tool' ? undefined : contentData.topic?.title,
+              courseTitle: parsedUrl.type === 'study-tool' ?
+                    contentData.course?.title :
+                    (contentData.topic?.course?.title || contentData.course?.title),
               description: contentData.description,
             }
 

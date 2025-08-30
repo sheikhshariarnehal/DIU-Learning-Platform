@@ -270,8 +270,8 @@ export function UnifiedFileViewer({
                     )}
                   </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {(content.topic?.course.title || content.course?.title)} 
-                    {content.topic?.title && ` • ${content.topic.title}`}
+                    {(contentType === 'study-tool' ? content.course?.title : (content.topic?.course?.title || content.course?.title))}
+                    {contentType !== 'study-tool' && content.topic?.title && ` • ${content.topic.title}`}
                     {content.studyToolType && ` • ${getStudyToolTypeLabel(content.studyToolType)}`}
                   </p>
                 </div>
@@ -312,8 +312,8 @@ export function UnifiedFileViewer({
               url: content.url,
               type: contentType === 'study-tool' && content.studyToolType === 'syllabus' ? 'syllabus' : 
                     contentType === 'study-tool' ? 'document' : contentType,
-              topicTitle: content.topic?.title,
-              courseTitle: content.topic?.course.title || content.course?.title
+              topicTitle: contentType === 'study-tool' ? undefined : content.topic?.title,
+              courseTitle: contentType === 'study-tool' ? content.course?.title : (content.topic?.course?.title || content.course?.title)
             }}
           />
         </div>
@@ -331,7 +331,7 @@ export function UnifiedFileViewer({
                     <BookOpen className="h-4 w-4 mr-2 text-gray-400" />
                     <dt className="font-medium text-gray-500 dark:text-gray-400 mr-2">Course:</dt>
                     <dd className="text-gray-900 dark:text-white">
-                      {content.topic?.course.title || content.course?.title}
+                      {contentType === 'study-tool' ? content.course?.title : (content.topic?.course?.title || content.course?.title)}
                     </dd>
                   </div>
                   {content.topic && (

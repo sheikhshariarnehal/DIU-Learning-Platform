@@ -56,30 +56,30 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       orderIndex: data.order_index,
       createdAt: data.created_at,
       updatedAt: data.updated_at,
-      topic: data.topic ? {
-        id: data.topic.id,
-        title: data.topic.title,
-        course: data.topic.course ? {
-          id: data.topic.course.id,
-          title: data.topic.course.title,
-          courseCode: data.topic.course.course_code,
-          teacherName: data.topic.course.teacher_name,
-          semester: data.topic.course.semester ? {
-            id: data.topic.course.semester.id,
-            title: data.topic.course.semester.title,
-            section: data.topic.course.semester.section,
-            name: data.topic.course.semester.title
+      topic: data.topic && data.topic[0] ? {
+        id: data.topic[0].id,
+        title: data.topic[0].title,
+        course: data.topic[0].course && data.topic[0].course[0] ? {
+          id: data.topic[0].course[0].id,
+          title: data.topic[0].course[0].title,
+          courseCode: data.topic[0].course[0].course_code,
+          teacherName: data.topic[0].course[0].teacher_name,
+          semester: data.topic[0].course[0].semester && data.topic[0].course[0].semester[0] ? {
+            id: data.topic[0].course[0].semester[0].id,
+            title: data.topic[0].course[0].semester[0].title,
+            section: data.topic[0].course[0].semester[0].section,
+            name: data.topic[0].course[0].semester[0].title
           } : null
         } : null
       } : null,
       // SEO and sharing metadata
       metadata: {
-        title: data.topic?.course?.title ? `${data.title} - ${data.topic.course.title}` : data.title,
-        description: data.description || `View ${data.title} slides${data.topic?.course?.title ? ` from ${data.topic.course.title} course` : ''}`,
-        courseTitle: data.topic?.course?.title || null,
-        topicTitle: data.topic?.title || null,
-        semesterTitle: data.topic?.course?.semester?.title || null,
-        teacherName: data.topic?.course?.teacher_name || null,
+        title: data.topic?.[0]?.course?.[0]?.title ? `${data.title} - ${data.topic[0].course[0].title}` : data.title,
+        description: data.description || `View ${data.title} slides${data.topic?.[0]?.course?.[0]?.title ? ` from ${data.topic[0].course[0].title} course` : ''}`,
+        courseTitle: data.topic?.[0]?.course?.[0]?.title || null,
+        topicTitle: data.topic?.[0]?.title || null,
+        semesterTitle: data.topic?.[0]?.course?.[0]?.semester?.[0]?.title || null,
+        teacherName: data.topic?.[0]?.course?.[0]?.teacher_name || null,
         shareUrl: `/slide/${data.id}`,
         embedUrl: data.google_drive_url
       }

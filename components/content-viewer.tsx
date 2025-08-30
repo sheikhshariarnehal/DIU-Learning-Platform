@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { useIsMobile } from "@/components/ui/use-mobile"
 
 interface ContentItem {
-  type: "slide" | "video" | "document" | "syllabus"
+  type: "slide" | "video" | "document" | "syllabus" | "study-tool"
   title: string
   url: string
   id: string
@@ -379,8 +379,8 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
         const baseUrl = url.split("?")[0]
         return `${baseUrl}?enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}&rel=0&modestbranding=1`
       }
-    } else if (type === "slide" || type === "document") {
-      // Handle Google Drive URLs for documents and slides
+    } else if (type === "slide" || type === "document" || type === "study-tool") {
+      // Handle Google Drive URLs for documents, slides, and study tools
       let fileId = ""
 
       // Format: https://drive.google.com/file/d/FILE_ID/view
