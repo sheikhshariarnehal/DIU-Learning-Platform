@@ -340,10 +340,14 @@ export function Sidebar({ onContentSelect }: SidebarProps) {
                 : 0
 
               return (
-                <Card key={course.id} className="overflow-hidden">
+                <Card key={course.id} className={`overflow-hidden transition-all duration-300 ${
+                  course.is_highlighted
+                    ? 'border-l-4 border-l-blue-500 dark:border-l-blue-400 bg-gradient-to-r from-blue-50/50 to-indigo-50/30 dark:from-blue-950/20 dark:to-indigo-950/10 shadow-md hover:shadow-lg'
+                    : 'hover:shadow-md'
+                }`}>
                   <CardContent className="p-0">
                     {/* Course Header */}
-                    <div className={`${course.is_highlighted ? 'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/30' : ''}`}>
+                    <div>
                       <Button
                         variant="ghost"
                         className="w-full justify-start text-left p-4 h-auto hover:bg-muted/50 rounded-none"
@@ -351,18 +355,32 @@ export function Sidebar({ onContentSelect }: SidebarProps) {
                       >
                       <div className="flex items-center gap-3 w-full">
                         {expandedCourses.has(course.id) ? (
-                          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          <ChevronDown className={`h-4 w-4 shrink-0 transition-colors ${
+                            course.is_highlighted ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'
+                          }`} />
                         ) : (
-                          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          <ChevronRight className={`h-4 w-4 shrink-0 transition-colors ${
+                            course.is_highlighted ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'
+                          }`} />
                         )}
                         <div className="flex-1 min-w-0 space-y-2">
                           <div className="flex items-center gap-2">
-                            <div className="font-medium text-sm truncate flex-1">{course.title}</div>
+                            <div className={`font-semibold text-sm truncate flex-1 ${
+                              course.is_highlighted ? 'text-gray-900 dark:text-white' : ''
+                            }`}>
+                              {course.title}
+                            </div>
                             {course.is_highlighted && (
-                              <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                              <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
                             )}
                           </div>
-                          <div className="text-xs text-muted-foreground">({course.course_code})</div>
+                          <div className={`text-xs font-medium ${
+                            course.is_highlighted
+                              ? 'text-blue-700 dark:text-blue-300'
+                              : 'text-muted-foreground'
+                          }`}>
+                            {course.course_code}
+                          </div>
 
                           {courseData[course.id] && (
                             <div className="space-y-2">

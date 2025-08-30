@@ -118,45 +118,79 @@ export function HighlightedCourses({ onCourseSelect, className = "" }: Highlight
             {highlightedCourses.map((course) => (
               <Card
                 key={course.id}
-                className="hover:shadow-md transition-shadow cursor-pointer"
+                className="group hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 cursor-pointer border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50/50 to-indigo-50/30 dark:from-blue-950/20 dark:to-indigo-950/10 dark:border-l-blue-400"
                 onClick={() => onCourseSelect?.(course.id)}
               >
                 <CardContent className="p-0">
-                  <div className="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/30 p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-sm text-gray-900 truncate">
-                          {course.title}
-                        </h3>
-                        <Badge variant="outline" className="text-xs">
-                          {course.course_code}
-                        </Badge>
-                      </div>
-                      
-                      <div className="flex items-center gap-4 text-xs text-gray-600 mb-2">
-                        <div className="flex items-center gap-1">
-                          <User className="h-3 w-3" />
-                          {course.teacher_name}
+                  <div className="p-5">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        {/* Course Title and Code */}
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-lg text-gray-900 dark:text-white leading-tight mb-1">
+                              {course.title}
+                            </h3>
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                variant="secondary"
+                                className="text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+                              >
+                                {course.course_code}
+                              </Badge>
+                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                                {course.semester.title} • {course.semester.section}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {course.semester.title} ({course.semester.section})
+
+                        {/* Instructor Information */}
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                            <User className="h-4 w-4 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                              {course.teacher_name}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Course Instructor
+                            </p>
+                          </div>
                         </div>
+
+                        {/* Course Stats */}
+                        <div className="flex items-center gap-4 mb-3">
+                          <div className="flex items-center gap-1.5">
+                            <BookOpen className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              8 Topics
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              10 Slides
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Description */}
+                        {course.description && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                            {course.description}
+                          </p>
+                        )}
                       </div>
 
-                      {course.description && (
-                        <p className="text-xs text-gray-600 line-clamp-2">
-                          {course.description}
-                        </p>
-                      )}
+                      {/* Action Indicator */}
+                      <div className="flex flex-col items-center gap-2 ml-4">
+                        <div className="w-3 h-3 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full shadow-sm"></div>
+                        <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-200" />
+                      </div>
                     </div>
-                    
-                    <div className="flex items-center gap-2 ml-3">
-                      <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </div>
-                  </div>
                   </div>
                 </CardContent>
               </Card>

@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Edit, Trash2, Eye, BookOpen } from "lucide-react"
+import { Edit, Trash2, Eye, BookOpen, Star } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Link from "next/link"
 
@@ -95,16 +95,44 @@ export async function CoursesList() {
         {/* Mobile Card View */}
         <div className="lg:hidden space-y-4">
           {courses.map((course) => (
-            <div key={course.id} className="bg-card border border-border rounded-lg shadow-modern">
-              <div className={`p-4 rounded-lg ${course.is_highlighted ? 'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/20' : ''}`}>
+            <div key={course.id} className={`bg-card border rounded-lg shadow-modern transition-all duration-300 ${
+              course.is_highlighted
+                ? 'border-l-4 border-l-blue-500 dark:border-l-blue-400 bg-gradient-to-r from-blue-50/50 to-indigo-50/30 dark:from-blue-950/20 dark:to-indigo-950/10 shadow-lg'
+                : 'border-border hover:shadow-lg'
+            }`}>
+              <div className="p-4 rounded-lg">
               <div className="space-y-3">
                 {/* Header */}
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-lg truncate">{course.title}</h3>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className={`font-bold text-lg truncate ${
+                        course.is_highlighted ? 'text-gray-900 dark:text-white' : ''
+                      }`}>
+                        {course.title}
+                      </h3>
+                      {course.is_highlighted && (
+                        <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+                      )}
+                    </div>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="outline" className="text-xs">{course.course_code}</Badge>
-                      <span className="text-sm text-muted-foreground">by {course.teacher_name}</span>
+                      <Badge
+                        variant={course.is_highlighted ? "secondary" : "outline"}
+                        className={`text-xs font-medium ${
+                          course.is_highlighted
+                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                            : ''
+                        }`}
+                      >
+                        {course.course_code}
+                      </Badge>
+                      <span className={`text-sm ${
+                        course.is_highlighted
+                          ? 'text-gray-700 dark:text-gray-300 font-medium'
+                          : 'text-muted-foreground'
+                      }`}>
+                        by {course.teacher_name}
+                      </span>
                     </div>
                   </div>
                 </div>

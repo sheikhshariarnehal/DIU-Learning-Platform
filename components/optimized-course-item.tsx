@@ -89,49 +89,125 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
   return (
     <div className="space-y-1">
       {/* Course Header */}
-      <div className="bg-slate-800/90 backdrop-blur-sm rounded-lg border border-slate-700/50 shadow-lg hover:bg-slate-750 transition-all duration-200">
-        <div className={`p-3 sm:p-4 rounded-lg ${course.is_highlighted ? 'bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/30' : ''}`}>
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-left p-0 h-auto hover:bg-transparent touch-manipulation"
-          onClick={handleToggle}
-        >
-          <div className="flex items-center gap-3 w-full">
-            {isExpanded ? (
-              <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-slate-400 transition-transform duration-200" />
-            ) : (
-              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-slate-400 transition-transform duration-200" />
-            )}
-            <div className="flex-1 min-w-0">
-              <div className="font-semibold text-sm sm:text-base text-white truncate mb-1">
-                {course.title}
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                <div className="text-xs sm:text-sm text-slate-400 font-medium">
-                  {course.course_code}
-                </div>
-                <div className="text-xs text-slate-500">
-                  {course.teacher_name}
-                </div>
-              </div>
+      <div className={`
+        rounded-lg border shadow-lg hover:shadow-xl transition-all duration-300
+        ${course.is_highlighted
+          ? 'bg-gradient-to-r from-blue-50/80 to-indigo-50/60 dark:from-blue-950/30 dark:to-indigo-950/20 border-l-4 border-l-blue-500 dark:border-l-blue-400 border-blue-200/50 dark:border-blue-800/50'
+          : 'bg-slate-800/90 backdrop-blur-sm border-slate-700/50 hover:bg-slate-750'
+        }
+      `}>
+        <div className="p-3 sm:p-4">
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-left p-0 h-auto hover:bg-transparent touch-manipulation"
+            onClick={handleToggle}
+          >
+            <div className="flex items-center gap-3 w-full">
+              {isExpanded ? (
+                <ChevronDown className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 transition-transform duration-200 ${
+                  course.is_highlighted ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'
+                }`} />
+              ) : (
+                <ChevronRight className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 transition-transform duration-200 ${
+                  course.is_highlighted ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'
+                }`} />
+              )}
 
-              {courseData && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <Badge variant="secondary" className="text-xs bg-slate-700/80 text-slate-300 border border-slate-600">
-                    {courseData.length} Topics
+              <div className="flex-1 min-w-0">
+                {/* Course Title */}
+                <div className={`font-bold text-sm sm:text-base truncate mb-1 ${
+                  course.is_highlighted
+                    ? 'text-gray-900 dark:text-white'
+                    : 'text-white'
+                }`}>
+                  {course.title}
+                  {course.is_highlighted && (
+                    <Star className="inline-block ml-2 h-4 w-4 text-amber-500 fill-amber-500" />
+                  )}
+                </div>
+
+                {/* Course Code and Instructor */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-2">
+                  <Badge
+                    variant={course.is_highlighted ? "secondary" : "outline"}
+                    className={`text-xs font-medium w-fit ${
+                      course.is_highlighted
+                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                        : 'bg-slate-700/80 text-slate-300 border-slate-600'
+                    }`}
+                  >
+                    {course.course_code}
                   </Badge>
+                  <div className={`text-xs ${
+                    course.is_highlighted
+                      ? 'text-gray-600 dark:text-gray-400'
+                      : 'text-slate-500'
+                  }`}>
+                    {course.teacher_name}
+                  </div>
                 </div>
-              )}
 
-              {isLoading && (
-                <div className="flex items-center gap-2 mt-2">
-                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-slate-400" />
-                  <span className="text-xs sm:text-sm text-slate-400">Loading content...</span>
-                </div>
-              )}
+                {/* Course Stats */}
+                {courseData && (
+                  <div className="flex flex-wrap gap-3 mt-2">
+                    <div className="flex items-center gap-1">
+                      <BookOpen className={`h-3 w-3 ${
+                        course.is_highlighted
+                          ? 'text-blue-600 dark:text-blue-400'
+                          : 'text-slate-400'
+                      }`} />
+                      <span className={`text-xs font-medium ${
+                        course.is_highlighted
+                          ? 'text-gray-700 dark:text-gray-300'
+                          : 'text-slate-300'
+                      }`}>
+                        {courseData.length} Topics
+                      </span>
+                    </div>
+                    {/* Calculate total slides */}
+                    {(() => {
+                      const totalSlides = courseData.reduce((total: number, topic: any) =>
+                        total + (topic.slides?.length || 0), 0
+                      );
+                      return totalSlides > 0 && (
+                        <div className="flex items-center gap-1">
+                          <Calendar className={`h-3 w-3 ${
+                            course.is_highlighted
+                              ? 'text-green-600 dark:text-green-400'
+                              : 'text-slate-400'
+                          }`} />
+                          <span className={`text-xs font-medium ${
+                            course.is_highlighted
+                              ? 'text-gray-700 dark:text-gray-300'
+                              : 'text-slate-300'
+                          }`}>
+                            {totalSlides} Slides
+                          </span>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {isLoading && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <Loader2 className={`h-3 w-3 sm:h-4 sm:w-4 animate-spin ${
+                      course.is_highlighted
+                        ? 'text-blue-600 dark:text-blue-400'
+                        : 'text-slate-400'
+                    }`} />
+                    <span className={`text-xs sm:text-sm ${
+                      course.is_highlighted
+                        ? 'text-gray-600 dark:text-gray-400'
+                        : 'text-slate-400'
+                    }`}>
+                      Loading content...
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </Button>
+          </Button>
         </div>
       </div>
 
