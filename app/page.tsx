@@ -6,7 +6,9 @@ import { Bell, Sun, User, Download, Maximize, Moon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { FunctionalSidebar } from "@/components/functional-sidebar"
-import { ContentViewer } from "@/components/content-viewer"
+import { LazyContentViewer } from "@/components/lazy-content-viewer"
+import { useOptimizedContent } from "@/hooks/use-optimized-content"
+import { performanceMonitor, measureAsync } from "@/lib/performance"
 import { useToast } from "@/hooks/use-toast"
 import { Toaster } from "@/components/ui/toaster"
 import { useIsMobile } from "@/components/ui/use-mobile"
@@ -34,12 +36,30 @@ interface ContentItem {
 
 export default function HomePage() {
   const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
   const { toast } = useToast()
   const isMobile = useIsMobile()
   const { theme, setTheme } = useTheme()
   const router = useRouter()
+
+  // Fallback loading state for compatibility
+  const [fallbackLoading, setFallbackLoading] = useState(false)
+
+  // Use optimized content loading
+  const {
+    content: optimizedContent,
+    isLoading: optimizedLoading,
+    loadContent,
+    clearContent,
+    cacheStats
+  } = useOptimizedContent({
+    cacheStrategy: 'normal',
+    enablePrefetch: true,
+    preloadNext: true
+  })
+
+  // Use optimized loading or fallback
+  const isLoading = optimizedLoading || fallbackLoading
 
   // Ensure component is mounted before accessing theme
   useEffect(() => {
@@ -77,7 +97,9 @@ export default function HomePage() {
 
       if (parsedUrl) {
         try {
-          setIsLoading(true)
+          setFallbackLoading(true)
+          // Use optimized content loading
+          await loadContent(parsedUrl.type, parsedUrl.id)
 
           // Fetch content data from API (using simplified endpoints)
           let apiEndpoint
@@ -171,7 +193,7 @@ export default function HomePage() {
             variant: "destructive",
           })
         } finally {
-          setIsLoading(false)
+          setFallbackLoading(false)
         }
       } else {
         console.log("No shareable URL detected")
@@ -181,7 +203,7 @@ export default function HomePage() {
     // Add a small delay to ensure everything is mounted
     const timer = setTimeout(loadContentFromUrl, 100)
     return () => clearTimeout(timer)
-  }, [mounted, selectedContent, toast])
+  }, [mounted, selectedContent, toast, loadContent, setFallbackLoading])
 
   // Initialize with highlighted course syllabus if available (only if no shareable URL)
   useEffect(() => {
@@ -205,7 +227,7 @@ export default function HomePage() {
       }
 
       try {
-        setIsLoading(true)
+        setFallbackLoading(true)
 
         // First try to load highlighted course syllabus
         const highlightedResponse = await fetch("/api/content/highlighted-syllabus")
@@ -240,7 +262,7 @@ export default function HomePage() {
           variant: "destructive",
         })
       } finally {
-        setIsLoading(false)
+        setFallbackLoading(false)
       }
     }
 
@@ -249,18 +271,22 @@ export default function HomePage() {
       const timer = setTimeout(initializeHighlightedSyllabus, 300)
       return () => clearTimeout(timer)
     }
-  }, [mounted, selectedContent, toast])
+  }, [mounted, selectedContent, toast, setFallbackLoading])
 
   // Mobile layout doesn't need sidebar state management
 
   const handleContentSelect = async (content: ContentItem) => {
-    console.log("=== CONTENT SELECTION DEBUG ===")
+    console.log("=== OPTIMIZED CONTENT SELECTION ===")
     console.log("Selected content:", content)
     console.log("Content type:", content.type)
     console.log("Content ID:", content.id)
 
-    setIsLoading(true)
     try {
+      // Use optimized content loading with performance tracking
+      await measureAsync('content-load', async () => {
+        await loadContent(content.type, content.id)
+      })
+
       // Log content access for analytics (both internal and Vercel Analytics)
       await trackContentEvent({
         contentId: content.id,
@@ -270,6 +296,7 @@ export default function HomePage() {
           title: content.title,
           topicTitle: content.topicTitle,
           courseTitle: content.courseTitle,
+          cacheHitRate: cacheStats.hits / (cacheStats.hits + cacheStats.misses) || 0
         },
       })
 
@@ -307,7 +334,7 @@ export default function HomePage() {
         variant: "destructive",
       })
     } finally {
-      setIsLoading(false)
+      // Loading state is handled by the optimized content hook
     }
   }
 
@@ -514,7 +541,7 @@ export default function HomePage() {
                   {/* Content Viewer - Clean Mobile Design */}
                   <div className="relative w-full" style={{ aspectRatio: '16/9' }}>
                     <div className="absolute inset-0 overflow-hidden bg-black">
-                      <ContentViewer content={selectedContent} isLoading={isLoading} />
+                      <LazyContentViewer content={selectedContent} isLoading={isLoading} />
                     </div>
                   </div>
 
@@ -571,7 +598,7 @@ export default function HomePage() {
                   {/* Content Viewer - Desktop */}
                   <div className="flex-1 p-0.5 sm:p-1 md:p-3 lg:p-4 xl:p-6 overflow-hidden">
                     <div className="h-full rounded-md sm:rounded-lg md:rounded-xl overflow-hidden shadow-md sm:shadow-lg md:shadow-modern-lg border border-border animate-fade-in">
-                      <ContentViewer content={selectedContent} isLoading={isLoading} />
+                      <LazyContentViewer content={selectedContent} isLoading={isLoading} />
                     </div>
                   </div>
 

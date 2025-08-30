@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback, memo, useMemo } from "react"
 import {
   Loader2, AlertCircle, FileText, Play, BookOpen, ExternalLink, Maximize2, RotateCcw,
   ZoomIn, ZoomOut, RotateCw, Volume2, VolumeX, Settings, Share2, Bookmark,
@@ -34,7 +34,7 @@ interface ContentViewerProps {
   isLoading?: boolean
 }
 
-export function ContentViewer({ content, isLoading = false }: ContentViewerProps) {
+export const ContentViewer = memo(function ContentViewer({ content, isLoading = false }: ContentViewerProps) {
   const [iframeLoading, setIframeLoading] = useState(true)
   const [iframeError, setIframeError] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -52,6 +52,28 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
   const controlsTimeoutRef = useRef<NodeJS.Timeout>()
 
   const isMobile = useIsMobile()
+
+  // Memoized values for better performance
+  const contentUrl = useMemo(() => {
+    if (content.type === "syllabus") return ""
+    return content.url
+  }, [content.url, content.type])
+
+  const iframeStyle = useMemo(() => ({
+    transform: `scale(${zoomLevel / 100}) rotate(${isRotated}deg)`,
+    transformOrigin: 'center center',
+    transition: 'transform 0.3s ease-in-out'
+  }), [zoomLevel, isRotated])
+
+  const containerClasses = useMemo(() => {
+    return `
+      content-viewer-container h-full bg-white dark:bg-[#35374B] rounded-lg overflow-hidden
+      shadow-lg sm:shadow-2xl relative transition-all duration-300
+      dark:shadow-[0_8px_25px_-5px_rgba(53,55,75,0.4),0_16px_40px_-8px_rgba(53,55,75,0.3)]
+      ${isFullscreen ? 'fixed inset-0 z-50 rounded-none' : ''}
+      ${isMobile ? 'mobile-content-viewer' : ''}
+    `.trim()
+  }, [isFullscreen, isMobile])
 
   useEffect(() => {
     // Don't show loading for syllabus content since it doesn't use iframe
@@ -78,16 +100,16 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
     }
   }, [content.url, content.type])
 
-  const handleIframeLoad = () => {
+  const handleIframeLoad = useCallback(() => {
     setIframeLoading(false)
-  }
+  }, [])
 
-  const handleIframeError = () => {
+  const handleIframeError = useCallback(() => {
     setIframeLoading(false)
     setIframeError(true)
-  }
+  }, [])
 
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     setIframeError(false)
     setIframeLoading(true)
     // Force iframe reload by changing src
@@ -99,7 +121,7 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
         iframe.src = src
       }, 100)
     }
-  }
+  }, [])
 
   // Modern functionality methods
   const handleZoomIn = useCallback(() => {
@@ -991,4 +1013,4 @@ export function ContentViewer({ content, isLoading = false }: ContentViewerProps
       )}
     </div>
   )
-}
+})

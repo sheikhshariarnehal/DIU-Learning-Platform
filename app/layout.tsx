@@ -7,21 +7,36 @@ import "./globals.css"
 
 export const metadata: Metadata = {
   title: {
-    default: "DIU Learning Platform",
+    default: "DIU Learning Platform - Computer Science & Engineering",
     template: "%s | DIU Learning Platform"
   },
-  description: "Smart learning platform for DIU CSE students",
+  description: "Access comprehensive learning materials, video lectures, slides, and study tools for Computer Science & Engineering courses at Daffodil International University (DIU). Enhance your academic journey with our optimized learning platform.",
   viewport: "width=device-width, initial-scale=1",
   applicationName: "DIU Learning Platform",
   authors: [{ name: "DIU CSE Department" }],
-  keywords: ["learning", "education", "DIU", "CSE", "platform", "smart", "online"],
+  keywords: [
+    "DIU", "Daffodil International University", "Computer Science", "Engineering",
+    "Learning Platform", "Online Education", "Video Lectures", "Study Materials",
+    "Course Content", "Academic Resources", "CSE", "Bangladesh", "University",
+    "Slides", "Study Tools", "Educational Technology", "E-Learning"
+  ],
   generator: "DIU Learning Platform",
   creator: "DIU CSE Department",
-  publisher: "DIU CSE Department",
-  robots: "index, follow",
+  publisher: "Daffodil International University",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   openGraph: {
-    title: "DIU Learning Platform",
-    description: "Smart learning platform for DIU CSE students",
+    title: "DIU Learning Platform - Computer Science & Engineering",
+    description: "Access comprehensive learning materials, video lectures, slides, and study tools for Computer Science & Engineering courses at Daffodil International University.",
     type: "website",
     siteName: "DIU Learning Platform",
     locale: "en_US",
@@ -31,17 +46,25 @@ export const metadata: Metadata = {
         url: "/images/diu-logo.png",
         width: 1200,
         height: 630,
-        alt: "DIU Learning Platform",
+        alt: "DIU Learning Platform - Computer Science & Engineering",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "DIU Learning Platform",
-    description: "Smart learning platform for DIU CSE students",
-    creator: "@DIU_CSE",
+    title: "DIU Learning Platform - Computer Science & Engineering",
+    description: "Access comprehensive learning materials, video lectures, slides, and study tools for CSE courses at DIU.",
+    creator: "@DIU_Official",
     images: ["/images/diu-logo.png"],
   },
+  verification: {
+    google: "your-google-verification-code",
+  },
+  alternates: {
+    canonical: "https://diu-learning.vercel.app",
+  },
+  category: "education",
+  classification: "Educational Platform",
   metadataBase: new URL('https://diu-learning.vercel.app'),
 }
 
@@ -53,29 +76,65 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="application-name" content="DIU Learning Platform" />
-        <meta name="generator" content="DIU Learning Platform" />
-        <meta name="creator" content="DIU CSE Department" />
-        <meta name="publisher" content="DIU CSE Department" />
-        <meta property="og:title" content="DIU Learning Platform" />
-        <meta property="og:description" content="Smart learning platform for DIU CSE students" />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="DIU Learning Platform" />
-        <meta property="og:url" content="https://diu-learning.vercel.app" />
-        <meta property="og:image" content="https://diu-learning.vercel.app/images/diu-logo.png" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="DIU Learning Platform" />
-        <meta property="og:locale" content="en_US" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="DIU Learning Platform" />
-        <meta name="twitter:description" content="Smart learning platform for DIU CSE students" />
-        <meta name="twitter:image" content="https://diu-learning.vercel.app/images/diu-logo.png" />
-        <meta name="twitter:creator" content="@DIU_CSE" />
+        {/* Performance optimizations */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="preconnect" href="https://drive.google.com" />
+        <link rel="preconnect" href="https://youtube.com" />
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+        <link rel="dns-prefetch" href="//drive.google.com" />
+        <link rel="dns-prefetch" href="//youtube.com" />
+
+        {/* App icons and manifest */}
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
-        <link rel="icon" href="/images/diu-logo.png" />
-        <link rel="apple-touch-icon" href="/images/diu-logo.png" />
+
+        {/* Theme colors */}
+        <meta name="theme-color" content="#3b82f6" />
+        <meta name="msapplication-TileColor" content="#3b82f6" />
+
+        {/* Mobile app capabilities */}
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="DIU Learning" />
+        <meta name="format-detection" content="telephone=no" />
+
+        {/* Structured data for SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "EducationalOrganization",
+              "name": "DIU Learning Platform",
+              "description": "Computer Science & Engineering learning platform for Daffodil International University students",
+              "url": "https://diu-learning.vercel.app",
+              "logo": "https://diu-learning.vercel.app/images/diu-logo.png",
+              "sameAs": [
+                "https://daffodilvarsity.edu.bd",
+                "https://facebook.com/daffodilvarsity",
+                "https://twitter.com/DIU_Official"
+              ],
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "102/1, Shukrabad",
+                "addressLocality": "Mirpur Road",
+                "addressRegion": "Dhaka",
+                "postalCode": "1207",
+                "addressCountry": "BD"
+              },
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": "+880-2-9138234",
+                "contactType": "customer service"
+              }
+            })
+          }}
+        />
       </head>
       <body className="min-h-screen bg-background text-foreground font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange={false}>
