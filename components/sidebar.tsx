@@ -340,9 +340,15 @@ export function Sidebar({ onContentSelect }: SidebarProps) {
                 : 0
 
               return (
-                <Card key={course.id} className={`overflow-hidden transition-all duration-300 ${
+                <Card key={course.id} className={`overflow-hidden transition-all duration-500 ease-out ${
                   course.is_highlighted
-                    ? 'border-l-4 border-l-blue-500 dark:border-l-blue-400 bg-gradient-to-r from-blue-50/50 to-indigo-50/30 dark:from-blue-950/20 dark:to-indigo-950/10 shadow-md hover:shadow-lg'
+                    ? `border-l-4 border-l-blue-500 dark:border-l-blue-400
+                       bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20
+                       border border-blue-200/60
+                       shadow-[0_2px_8px_-2px_rgba(59,130,246,0.15),0_4px_16px_-4px_rgba(59,130,246,0.1)]
+                       hover:shadow-[0_8px_25px_-5px_rgba(59,130,246,0.25),0_8px_16px_-8px_rgba(59,130,246,0.15)]
+                       hover:border-blue-300/70 hover:-translate-y-0.5
+                       dark:from-blue-950/20 dark:to-indigo-950/10`
                     : 'hover:shadow-md'
                 }`}>
                   <CardContent className="p-0">
@@ -365,19 +371,19 @@ export function Sidebar({ onContentSelect }: SidebarProps) {
                         )}
                         <div className="flex-1 min-w-0 space-y-2">
                           <div className="flex items-center gap-2">
-                            <div className={`font-semibold text-sm truncate flex-1 ${
-                              course.is_highlighted ? 'text-gray-900 dark:text-white' : ''
+                            <div className={`font-bold text-sm truncate flex-1 tracking-tight ${
+                              course.is_highlighted ? 'text-slate-800 dark:text-white' : ''
                             }`}>
                               {course.title}
                             </div>
                             {course.is_highlighted && (
-                              <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                              <Star className="h-4 w-4 text-amber-500 fill-amber-500 drop-shadow-sm" />
                             )}
                           </div>
-                          <div className={`text-xs font-medium ${
+                          <div className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold ${
                             course.is_highlighted
-                              ? 'text-blue-700 dark:text-blue-300'
-                              : 'text-muted-foreground'
+                              ? 'bg-gradient-to-r from-blue-100 to-blue-50 text-blue-800 border border-blue-200/60 shadow-sm dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800'
+                              : 'text-muted-foreground bg-muted/50'
                           }`}>
                             {course.course_code}
                           </div>

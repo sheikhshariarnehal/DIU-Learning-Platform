@@ -118,77 +118,107 @@ export function HighlightedCourses({ onCourseSelect, className = "" }: Highlight
             {highlightedCourses.map((course) => (
               <Card
                 key={course.id}
-                className="group hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 cursor-pointer border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50/50 to-indigo-50/30 dark:from-blue-950/20 dark:to-indigo-950/10 dark:border-l-blue-400"
+                className="group cursor-pointer relative overflow-hidden
+                  bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20
+                  border border-blue-200/60 border-l-4 border-l-blue-500
+                  shadow-[0_2px_8px_-2px_rgba(59,130,246,0.15),0_4px_16px_-4px_rgba(59,130,246,0.1)]
+                  hover:shadow-[0_8px_25px_-5px_rgba(59,130,246,0.25),0_8px_16px_-8px_rgba(59,130,246,0.15)]
+                  hover:border-blue-300/70 hover:-translate-y-1
+                  transition-all duration-500 ease-out
+                  dark:from-blue-950/20 dark:to-indigo-950/10 dark:border-l-blue-400"
                 onClick={() => onCourseSelect?.(course.id)}
               >
-                <CardContent className="p-0">
-                  <div className="p-5">
+                <CardContent className="p-0 relative">
+                  {/* Subtle top accent line */}
+                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400/40 to-transparent"></div>
+
+                  <div className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
                         {/* Course Title and Code */}
-                        <div className="flex items-start gap-3 mb-3">
+                        <div className="flex items-start gap-3 mb-4">
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-lg text-gray-900 dark:text-white leading-tight mb-1">
+                            <h3 className="font-bold text-xl text-slate-800 dark:text-white leading-tight mb-2 tracking-tight">
                               {course.title}
                             </h3>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-3">
                               <Badge
                                 variant="secondary"
-                                className="text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+                                className="text-xs font-semibold px-3 py-1.5
+                                  bg-gradient-to-r from-blue-100 to-blue-50
+                                  text-blue-800 border border-blue-200/60
+                                  shadow-sm hover:shadow-md transition-shadow
+                                  dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800"
                               >
                                 {course.course_code}
                               </Badge>
-                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                                {course.semester.title} • {course.semester.section}
-                              </span>
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full"></div>
+                                <span className="text-sm text-slate-600 dark:text-gray-400 font-medium">
+                                  {course.semester.title} • {course.semester.section}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
 
                         {/* Instructor Information */}
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                            <User className="h-4 w-4 text-white" />
+                        <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-gradient-to-r from-slate-50 to-blue-50/50 border border-slate-200/60">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+                            <User className="h-5 w-5 text-white" />
                           </div>
-                          <div>
-                            <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                          <div className="flex-1">
+                            <p className="text-sm font-bold text-slate-800 dark:text-white leading-tight">
                               {course.teacher_name}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                            <p className="text-xs text-slate-600 dark:text-gray-400 font-medium">
                               Course Instructor
                             </p>
                           </div>
+                          <div className="w-2 h-2 bg-green-400 rounded-full shadow-sm"></div>
                         </div>
 
                         {/* Course Stats */}
-                        <div className="flex items-center gap-4 mb-3">
-                          <div className="flex items-center gap-1.5">
-                            <BookOpen className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              8 Topics
-                            </span>
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                          <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/40">
+                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+                              <BookOpen className="h-4 w-4 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-lg font-bold text-blue-800 leading-none">8</p>
+                              <p className="text-xs font-medium text-blue-600">Topics</p>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <Calendar className="h-4 w-4 text-green-600 dark:text-green-400" />
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              10 Slides
-                            </span>
+                          <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200/40">
+                            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
+                              <Calendar className="h-4 w-4 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-lg font-bold text-emerald-800 leading-none">10</p>
+                              <p className="text-xs font-medium text-emerald-600">Slides</p>
+                            </div>
                           </div>
                         </div>
 
                         {/* Description */}
                         {course.description && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                            {course.description}
-                          </p>
+                          <div className="p-4 rounded-xl bg-gradient-to-r from-slate-50/80 to-white border border-slate-200/50">
+                            <p className="text-sm text-slate-700 dark:text-gray-400 line-clamp-2 leading-relaxed font-medium">
+                              {course.description}
+                            </p>
+                          </div>
                         )}
                       </div>
 
                       {/* Action Indicator */}
-                      <div className="flex flex-col items-center gap-2 ml-4">
-                        <div className="w-3 h-3 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full shadow-sm"></div>
-                        <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-200" />
+                      <div className="flex flex-col items-center gap-3 ml-6">
+                        <div className="relative">
+                          <div className="w-4 h-4 bg-gradient-to-br from-amber-400 via-orange-400 to-orange-500 rounded-full shadow-lg shadow-orange-500/30"></div>
+                          <div className="absolute inset-0 w-4 h-4 bg-gradient-to-br from-amber-400 via-orange-400 to-orange-500 rounded-full animate-ping opacity-20"></div>
+                        </div>
+                        <div className="p-2 rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/40 group-hover:bg-gradient-to-br group-hover:from-blue-100 group-hover:to-indigo-100 transition-all duration-300">
+                          <ChevronRight className="h-5 w-5 text-blue-600 group-hover:text-blue-700 group-hover:translate-x-0.5 transition-all duration-300" />
+                        </div>
                       </div>
                     </div>
                   </div>

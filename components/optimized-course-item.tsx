@@ -90,10 +90,16 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
     <div className="space-y-1">
       {/* Course Header */}
       <div className={`
-        rounded-lg border shadow-lg hover:shadow-xl transition-all duration-300
+        rounded-xl border transition-all duration-500 ease-out relative overflow-hidden
         ${course.is_highlighted
-          ? 'bg-gradient-to-r from-blue-50/80 to-indigo-50/60 dark:from-blue-950/30 dark:to-indigo-950/20 border-l-4 border-l-blue-500 dark:border-l-blue-400 border-blue-200/50 dark:border-blue-800/50'
-          : 'bg-slate-800/90 backdrop-blur-sm border-slate-700/50 hover:bg-slate-750'
+          ? `bg-gradient-to-br from-white via-blue-50/40 to-indigo-50/30
+             border border-blue-200/60 border-l-4 border-l-blue-500
+             shadow-[0_4px_12px_-2px_rgba(59,130,246,0.2),0_8px_24px_-4px_rgba(59,130,246,0.1)]
+             hover:shadow-[0_12px_32px_-4px_rgba(59,130,246,0.3),0_8px_24px_-8px_rgba(59,130,246,0.15)]
+             hover:border-blue-300/70 hover:-translate-y-1
+             dark:from-blue-950/30 dark:to-indigo-950/20 dark:border-l-blue-400`
+          : `bg-slate-800/90 backdrop-blur-sm border-slate-700/50
+             shadow-lg hover:shadow-xl hover:bg-slate-750`
         }
       `}>
         <div className="p-3 sm:p-4">
@@ -115,32 +121,34 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
 
               <div className="flex-1 min-w-0">
                 {/* Course Title */}
-                <div className={`font-bold text-sm sm:text-base truncate mb-1 ${
+                <div className={`font-bold text-sm sm:text-lg truncate mb-2 tracking-tight ${
                   course.is_highlighted
-                    ? 'text-gray-900 dark:text-white'
+                    ? 'text-slate-800 dark:text-white'
                     : 'text-white'
                 }`}>
                   {course.title}
                   {course.is_highlighted && (
-                    <Star className="inline-block ml-2 h-4 w-4 text-amber-500 fill-amber-500" />
+                    <Star className="inline-block ml-2 h-4 w-4 text-amber-500 fill-amber-500 drop-shadow-sm" />
                   )}
                 </div>
 
                 {/* Course Code and Instructor */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
                   <Badge
                     variant={course.is_highlighted ? "secondary" : "outline"}
-                    className={`text-xs font-medium w-fit ${
+                    className={`text-xs font-semibold w-fit px-3 py-1.5 ${
                       course.is_highlighted
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                        ? `bg-gradient-to-r from-blue-100 to-blue-50 text-blue-800
+                           border border-blue-200/60 shadow-sm hover:shadow-md transition-shadow
+                           dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800`
                         : 'bg-slate-700/80 text-slate-300 border-slate-600'
                     }`}
                   >
                     {course.course_code}
                   </Badge>
-                  <div className={`text-xs ${
+                  <div className={`text-sm font-medium ${
                     course.is_highlighted
-                      ? 'text-gray-600 dark:text-gray-400'
+                      ? 'text-slate-700 dark:text-gray-400'
                       : 'text-slate-500'
                   }`}>
                     {course.teacher_name}
@@ -149,20 +157,33 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
 
                 {/* Course Stats */}
                 {courseData && (
-                  <div className="flex flex-wrap gap-3 mt-2">
-                    <div className="flex items-center gap-1">
-                      <BookOpen className={`h-3 w-3 ${
+                  <div className={`flex flex-wrap gap-3 mt-3 ${
+                    course.is_highlighted ? 'p-3 rounded-lg bg-gradient-to-r from-slate-50/60 to-blue-50/40 border border-slate-200/40' : ''
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
                         course.is_highlighted
-                          ? 'text-blue-600 dark:text-blue-400'
-                          : 'text-slate-400'
-                      }`} />
-                      <span className={`text-xs font-medium ${
-                        course.is_highlighted
-                          ? 'text-gray-700 dark:text-gray-300'
-                          : 'text-slate-300'
+                          ? 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm'
+                          : 'bg-slate-600'
                       }`}>
-                        {courseData.length} Topics
-                      </span>
+                        <BookOpen className="h-3 w-3 text-white" />
+                      </div>
+                      <div>
+                        <span className={`text-sm font-bold leading-none ${
+                          course.is_highlighted
+                            ? 'text-blue-800 dark:text-gray-200'
+                            : 'text-slate-300'
+                        }`}>
+                          {courseData.length}
+                        </span>
+                        <p className={`text-xs font-medium ${
+                          course.is_highlighted
+                            ? 'text-blue-600 dark:text-gray-400'
+                            : 'text-slate-400'
+                        }`}>
+                          Topics
+                        </p>
+                      </div>
                     </div>
                     {/* Calculate total slides */}
                     {(() => {
@@ -170,19 +191,30 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
                         total + (topic.slides?.length || 0), 0
                       );
                       return totalSlides > 0 && (
-                        <div className="flex items-center gap-1">
-                          <Calendar className={`h-3 w-3 ${
+                        <div className="flex items-center gap-2">
+                          <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
                             course.is_highlighted
-                              ? 'text-green-600 dark:text-green-400'
-                              : 'text-slate-400'
-                          }`} />
-                          <span className={`text-xs font-medium ${
-                            course.is_highlighted
-                              ? 'text-gray-700 dark:text-gray-300'
-                              : 'text-slate-300'
+                              ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-sm'
+                              : 'bg-slate-600'
                           }`}>
-                            {totalSlides} Slides
-                          </span>
+                            <Calendar className="h-3 w-3 text-white" />
+                          </div>
+                          <div>
+                            <span className={`text-sm font-bold leading-none ${
+                              course.is_highlighted
+                                ? 'text-emerald-800 dark:text-gray-200'
+                                : 'text-slate-300'
+                            }`}>
+                              {totalSlides}
+                            </span>
+                            <p className={`text-xs font-medium ${
+                              course.is_highlighted
+                                ? 'text-emerald-600 dark:text-gray-400'
+                                : 'text-slate-400'
+                            }`}>
+                              Slides
+                            </p>
+                          </div>
                         </div>
                       );
                     })()}
