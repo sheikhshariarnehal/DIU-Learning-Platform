@@ -1,4 +1,28 @@
+# *
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /test-*
+Disallow: /debug-*
+Disallow: /minimal-test
+Disallow: /simple-login
+Disallow: /demo/
 
+# AhrefsBot
+User-agent: AhrefsBot
+Disallow: /
+
+# MJ12bot
+User-agent: MJ12bot
+Disallow: /
+
+# DotBot
+User-agent: DotBot
+Disallow: /
+
+# Host
+Host: https://diu-learning.vercel.app
+
+# Sitemaps
 Sitemap: https://diu-learning.vercel.app/sitemap.xml

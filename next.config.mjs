@@ -13,12 +13,13 @@ const nextConfig = {
   },
   // Enable experimental features for better performance
   experimental: {
-    optimizeCss: true,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
   // Compression and caching
   compress: true,
   poweredByHeader: false,
+  // Fix for Vercel deployment
+  output: 'standalone',
 
   async headers() {
     return [

@@ -27,12 +27,22 @@ function verifyJWT(token: string, secret: string): any {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  console.log("Middleware called for:", pathname)
+  // Only log in development to avoid Vercel function logs spam
+  if (process.env.NODE_ENV === 'development') {
+    console.log("Middleware called for:", pathname)
+  }
+
+  // Add analytics headers for tracking
+  const response = NextResponse.next()
+  response.headers.set('x-pathname', pathname)
+  response.headers.set('x-timestamp', new Date().toISOString())
 
   // Allow access to login page without authentication
   if (pathname === "/login") {
-    console.log("Allowing access to login page")
-    return NextResponse.next()
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Allowing access to login page")
+    }
+    return response
   }
 
   // Check if accessing admin routes
@@ -40,29 +50,37 @@ export function middleware(request: NextRequest) {
     // For all admin routes, check authentication
     const token = request.cookies.get("admin_token")?.value
 
-    console.log("🔍 Admin route access attempt:", pathname)
-    console.log("🔍 Token found:", token ? "YES" : "NO")
-    console.log("🔍 Token length:", token ? token.length : 0)
-    console.log("🔍 JWT_SECRET length:", JWT_SECRET.length)
+    if (process.env.NODE_ENV === 'development') {
+      console.log("🔍 Admin route access attempt:", pathname)
+      console.log("🔍 Token found:", token ? "YES" : "NO")
+      console.log("🔍 Token length:", token ? token.length : 0)
+      console.log("🔍 JWT_SECRET length:", JWT_SECRET.length)
+    }
 
     if (!token) {
-      console.log("❌ No token found, redirecting to login")
+      if (process.env.NODE_ENV === 'development') {
+        console.log("❌ No token found, redirecting to login")
+      }
       return NextResponse.redirect(new URL("/login", request.url))
     }
 
     try {
       // Verify JWT token using Edge Runtime compatible method
       const decoded = verifyJWT(token, JWT_SECRET)
-      console.log("✅ Token verified successfully:", decoded)
-      console.log("✅ Allowing access to:", pathname)
+      if (process.env.NODE_ENV === 'development') {
+        console.log("✅ Token verified successfully:", decoded)
+        console.log("✅ Allowing access to:", pathname)
+      }
       return NextResponse.next()
     } catch (error) {
-      console.log("❌ Invalid token error:", error.message)
-      console.log("❌ Token that failed:", token.substring(0, 50) + "...")
+      if (process.env.NODE_ENV === 'development') {
+        console.log("❌ Invalid token error:", error.message)
+        console.log("❌ Token that failed:", token.substring(0, 50) + "...")
+      }
       // Invalid token, redirect to login
-      const response = NextResponse.redirect(new URL("/login", request.url))
-      response.cookies.delete("admin_token")
-      return response
+      const redirectResponse = NextResponse.redirect(new URL("/login", request.url))
+      redirectResponse.cookies.delete("admin_token")
+      return redirectResponse
     }
   }
 
@@ -74,7 +92,10 @@ export function middleware(request: NextRequest) {
   ]
 
   const isShareableUrl = shareablePatterns.some(pattern => pattern.test(pathname))
-  console.log("Is shareable URL:", isShareableUrl, "for path:", pathname)
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log("Is shareable URL:", isShareableUrl, "for path:", pathname)
+  }
 
   if (isShareableUrl) {
     // Rewrite to the main page but keep the original URL in the browser
@@ -84,11 +105,17 @@ export function middleware(request: NextRequest) {
     // Add the original path as a query parameter so we can access it
     url.searchParams.set('share_path', pathname)
 
-    console.log("Rewriting to:", url.toString())
-    return NextResponse.rewrite(url)
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Rewriting to:", url.toString())
+    }
+
+    const rewriteResponse = NextResponse.rewrite(url)
+    // Add analytics headers for shareable URLs
+    rewriteResponse.headers.set('x-share-url', pathname)
+    return rewriteResponse
   }
 
-  return NextResponse.next()
+  return response
 }
 
 export const config = {
