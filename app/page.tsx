@@ -2,17 +2,18 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Bell, Sun, User, Download, Maximize, Moon } from "lucide-react"
+import { Download, Maximize } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { FunctionalSidebar } from "@/components/functional-sidebar"
 import { LazyContentViewer } from "@/components/lazy-content-viewer"
+import { Header } from "@/components/header"
 import { useOptimizedContent } from "@/hooks/use-optimized-content"
 import { performanceMonitor, measureAsync } from "@/lib/performance"
 import { useToast } from "@/hooks/use-toast"
 import { Toaster } from "@/components/ui/toaster"
 import { useIsMobile } from "@/components/ui/use-mobile"
-import { useTheme } from "next-themes"
+
 import { trackContentEvent, trackDownloadEvent, trackError } from "@/lib/analytics"
 import { generateSimpleShareUrl, parseSimpleShareUrl, updateUrlWithoutNavigation } from "@/lib/simple-share-utils"
 
@@ -39,7 +40,7 @@ export default function HomePage() {
   const [mounted, setMounted] = useState(false)
   const { toast } = useToast()
   const isMobile = useIsMobile()
-  const { theme, setTheme } = useTheme()
+
   const router = useRouter()
 
   // Fallback loading state for compatibility
@@ -432,15 +433,7 @@ export default function HomePage() {
     }
   }
 
-  const toggleTheme = () => {
-    if (!mounted) return
-    setTheme(theme === "dark" ? "light" : "dark")
 
-    toast({
-      title: "Theme Changed",
-      description: `Switched to ${theme === "dark" ? "light" : "dark"} mode`,
-    })
-  }
 
   if (!mounted) {
     return null // Prevent hydration mismatch
@@ -449,85 +442,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       {/* Header */}
-      <header className="border-b border-border/50 sticky top-0 z-50 backdrop-blur-sm bg-background/95 shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            {/* Left Section - Logo */}
-            <div className="flex items-center gap-3 lg:gap-4">
-              {/* Logo Section */}
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-lg flex items-center justify-center bg-primary/10 border border-primary/20">
-                  <img
-                    src="/images/diu-logo.png"
-                    alt="Daffodil International University Logo"
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-semibold text-lg text-foreground">
-                    DIU CSE
-                  </span>
-                  <span className="text-xs text-muted-foreground hidden sm:block">Learning Platform</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Center Section - Navigation (Hidden on mobile) */}
-            <nav className="hidden lg:flex items-center gap-1">
-              <Button variant="ghost" className="text-sm font-medium px-4 py-2 rounded-md hover:bg-accent transition-colors">
-                Home
-              </Button>
-              <Button variant="ghost" className="text-sm font-medium px-4 py-2 rounded-md hover:bg-accent transition-colors">
-                Notes
-              </Button>
-              <Button variant="default" className="text-sm px-6 py-2 rounded-md font-medium bg-primary hover:bg-primary/90">
-                Video Lecture
-              </Button>
-              <Button variant="ghost" className="text-sm font-medium px-4 py-2 rounded-md hover:bg-accent transition-colors">
-                Result
-              </Button>
-            </nav>
-
-            {/* Right Section - Controls */}
-            <div className="flex items-center gap-2">
-              {/* Theme Toggle */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleTheme}
-                className="w-9 h-9 rounded-md hover:bg-accent transition-colors"
-                title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-4 w-4" />
-                ) : (
-                  <Moon className="h-4 w-4" />
-                )}
-              </Button>
-
-              {/* Notifications */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-9 h-9 rounded-md hover:bg-accent transition-colors"
-                title="Notifications"
-              >
-                <Bell className="h-4 w-4" />
-              </Button>
-
-              {/* Profile Icon */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-9 h-9 rounded-full hover:bg-accent transition-colors"
-                title="Profile"
-              >
-                <User className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <div className={`${isMobile ? 'flex flex-col h-[calc(100vh-3.5rem)]' : 'flex h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)] overflow-hidden'}`}>

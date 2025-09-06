@@ -84,6 +84,42 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // Check if accessing section admin routes
+  if (pathname.startsWith("/section-admin")) {
+    // For all section admin routes, check authentication
+    const token = request.cookies.get("admin_token")?.value
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log("🔍 Section admin route access attempt:", pathname)
+      console.log("🔍 Token found:", token ? "YES" : "NO")
+    }
+
+    if (!token) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log("❌ No token found, redirecting to login")
+      }
+      return NextResponse.redirect(new URL("/login", request.url))
+    }
+
+    try {
+      // Verify JWT token using Edge Runtime compatible method
+      const decoded = verifyJWT(token, JWT_SECRET)
+      if (process.env.NODE_ENV === 'development') {
+        console.log("✅ Section admin token verified successfully:", decoded)
+        console.log("✅ Allowing access to:", pathname)
+      }
+      return NextResponse.next()
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log("❌ Invalid token error:", error.message)
+      }
+      // Invalid token, redirect to login
+      const redirectResponse = NextResponse.redirect(new URL("/login", request.url))
+      redirectResponse.cookies.delete("admin_token")
+      return redirectResponse
+    }
+  }
+
   // Check if the path matches our shareable URL patterns
   const shareablePatterns = [
     /^\/video\/[a-f0-9-]{36}$/i,
@@ -121,6 +157,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/admin/:path*',
+    '/section-admin/:path*',
     '/login',
     '/video/:path*',
     '/slide/:path*',
