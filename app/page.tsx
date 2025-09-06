@@ -544,27 +544,6 @@ export default function HomePage() {
                       <LazyContentViewer content={selectedContent} isLoading={isLoading} />
                     </div>
                   </div>
-
-                  {/* Content Info - Minimal Mobile Design */}
-                  <div className="bg-background px-4 py-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-sm text-foreground truncate">
-                          {selectedContent.title}
-                        </h3>
-                        <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                          {selectedContent.topicTitle || selectedContent.courseTitle}
-                        </p>
-                      </div>
-                      <div className={`w-2 h-2 rounded-full ml-3 flex-shrink-0 ${
-                        selectedContent.type === "video"
-                          ? "bg-red-500"
-                          : selectedContent.type === "slide"
-                            ? "bg-blue-500"
-                            : "bg-green-500"
-                      }`}></div>
-                    </div>
-                  </div>
                 </>
               ) : (
                 <div className="flex items-center justify-center h-48 bg-background">
