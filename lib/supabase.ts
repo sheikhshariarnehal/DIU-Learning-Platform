@@ -24,6 +24,62 @@ function getSupabaseConfig() {
     throw new Error("Missing Supabase environment variables")
   }
 
+  // Try to detect obvious configuration mismatches (anonymous key from a different project)
+  try {
+    const extractRefFromUrl = (u: string) => {
+      try {
+        const host = new URL(u).host
+        return host.split(".")[0]
+      } catch {
+        return null
+      }
+    }
+
+    const decodeBase64 = (s: string) => {
+      try {
+        if (typeof window === "undefined") {
+          // Node
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const buf = Buffer.from(s, "base64")
+          return buf.toString("utf8")
+        }
+        // browser
+        return decodeURIComponent(escape(window.atob(s)))
+      } catch {
+        return null
+      }
+    }
+
+    const extractRefFromKey = (k: string) => {
+      try {
+        const parts = k.split('.')
+        if (parts.length < 2) return null
+        const payload = decodeBase64(parts[1])
+        if (!payload) return null
+        const parsed = JSON.parse(payload)
+        // Supabase keys often include the project ref in the `sub` or `ref` field
+        return parsed.sub || parsed.ref || null
+      } catch {
+        return null
+      }
+    }
+
+    const urlRef = extractRefFromUrl(url)
+    const keyRef = extractRefFromKey(key)
+
+    if (urlRef && keyRef && urlRef !== keyRef) {
+      console.error("Supabase config mismatch detected:", {
+        url,
+        urlRef,
+        keyRef,
+        hint: "Your NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY appear to belong to different Supabase projects. Make sure you use matching values (URL & anon key) for the same project."
+      })
+    }
+  } catch (err) {
+    // Non-fatal - if detection fails, continue. We still validate presence above.
+    console.warn("Unable to heuristically validate Supabase key vs URL", err)
+  }
+
   return { url, key }
 }
 

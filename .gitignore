@@ -19,6 +19,9 @@ yarn-error.log*
 # env files
 .env*
 
+# admin credentials (NEVER commit sensitive login info)
+ADMIN_LOGIN_CREDENTIALS.md
+
 # vercel
 .vercel
 

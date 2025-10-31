@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase"
 
 export async function GET() {
   try {
+    const supabase = createClient()
+    
     // Get the first highlighted course from an active semester
     const { data: highlightedCourses, error: coursesError } = await supabase
       .from("courses")
