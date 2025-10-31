@@ -206,9 +206,9 @@ export default function HomePage() {
     return () => clearTimeout(timer)
   }, [mounted, selectedContent, toast, loadContent, setFallbackLoading])
 
-  // Initialize with highlighted course syllabus if available (only if no shareable URL)
+  // Initialize with featured course content (prioritizes syllabus, fallback to other content) if available (only if no shareable URL)
   useEffect(() => {
-    const initializeHighlightedSyllabus = async () => {
+    const initializeHighlightedContent = async () => {
       // Skip if content is already selected (from shareable URL)
       if (selectedContent) {
         console.log("Skipping default content load - content already selected")
@@ -230,24 +230,34 @@ export default function HomePage() {
       try {
         setFallbackLoading(true)
 
-        // First try to load highlighted course syllabus
+        // First try to load content from highlighted/featured course (prioritizes syllabus, then other content)
         const highlightedResponse = await fetch("/api/content/highlighted-syllabus")
         if (highlightedResponse.ok) {
           const highlightedContent = await highlightedResponse.json()
-          if (highlightedContent && highlightedContent.type === "syllabus") {
+          if (highlightedContent) {
             setSelectedContent(highlightedContent)
+            
+            // Show appropriate toast based on content type
+            const contentTypeLabel = highlightedContent.type === "syllabus" 
+              ? "Syllabus" 
+              : highlightedContent.type === "slide" 
+              ? "Slide" 
+              : highlightedContent.type === "video" 
+              ? "Video"
+              : "Content"
+            
             toast({
               title: "✨ Featured Course Loaded",
-              description: `Showing syllabus for ${highlightedContent.courseTitle}`,
+              description: `Showing ${contentTypeLabel}: ${highlightedContent.title}`,
               duration: 4000,
             })
             return
           }
         } else if (highlightedResponse.status === 404) {
-          console.log("No highlighted course syllabus found, falling back to default content")
+          console.log("No highlighted course content found, falling back to default content")
         }
 
-        // Fallback to default content if no highlighted syllabus
+        // Fallback to default content if no highlighted course content
         const defaultResponse = await fetch("/api/content/default")
         if (defaultResponse.ok) {
           const defaultContent = await defaultResponse.json()
@@ -269,7 +279,7 @@ export default function HomePage() {
 
     if (mounted) {
       // Add a delay to ensure shareable URL processing happens first
-      const timer = setTimeout(initializeHighlightedSyllabus, 300)
+      const timer = setTimeout(initializeHighlightedContent, 300)
       return () => clearTimeout(timer)
     }
   }, [mounted, selectedContent, toast, setFallbackLoading])
