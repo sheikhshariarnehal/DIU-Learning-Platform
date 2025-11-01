@@ -1,9 +1,10 @@
 "use client"
 
-import { memo, useState, useCallback, useEffect, useRef } from "react"
-import { ChevronDown, ChevronRight, FileText, Play, Loader2 } from "lucide-react"
+import { memo, useState, useCallback, useEffect, useRef, useMemo } from "react"
+import { ChevronRight, FileText, Play, Loader2, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Badge } from "@/components/ui/badge"
 import { ProfessionalTopicTitle } from "@/components/ui/professional-topic-title"
 import { useIsMobile } from "@/components/ui/use-mobile"
 
@@ -18,6 +19,7 @@ interface Video {
   id: string
   title: string
   youtube_url: string
+  duration_minutes?: number
   [key: string]: any
 }
 
@@ -25,6 +27,7 @@ interface Slide {
   id: string
   title: string
   google_drive_url: string
+  file_size?: number
   [key: string]: any
 }
 
@@ -44,9 +47,69 @@ interface OptimizedTopicItemProps {
   isExpanded: boolean
 }
 
-// Cache for topic content
-const topicContentCache = new Map<string, { data: TopicContent; timestamp: number }>()
-const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+// Enhanced cache system with metadata
+interface CacheEntry {
+  data: TopicContent
+  timestamp: number
+  prefetched: boolean
+  accessCount: number
+}
+
+const topicContentCache = new Map<string, CacheEntry>()
+const CACHE_DURATION = 10 * 60 * 1000 // 10 minutes (increased for better performance)
+const MAX_CACHE_SIZE = 50 // Limit cache size
+
+// YouTube thumbnail cache
+const thumbnailCache = new Map<string, string>()
+
+// Cache utilities
+const getCacheKey = (topicId: string, courseId: string) => `${courseId}-${topicId}`
+
+const getCachedContent = (cacheKey: string): CacheEntry | null => {
+  const cached = topicContentCache.get(cacheKey)
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    cached.accessCount++
+    return cached
+  }
+  if (cached) topicContentCache.delete(cacheKey)
+  return null
+}
+
+const setCachedContent = (cacheKey: string, data: TopicContent, prefetched: boolean = false) => {
+  // LRU cache management
+  if (topicContentCache.size >= MAX_CACHE_SIZE) {
+    const oldestKey = Array.from(topicContentCache.entries())
+      .sort((a, b) => a[1].accessCount - b[1].accessCount)[0]?.[0]
+    if (oldestKey) topicContentCache.delete(oldestKey)
+  }
+  
+  topicContentCache.set(cacheKey, {
+    data,
+    timestamp: Date.now(),
+    prefetched,
+    accessCount: 1
+  })
+}
+
+// Extract YouTube video ID
+const extractYouTubeId = (url: string): string | null => {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+  const match = url.match(regExp)
+  return (match && match[2].length === 11) ? match[2] : null
+}
+
+// Get YouTube thumbnail URL
+const getYouTubeThumbnail = (videoId: string): string => {
+  return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+}
+
+// Format file size
+const formatFileSize = (bytes?: number): string => {
+  if (!bytes) return ''
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+}
 
 export const OptimizedTopicItem = memo(({
   topic,
@@ -61,8 +124,12 @@ export const OptimizedTopicItem = memo(({
   const [topicContent, setTopicContent] = useState<TopicContent | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [prefetchStarted, setPrefetchStarted] = useState(false)
+  const [isOptimisticallyExpanded, setIsOptimisticallyExpanded] = useState(false)
   const isMobile = useIsMobile()
   const prefetchTimerRef = useRef<NodeJS.Timeout | null>(null)
+  
+  // Show content if expanded or optimistically expanded
+  const showContent = isExpanded || isOptimisticallyExpanded
 
   // Prefetch topic content on hover with debounce
   const prefetchTopicContent = useCallback(async () => {
@@ -71,9 +138,9 @@ export const OptimizedTopicItem = memo(({
     setPrefetchStarted(true)
 
     // Check cache first
-    const cacheKey = `topic-${topic.id}`
-    const cached = topicContentCache.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    const cacheKey = getCacheKey(topic.id, courseId)
+    const cached = getCachedContent(cacheKey)
+    if (cached) {
       setTopicContent(cached.data)
       return
     }
@@ -93,7 +160,7 @@ export const OptimizedTopicItem = memo(({
       const data = { slides: slides || [], videos: videos || [] }
       
       // Cache the result
-      topicContentCache.set(cacheKey, { data, timestamp: Date.now() })
+      setCachedContent(cacheKey, data, true)
       setTopicContent(data)
     } catch (error) {
       console.error("Failed to prefetch topic content:", error)
@@ -102,18 +169,17 @@ export const OptimizedTopicItem = memo(({
 
   // Fetch topic content when expanded
   const fetchTopicContent = useCallback(async () => {
-    if (topicContent || isLoading) return
-
-    setIsLoading(true)
-
-    // Check cache first
-    const cacheKey = `topic-${topic.id}`
-    const cached = topicContentCache.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    // Check cache first for instant response
+    const cacheKey = getCacheKey(topic.id, courseId)
+    const cached = getCachedContent(cacheKey)
+    if (cached) {
       setTopicContent(cached.data)
       setIsLoading(false)
       return
     }
+
+    if (topicContent || isLoading) return
+    setIsLoading(true)
 
     try {
       const [slidesRes, videosRes] = await Promise.all([
@@ -129,7 +195,7 @@ export const OptimizedTopicItem = memo(({
       const data = { slides: slides || [], videos: videos || [] }
       
       // Cache the result
-      topicContentCache.set(cacheKey, { data, timestamp: Date.now() })
+      setCachedContent(cacheKey, data, false)
       setTopicContent(data)
     } catch (error) {
       console.error("Failed to fetch topic content:", error)
@@ -147,13 +213,27 @@ export const OptimizedTopicItem = memo(({
     }
   }, [isExpanded, topicContent, isLoading, fetchTopicContent])
 
-  // Handle topic expansion with smooth animation
+  // Handle topic expansion with optimistic UI and smooth animation
   const handleToggle = useCallback(() => {
+    if (!isExpanded) {
+      // Optimistic UI: Show expanded state immediately
+      setIsOptimisticallyExpanded(true)
+      
+      // Start fetching content immediately if not cached
+      const cached = getCachedContent(getCacheKey(topic.id, courseId))
+      if (!cached && !topicContent) {
+        fetchTopicContent()
+      }
+      
+      // Reset optimistic state after actual state updates
+      setTimeout(() => setIsOptimisticallyExpanded(false), 350)
+    }
+    
     // Use requestAnimationFrame for smoother UI updates
     requestAnimationFrame(() => {
       onTopicExpand?.(topic.id)
     })
-  }, [topic.id, onTopicExpand])
+  }, [topic.id, courseId, isExpanded, topicContent, onTopicExpand, fetchTopicContent])
 
   // Handle hover with debounce (300ms delay)
   const handleMouseEnter = useCallback(() => {
@@ -191,8 +271,8 @@ export const OptimizedTopicItem = memo(({
       {/* Topic Header */}
       <Button
         variant="ghost"
-        className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[44px]' : 'px-3 py-2.5'} h-auto min-w-0 sidebar-item-professional touch-manipulation rounded-md transition-all duration-200 ease-out ${
-          isExpanded
+        className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[44px]' : 'px-3 py-2.5'} h-auto min-w-0 sidebar-item-professional touch-manipulation rounded-md transition-all duration-200 ease-out will-change-transform ${
+          showContent
             ? 'bg-primary/10 border border-primary/20 shadow-sm'
             : 'hover:bg-accent/70 hover:scale-[1.01] active:scale-[0.99]'
         }`}
@@ -200,8 +280,8 @@ export const OptimizedTopicItem = memo(({
       >
         <div className="flex items-start gap-2.5 w-full min-w-0">
           <ChevronRight 
-            className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} text-muted-foreground flex-shrink-0 mt-0.5 transition-transform duration-200 ease-out ${
-              isExpanded ? 'rotate-90' : 'rotate-0'
+            className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} text-muted-foreground flex-shrink-0 mt-0.5 transition-transform duration-200 ease-out will-change-transform ${
+              showContent ? 'rotate-90' : 'rotate-0'
             }`} 
           />
           
@@ -211,7 +291,7 @@ export const OptimizedTopicItem = memo(({
               title={topic.title}
               maxLength={isMobile ? 45 : 50}
               variant={isMobile ? "compact" : "default"}
-              className={`${isExpanded ? "text-primary font-semibold" : "text-foreground"} break-words leading-relaxed`}
+              className={`${showContent ? "text-primary font-semibold" : "text-foreground"} break-words leading-relaxed transition-colors duration-200`}
             />
           </div>
           
@@ -239,10 +319,10 @@ export const OptimizedTopicItem = memo(({
         </div>
       </Button>
 
-      {/* Topic Content with smooth animation */}
+      {/* Topic Content with smooth animation and optimistic UI */}
       <div 
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+        className={`overflow-hidden transition-all duration-300 ease-in-out will-change-contents ${
+          showContent ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <div className={`${isMobile ? 'ml-4' : 'ml-6'} space-y-1.5 mt-2 min-w-0`}>
@@ -398,13 +478,6 @@ const VideoItem = memo(({ video, isSelected, isMobile, onSelect }: {
 })
 
 VideoItem.displayName = "VideoItem"
-
-// Helper to extract YouTube video ID
-const extractYouTubeId = (url: string): string | null => {
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-  const match = url.match(regExp)
-  return (match && match[2].length === 11) ? match[2] : null
-}
 
 // Optimized Slide Item Component with enhanced interactions
 const SlideItem = memo(({ slide, isSelected, isMobile, onSelect }: {
