@@ -72,40 +72,43 @@ export function Header({ className }: HeaderProps) {
 
   return (
     <header className={cn(
-      "border-b border-border/40 sticky top-0 z-50 backdrop-blur-md bg-background/80 shadow-sm",
+      "border-b border-border/30 sticky top-0 z-50 backdrop-blur-xl bg-background/95 shadow-sm",
       className
     )}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Left Section - Logo */}
-          <div className="flex items-center gap-3 min-w-fit">
+          <div className="flex items-center min-w-fit">
             <button 
               onClick={() => handleNavigation("/")}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              className="flex items-center gap-3 sm:gap-3.5 hover:opacity-90 transition-all duration-200 group py-2"
             >
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 shadow-sm">
+              {/* Logo Icon */}
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 border border-primary/20 shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-200">
                 <img
                   src="/images/diu-logo.png"
                   alt="DIU Logo"
-                  className="w-full h-full object-contain p-1"
+                  className="w-full h-full object-contain p-1.5"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
                     target.style.display = 'none'
                     const parent = target.parentElement
                     if (parent && !parent.querySelector('.fallback-text')) {
                       const fallback = document.createElement('span')
-                      fallback.className = 'fallback-text text-primary font-bold text-lg'
-                      fallback.textContent = 'DIU'
+                      fallback.className = 'fallback-text text-primary font-bold text-base sm:text-lg'
+                      fallback.textContent = 'SH'
                       parent.appendChild(fallback)
                     }
                   }}
                 />
               </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-lg leading-tight tracking-tight text-foreground">
-                  DIU CSE
+              
+              {/* Brand Text */}
+              <div className="flex flex-col justify-center gap-0.5">
+                <span className="font-semibold text-sm sm:text-base md:text-lg leading-none tracking-tight text-foreground group-hover:text-primary transition-colors whitespace-nowrap">
+                  StudyHub DIU
                 </span>
-                <span className="text-xs text-muted-foreground font-medium hidden sm:block">
+                <span className="text-[9px] sm:text-[10px] text-muted-foreground/80 font-normal uppercase tracking-widest leading-none mt-0.5">
                   Learning Platform
                 </span>
               </div>
@@ -113,7 +116,7 @@ export function Header({ className }: HeaderProps) {
           </div>
 
           {/* Center Section - Navigation (Hidden on mobile) */}
-          <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center">
+          <nav className="hidden lg:flex items-center gap-2 flex-1 justify-center">
             {navigationItems.map((item) => {
               const isActive = pathname === item.href
               const Icon = item.icon
@@ -122,8 +125,10 @@ export function Header({ className }: HeaderProps) {
                   key={item.name}
                   variant="ghost"
                   className={cn(
-                    "text-sm font-medium px-4 h-9 rounded-lg transition-all duration-200 hover:bg-accent/80",
-                    isActive && "bg-accent text-accent-foreground font-semibold"
+                    "text-sm font-medium px-5 h-10 rounded-xl transition-all duration-200",
+                    isActive 
+                      ? "bg-primary/10 text-primary hover:bg-primary/15 font-semibold shadow-sm" 
+                      : "hover:bg-accent/60 text-foreground/80 hover:text-foreground"
                   )}
                   onClick={() => handleNavigation(item.href)}
                 >
@@ -135,13 +140,13 @@ export function Header({ className }: HeaderProps) {
           </nav>
 
           {/* Right Section - Controls */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             {/* Theme Toggle */}
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
-              className="w-9 h-9 rounded-lg hover:bg-accent transition-colors"
+              className="w-10 h-10 rounded-xl hover:bg-accent/60 transition-all duration-200 hover:scale-105"
               title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
             >
               {theme === "dark" ? (
@@ -156,13 +161,13 @@ export function Header({ className }: HeaderProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="w-9 h-9 rounded-lg hover:bg-accent transition-colors relative"
+                className="w-10 h-10 rounded-xl hover:bg-accent/60 transition-all duration-200 relative hover:scale-105"
                 onClick={() => setIsNotificationOpen(!isNotificationOpen)}
                 title="Notifications"
               >
                 <Bell className="h-4 w-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 h-4 w-4 bg-destructive rounded-full text-[10px] font-semibold flex items-center justify-center text-white">
+                  <span className="absolute top-1 right-1 h-4 w-4 bg-destructive rounded-full text-[10px] font-bold flex items-center justify-center text-white shadow-md animate-pulse">
                     {unreadCount}
                   </span>
                 )}
@@ -170,11 +175,11 @@ export function Header({ className }: HeaderProps) {
 
               {/* Notifications Dropdown */}
               {isNotificationOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-background border border-border rounded-lg shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="p-4 border-b border-border bg-muted/30">
-                    <h3 className="font-semibold text-sm">Notifications</h3>
+                <div className="absolute right-0 mt-3 w-80 bg-background border border-border/50 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="p-4 border-b border-border/50 bg-gradient-to-br from-primary/5 to-transparent">
+                    <h3 className="font-semibold text-base">Notifications</h3>
                     {unreadCount > 0 && (
-                      <p className="text-xs text-muted-foreground mt-0.5">{unreadCount} unread</p>
+                      <p className="text-xs text-muted-foreground mt-1">{unreadCount} unread</p>
                     )}
                   </div>
                   <div className="max-h-96 overflow-y-auto">
@@ -205,8 +210,8 @@ export function Header({ className }: HeaderProps) {
                       </div>
                     ))}
                   </div>
-                  <div className="p-3 border-t border-border bg-muted/30">
-                    <button className="text-xs text-primary hover:underline font-medium w-full text-center">
+                  <div className="p-3 border-t border-border/50 bg-gradient-to-br from-primary/5 to-transparent">
+                    <button className="text-sm text-primary hover:text-primary/80 font-medium w-full text-center transition-colors">
                       View all notifications
                     </button>
                   </div>
@@ -218,53 +223,62 @@ export function Header({ className }: HeaderProps) {
             <div className="relative hidden sm:block" ref={profileRef}>
               <Button
                 variant="ghost"
-                className="h-9 px-2 rounded-lg hover:bg-accent transition-colors flex items-center gap-2"
+                className="h-10 px-3 rounded-xl hover:bg-accent/60 transition-all duration-200 flex items-center gap-2.5 hover:scale-105"
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
               >
-                <div className="w-7 h-7 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 border-2 border-primary/30 flex items-center justify-center shadow-sm">
                   <User className="h-4 w-4 text-primary" />
                 </div>
-                <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                <ChevronDown className={cn(
+                  "h-3.5 w-3.5 text-muted-foreground transition-transform duration-200",
+                  isProfileOpen && "rotate-180"
+                )} />
               </Button>
 
               {/* Profile Dropdown Menu */}
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-background border border-border rounded-lg shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="p-4 border-b border-border bg-muted/30">
-                    <p className="font-semibold text-sm">Student Name</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">student@diu.edu.bd</p>
+                <div className="absolute right-0 mt-3 w-60 bg-background border border-border/50 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="p-4 border-b border-border/50 bg-gradient-to-br from-primary/5 to-transparent">
+                    <p className="font-semibold text-base">Student Name</p>
+                    <p className="text-xs text-muted-foreground mt-1">student@diu.edu.bd</p>
                   </div>
-                  <div className="py-2">
+                  <div className="py-2 px-2">
                     <button
-                      className="w-full px-4 py-2.5 text-left text-sm hover:bg-accent transition-colors flex items-center gap-3"
+                      className="w-full px-3 py-2.5 text-left text-sm hover:bg-accent/60 rounded-lg transition-all duration-200 flex items-center gap-3 font-medium"
                       onClick={() => {
                         handleNavigation("/profile")
                         setIsProfileOpen(false)
                       }}
                     >
-                      <User className="h-4 w-4 text-muted-foreground" />
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <User className="h-4 w-4 text-primary" />
+                      </div>
                       <span>My Profile</span>
                     </button>
                     <button
-                      className="w-full px-4 py-2.5 text-left text-sm hover:bg-accent transition-colors flex items-center gap-3"
+                      className="w-full px-3 py-2.5 text-left text-sm hover:bg-accent/60 rounded-lg transition-all duration-200 flex items-center gap-3 font-medium"
                       onClick={() => {
                         handleNavigation("/settings")
                         setIsProfileOpen(false)
                       }}
                     >
-                      <Settings className="h-4 w-4 text-muted-foreground" />
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Settings className="h-4 w-4 text-primary" />
+                      </div>
                       <span>Settings</span>
                     </button>
                   </div>
-                  <div className="border-t border-border">
+                  <div className="border-t border-border/50 p-2">
                     <button
-                      className="w-full px-4 py-2.5 text-left text-sm hover:bg-destructive/10 text-destructive transition-colors flex items-center gap-3"
+                      className="w-full px-3 py-2.5 text-left text-sm hover:bg-destructive/10 rounded-lg text-destructive transition-all duration-200 flex items-center gap-3 font-medium"
                       onClick={() => {
                         // Add logout logic here
                         setIsProfileOpen(false)
                       }}
                     >
-                      <LogOut className="h-4 w-4" />
+                      <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center">
+                        <LogOut className="h-4 w-4 text-destructive" />
+                      </div>
                       <span>Log Out</span>
                     </button>
                   </div>
@@ -276,7 +290,7 @@ export function Header({ className }: HeaderProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="sm:hidden w-9 h-9 rounded-full hover:bg-accent transition-colors"
+              className="sm:hidden w-10 h-10 rounded-xl hover:bg-accent/60 transition-all duration-200 hover:scale-105"
               onClick={() => handleNavigation("/profile")}
               title="Profile"
             >
@@ -287,7 +301,7 @@ export function Header({ className }: HeaderProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden w-9 h-9 rounded-lg hover:bg-accent transition-colors"
+              className="lg:hidden w-10 h-10 rounded-xl hover:bg-accent/60 transition-all duration-200 hover:scale-105"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               title="Menu"
             >
@@ -303,8 +317,8 @@ export function Header({ className }: HeaderProps) {
 
       {/* Mobile Navigation Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-border/50 bg-background/95 backdrop-blur-md animate-in slide-in-from-top duration-200">
-          <div className="container mx-auto px-4 py-4">
+        <div className="lg:hidden border-t border-border/30 bg-background/98 backdrop-blur-xl animate-in slide-in-from-top duration-200 shadow-lg">
+          <div className="container mx-auto px-4 py-5">
             <nav className="flex flex-col gap-2">
               {navigationItems.map((item) => {
                 const isActive = pathname === item.href
@@ -314,12 +328,19 @@ export function Header({ className }: HeaderProps) {
                     key={item.name}
                     variant="ghost"
                     className={cn(
-                      "justify-start text-sm font-medium px-4 py-3 rounded-lg transition-colors hover:bg-accent/80",
-                      isActive && "bg-accent text-accent-foreground font-semibold"
+                      "justify-start text-sm font-medium px-5 py-3.5 rounded-xl transition-all duration-200",
+                      isActive 
+                        ? "bg-primary/10 text-primary hover:bg-primary/15 font-semibold shadow-sm" 
+                        : "hover:bg-accent/60 text-foreground/80"
                     )}
                     onClick={() => handleNavigation(item.href)}
                   >
-                    {Icon && <Icon className="h-4 w-4 mr-3" />}
+                    <div className={cn(
+                      "w-9 h-9 rounded-lg flex items-center justify-center mr-3",
+                      isActive ? "bg-primary/15" : "bg-accent/30"
+                    )}>
+                      {Icon && <Icon className="h-4 w-4" />}
+                    </div>
                     {item.name}
                   </Button>
                 )
