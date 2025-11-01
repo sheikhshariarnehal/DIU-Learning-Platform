@@ -78,16 +78,16 @@ export function Header({ className }: HeaderProps) {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Left Section - Logo */}
-          <div className="flex items-center min-w-fit">
+          <div className="flex items-center">
             <button 
               onClick={() => handleNavigation("/")}
-              className="flex items-center gap-3 sm:gap-3.5 hover:opacity-90 transition-all duration-200 group py-2"
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity group"
             >
               {/* Logo Icon */}
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 border border-primary/20 shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-200">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/10 border border-primary/20">
                 <img
                   src="/images/diu-logo.png"
-                  alt="DIU Logo"
+                  alt="StudyHub DIU"
                   className="w-full h-full object-contain p-1.5"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
@@ -95,7 +95,7 @@ export function Header({ className }: HeaderProps) {
                     const parent = target.parentElement
                     if (parent && !parent.querySelector('.fallback-text')) {
                       const fallback = document.createElement('span')
-                      fallback.className = 'fallback-text text-primary font-bold text-base sm:text-lg'
+                      fallback.className = 'fallback-text text-primary font-semibold text-sm'
                       fallback.textContent = 'SH'
                       parent.appendChild(fallback)
                     }
@@ -104,11 +104,11 @@ export function Header({ className }: HeaderProps) {
               </div>
               
               {/* Brand Text */}
-              <div className="flex flex-col justify-center gap-0.5">
-                <span className="font-semibold text-sm sm:text-base md:text-lg leading-none tracking-tight text-foreground group-hover:text-primary transition-colors whitespace-nowrap">
+              <div className="flex flex-col">
+                <span className="font-semibold text-base leading-none text-foreground">
                   StudyHub DIU
                 </span>
-                <span className="text-[9px] sm:text-[10px] text-muted-foreground/80 font-normal uppercase tracking-widest leading-none mt-0.5">
+                <span className="text-[10px] text-muted-foreground font-normal uppercase tracking-wider leading-none mt-1">
                   Learning Platform
                 </span>
               </div>
