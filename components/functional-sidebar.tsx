@@ -334,17 +334,29 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
   const toggleTopicItem = useCallback((topicId: string, courseId: string) => {
     setExpandedTopicItems((prev) => {
       const newSet = new Set(prev)
-      // Toggle the topic: if expanded, collapse it; if collapsed, expand it
+      
+      // If clicking on already expanded topic, collapse it
       if (newSet.has(topicId)) {
         newSet.delete(topicId)
       } else {
+        // Close all other topics in the same course before opening this one
+        const currentCourseData = courseData[courseId]
+        if (currentCourseData?.topics) {
+          currentCourseData.topics.forEach(topic => {
+            if (topic.id !== topicId) {
+              newSet.delete(topic.id)
+            }
+          })
+        }
+        
+        // Now add the new topic
         newSet.add(topicId)
         // Lazy load content when expanding
         fetchTopicContent(courseId, topicId)
       }
       return newSet
     })
-  }, [fetchTopicContent])
+  }, [fetchTopicContent, courseData])
 
   // Content selection handlers
   const handleContentClick = useCallback(

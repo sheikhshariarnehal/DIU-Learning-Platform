@@ -271,16 +271,16 @@ export const OptimizedTopicItem = memo(({
       {/* Topic Header */}
       <Button
         variant="ghost"
-        className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[44px]' : 'px-3 py-2.5'} h-auto min-w-0 sidebar-item-professional touch-manipulation rounded-md transition-all duration-200 ease-out will-change-transform ${
+        className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[44px]' : 'px-1 py-[2px]'} h-auto min-w-0 sidebar-item-professional touch-manipulation rounded-sm transition-all duration-200 ease-out will-change-transform ${
           showContent
             ? 'bg-primary/10 border border-primary/20 shadow-sm'
             : 'hover:bg-accent/70 hover:scale-[1.01] active:scale-[0.99]'
         }`}
         onClick={handleToggle}
       >
-        <div className="flex items-start gap-2.5 w-full min-w-0">
+        <div className="flex items-center gap-0.5 w-full min-w-0">
           <ChevronRight 
-            className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} text-muted-foreground flex-shrink-0 mt-0.5 transition-transform duration-200 ease-out will-change-transform ${
+            className={`${isMobile ? 'h-4 w-4' : 'h-1.5 w-1.5'} text-muted-foreground flex-shrink-0 transition-transform duration-200 ease-out will-change-transform ${
               showContent ? 'rotate-90' : 'rotate-0'
             }`} 
           />
@@ -291,30 +291,30 @@ export const OptimizedTopicItem = memo(({
               title={topic.title}
               maxLength={isMobile ? 45 : 50}
               variant={isMobile ? "compact" : "default"}
-              className={`${showContent ? "text-primary font-semibold" : "text-foreground"} break-words leading-relaxed transition-colors duration-200`}
+              className={`${showContent ? "text-primary font-semibold" : "text-foreground"} ${isMobile ? 'text-sm' : 'text-[8px]'} break-words leading-[1.05] transition-colors duration-200`}
             />
           </div>
           
           {/* Content count badge */}
           {totalContent > 0 && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground/70 flex-shrink-0">
+            <div className="flex items-center gap-0.5 text-[6px] text-muted-foreground/70 flex-shrink-0">
               {topicContent?.videos && topicContent.videos.length > 0 && (
                 <span className="flex items-center gap-0.5">
-                  <Play className="h-2.5 w-2.5" />
-                  {topicContent.videos.length}
+                  <Play className="h-1.5 w-1.5" />
+                  <span className="text-[6px]">{topicContent.videos.length}</span>
                 </span>
               )}
               {topicContent?.slides && topicContent.slides.length > 0 && (
                 <span className="flex items-center gap-0.5">
-                  <FileText className="h-2.5 w-2.5" />
-                  {topicContent.slides.length}
+                  <FileText className="h-1.5 w-1.5" />
+                  <span className="text-[6px]">{topicContent.slides.length}</span>
                 </span>
               )}
             </div>
           )}
           
           {isLoading && !topicContent && (
-            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground flex-shrink-0" />
+            <Loader2 className="h-2.5 w-2.5 animate-spin text-muted-foreground flex-shrink-0" />
           )}
         </div>
       </Button>
@@ -325,14 +325,14 @@ export const OptimizedTopicItem = memo(({
           showContent ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className={`${isMobile ? 'ml-4' : 'ml-6'} space-y-1.5 mt-2 min-w-0`}>
+        <div className={`${isMobile ? 'ml-4 space-y-1.5 mt-2' : 'ml-1.5 space-y-0 mt-0'} min-w-0`}>
           {isLoading && !topicContent ? (
             /* Skeleton Loading */
             <>
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center gap-2.5 px-2 py-2 animate-pulse">
-                  <Skeleton className="h-3.5 w-3.5 rounded flex-shrink-0" />
-                  <Skeleton className="h-4 flex-1" />
+                <div key={i} className="flex items-center gap-0.5 px-0.5 py-[2px] animate-pulse">
+                  <Skeleton className="h-1.5 w-1.5 rounded flex-shrink-0" />
+                  <Skeleton className="h-2 flex-1" />
                 </div>
               ))}
             </>
@@ -434,19 +434,19 @@ const VideoItem = memo(({ video, isSelected, isMobile, onSelect }: {
   return (
     <Button
       variant="ghost"
-      className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[40px]' : 'px-2 py-2'} h-auto rounded-md group transition-all duration-150 touch-manipulation min-w-0 will-change-transform ${
+      className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[40px]' : 'px-0.5 py-[1px]'} h-auto rounded-sm group transition-all duration-150 touch-manipulation min-w-0 will-change-transform ${
         isSelected
           ? "bg-primary/10 text-primary border border-primary/20 shadow-sm scale-[1.01]"
-          : "hover:bg-accent/50 text-muted-foreground hover:text-foreground hover:scale-[1.02] active:scale-[0.98]"
+          : "hover:bg-accent/50 text-muted-foreground hover:text-foreground hover:scale-[1.01] active:scale-[0.99]"
       }`}
       onClick={onSelect}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="flex items-start gap-2.5 w-full min-w-0">
+      <div className="flex items-center gap-0.5 w-full min-w-0">
         <div className={`relative flex-shrink-0 ${isHovered && !isSelected ? 'animate-pulse' : ''}`}>
           <Play 
-            className={`h-3.5 w-3.5 mt-0.5 transition-all duration-150 ${
+            className={`h-1.5 w-1.5 transition-all duration-150 ${
               isSelected 
                 ? "text-red-500 fill-red-500/20" 
                 : isHovered 
@@ -456,21 +456,20 @@ const VideoItem = memo(({ video, isSelected, isMobile, onSelect }: {
           />
         </div>
         <span 
-          className={`text-xs ${isMobile ? 'text-sm' : 'text-xs'} leading-relaxed break-words min-w-0 flex-1 transition-colors duration-150 ${
+          className={`${isMobile ? 'text-sm' : 'text-[7px]'} break-words min-w-0 flex-1 transition-colors duration-150 ${
             isSelected ? "font-medium text-foreground" : ""
           }`}
           style={{ 
             wordBreak: 'break-word',
             overflowWrap: 'anywhere',
-            hyphens: 'auto'
+            hyphens: 'auto',
+            lineHeight: isMobile ? '1.25' : '1'
           }}
         >
           {video.title}
         </span>
         {isHovered && !isSelected && !isMobile && (
-          <span className="text-[10px] text-muted-foreground flex-shrink-0 animate-in fade-in duration-150">
-            Video
-          </span>
+          <Play className="h-1.5 w-1.5 text-red-500 flex-shrink-0 animate-in fade-in duration-150" />
         )}
       </div>
     </Button>
@@ -517,19 +516,19 @@ const SlideItem = memo(({ slide, isSelected, isMobile, onSelect }: {
   return (
     <Button
       variant="ghost"
-      className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[40px]' : 'px-2 py-2'} h-auto rounded-md group transition-all duration-150 touch-manipulation min-w-0 will-change-transform ${
+      className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[40px]' : 'px-0.5 py-[1px]'} h-auto rounded-sm group transition-all duration-150 touch-manipulation min-w-0 will-change-transform ${
         isSelected
           ? "bg-primary/10 text-primary border border-primary/20 shadow-sm scale-[1.01]"
-          : "hover:bg-accent/50 text-muted-foreground hover:text-foreground hover:scale-[1.02] active:scale-[0.98]"
+          : "hover:bg-accent/50 text-muted-foreground hover:text-foreground hover:scale-[1.01] active:scale-[0.99]"
       }`}
       onClick={onSelect}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="flex items-start gap-2.5 w-full min-w-0">
+      <div className="flex items-center gap-0.5 w-full min-w-0">
         <div className={`relative flex-shrink-0 ${isHovered && !isSelected ? 'animate-pulse' : ''}`}>
           <FileText 
-            className={`h-3.5 w-3.5 mt-0.5 transition-all duration-150 ${
+            className={`h-1.5 w-1.5 transition-all duration-150 ${
               isSelected 
                 ? "text-blue-500 fill-blue-500/20" 
                 : isHovered 
@@ -539,19 +538,20 @@ const SlideItem = memo(({ slide, isSelected, isMobile, onSelect }: {
           />
         </div>
         <span 
-          className={`text-xs ${isMobile ? 'text-sm' : 'text-xs'} leading-relaxed break-words min-w-0 flex-1 transition-colors duration-150 ${
+          className={`${isMobile ? 'text-sm' : 'text-[7px]'} break-words min-w-0 flex-1 transition-colors duration-150 ${
             isSelected ? "font-medium text-foreground" : ""
           }`}
           style={{ 
             wordBreak: 'break-word',
             overflowWrap: 'anywhere',
-            hyphens: 'auto'
+            hyphens: 'auto',
+            lineHeight: isMobile ? '1.25' : '1'
           }}
         >
           {slide.title}
         </span>
         {isHovered && !isSelected && !isMobile && slide.file_url && (
-          <span className="text-[10px] text-muted-foreground flex-shrink-0 animate-in fade-in duration-150 font-medium">
+          <span className="text-[6px] text-muted-foreground flex-shrink-0 animate-in fade-in duration-150 font-medium">
             {getFileType(slide.file_url)}
           </span>
         )}
