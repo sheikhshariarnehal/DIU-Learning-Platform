@@ -147,9 +147,12 @@ export const OptimizedTopicItem = memo(({
     }
   }, [isExpanded, topicContent, isLoading, fetchTopicContent])
 
-  // Handle topic expansion
+  // Handle topic expansion with smooth animation
   const handleToggle = useCallback(() => {
-    onTopicExpand?.(topic.id)
+    // Use requestAnimationFrame for smoother UI updates
+    requestAnimationFrame(() => {
+      onTopicExpand?.(topic.id)
+    })
   }, [topic.id, onTopicExpand])
 
   // Handle hover with debounce (300ms delay)
@@ -188,19 +191,19 @@ export const OptimizedTopicItem = memo(({
       {/* Topic Header */}
       <Button
         variant="ghost"
-        className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[44px]' : 'px-3 py-2.5'} h-auto min-w-0 sidebar-item-professional touch-manipulation rounded-md transition-all duration-150 ${
+        className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[44px]' : 'px-3 py-2.5'} h-auto min-w-0 sidebar-item-professional touch-manipulation rounded-md transition-all duration-200 ease-out ${
           isExpanded
             ? 'bg-primary/10 border border-primary/20 shadow-sm'
-            : 'hover:bg-accent/70 hover:scale-[1.01]'
+            : 'hover:bg-accent/70 hover:scale-[1.01] active:scale-[0.99]'
         }`}
         onClick={handleToggle}
       >
         <div className="flex items-start gap-2.5 w-full min-w-0">
-          {isExpanded ? (
-            <ChevronDown className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} text-muted-foreground flex-shrink-0 mt-0.5 transition-transform duration-150`} />
-          ) : (
-            <ChevronRight className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} text-muted-foreground flex-shrink-0 mt-0.5 transition-transform duration-150`} />
-          )}
+          <ChevronRight 
+            className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} text-muted-foreground flex-shrink-0 mt-0.5 transition-transform duration-200 ease-out ${
+              isExpanded ? 'rotate-90' : 'rotate-0'
+            }`} 
+          />
           
           <div className="flex-1 min-w-0 break-words">
             <ProfessionalTopicTitle
@@ -236,14 +239,18 @@ export const OptimizedTopicItem = memo(({
         </div>
       </Button>
 
-      {/* Topic Content */}
-      {isExpanded && (
-        <div className={`${isMobile ? 'ml-4' : 'ml-6'} space-y-1.5 mt-2 min-w-0 animate-in slide-in-from-top-2 duration-200`}>
+      {/* Topic Content with smooth animation */}
+      <div 
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className={`${isMobile ? 'ml-4' : 'ml-6'} space-y-1.5 mt-2 min-w-0`}>
           {isLoading && !topicContent ? (
             /* Skeleton Loading */
             <>
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center gap-2.5 px-2 py-2">
+                <div key={i} className="flex items-center gap-2.5 px-2 py-2 animate-pulse">
                   <Skeleton className="h-3.5 w-3.5 rounded flex-shrink-0" />
                   <Skeleton className="h-4 flex-1" />
                 </div>
@@ -253,51 +260,61 @@ export const OptimizedTopicItem = memo(({
             /* Actual Content */
             <>
               {/* Videos */}
-              {topicContent.videos.map((video) => (
-                <VideoItem
+              {topicContent.videos.map((video, index) => (
+                <div 
                   key={video.id}
-                  video={video}
-                  isSelected={selectedContentId === video.id}
-                  isMobile={isMobile}
-                  onSelect={() => onContentSelect(
-                    "video",
-                    video.title,
-                    video.youtube_url,
-                    video.id,
-                    topic.title,
-                    courseTitle
-                  )}
-                />
+                  className="animate-in fade-in slide-in-from-top-1"
+                  style={{ animationDelay: `${index * 30}ms`, animationDuration: '200ms' }}
+                >
+                  <VideoItem
+                    video={video}
+                    isSelected={selectedContentId === video.id}
+                    isMobile={isMobile}
+                    onSelect={() => onContentSelect(
+                      "video",
+                      video.title,
+                      video.youtube_url,
+                      video.id,
+                      topic.title,
+                      courseTitle
+                    )}
+                  />
+                </div>
               ))}
 
               {/* Slides */}
-              {topicContent.slides.map((slide) => (
-                <SlideItem
+              {topicContent.slides.map((slide, index) => (
+                <div 
                   key={slide.id}
-                  slide={slide}
-                  isSelected={selectedContentId === slide.id}
-                  isMobile={isMobile}
-                  onSelect={() => onContentSelect(
-                    "slide",
-                    slide.title,
-                    slide.google_drive_url,
-                    slide.id,
-                    topic.title,
-                    courseTitle
-                  )}
-                />
+                  className="animate-in fade-in slide-in-from-top-1"
+                  style={{ animationDelay: `${(topicContent.videos.length + index) * 30}ms`, animationDuration: '200ms' }}
+                >
+                  <SlideItem
+                    slide={slide}
+                    isSelected={selectedContentId === slide.id}
+                    isMobile={isMobile}
+                    onSelect={() => onContentSelect(
+                      "slide",
+                      slide.title,
+                      slide.google_drive_url,
+                      slide.id,
+                      topic.title,
+                      courseTitle
+                    )}
+                  />
+                </div>
               ))}
 
               {/* Empty State */}
               {topicContent.slides.length === 0 && topicContent.videos.length === 0 && (
-                <div className="text-xs text-muted-foreground py-4 text-center italic">
+                <div className="text-xs text-muted-foreground py-4 text-center italic animate-in fade-in duration-200">
                   No content available for this topic
                 </div>
               )}
             </>
           ) : null}
         </div>
-      )}
+      </div>
     </div>
   )
 })

@@ -333,10 +333,11 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
 
   const toggleTopicItem = useCallback((topicId: string, courseId: string) => {
     setExpandedTopicItems((prev) => {
-      const newSet = new Set()
-      // If the clicked topic is already expanded, close it (empty set)
-      // If it's not expanded, open only this topic (set with only this topic)
-      if (!prev.has(topicId)) {
+      const newSet = new Set(prev)
+      // Toggle the topic: if expanded, collapse it; if collapsed, expand it
+      if (newSet.has(topicId)) {
+        newSet.delete(topicId)
+      } else {
         newSet.add(topicId)
         // Lazy load content when expanding
         fetchTopicContent(courseId, topicId)
