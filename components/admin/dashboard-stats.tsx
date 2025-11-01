@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { supabase } from "@/lib/supabase"
-import { BookOpen, Calendar, FileText, Play } from "lucide-react"
+import { BookOpen, Calendar, FileText, Play, AlertCircle } from "lucide-react"
 
 export function DashboardStats() {
   const [stats, setStats] = useState({
@@ -16,18 +17,19 @@ export function DashboardStats() {
     studyToolCount: 0,
   })
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchStats() {
       try {
-        const [
-          { count: semesterCount },
-          { count: courseCount },
-          { count: topicCount },
-          { count: slideCount },
-          { count: videoCount },
-          { count: studyToolCount },
-        ] = await Promise.all([
+        setError(null)
+        
+        // Add timeout to prevent indefinite loading
+        const timeout = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout')), 10000)
+        )
+
+        const statsPromise = Promise.all([
           supabase.from("semesters").select("*", { count: "exact", head: true }),
           supabase.from("courses").select("*", { count: "exact", head: true }),
           supabase.from("topics").select("*", { count: "exact", head: true }),
@@ -35,6 +37,21 @@ export function DashboardStats() {
           supabase.from("videos").select("*", { count: "exact", head: true }),
           supabase.from("study_tools").select("*", { count: "exact", head: true }),
         ])
+
+        const [
+          { count: semesterCount, error: semesterError },
+          { count: courseCount, error: courseError },
+          { count: topicCount, error: topicError },
+          { count: slideCount, error: slideError },
+          { count: videoCount, error: videoError },
+          { count: studyToolCount, error: studyToolError },
+        ] = await Promise.race([statsPromise, timeout]) as any[]
+
+        // Check for errors
+        const errors = [semesterError, courseError, topicError, slideError, videoError, studyToolError].filter(Boolean)
+        if (errors.length > 0) {
+          throw new Error(errors[0].message)
+        }
 
         setStats({
           semesterCount: semesterCount || 0,
@@ -44,8 +61,9 @@ export function DashboardStats() {
           videoCount: videoCount || 0,
           studyToolCount: studyToolCount || 0,
         })
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching dashboard stats:", error)
+        setError(error?.message || "Failed to load statistics")
       } finally {
         setIsLoading(false)
       }
@@ -80,6 +98,17 @@ export function DashboardStats() {
       description: "Slides, videos & tools",
     },
   ]
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          {error}. Please check your database connection and try refreshing the page.
+        </AlertDescription>
+      </Alert>
+    )
+  }
 
   if (isLoading) {
     return (

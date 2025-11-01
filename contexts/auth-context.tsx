@@ -31,30 +31,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      console.log("🔍 Checking authentication...")
+      if (process.env.NODE_ENV === 'development') {
+        console.log("🔍 Checking authentication...")
+      }
+      
+      // Add timeout for production
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000)
+
       const response = await fetch("/api/auth/me", {
         method: "GET",
         credentials: "include",
+        signal: controller.signal,
       })
 
-      console.log("📊 Auth check response status:", response.status)
+      clearTimeout(timeoutId)
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log("📊 Auth check response status:", response.status)
+      }
 
       if (response.ok) {
         const data = await response.json()
-        console.log("📊 Auth check response data:", data)
+        if (process.env.NODE_ENV === 'development') {
+          console.log("📊 Auth check response data:", data)
+        }
         if (data.success) {
-          console.log("✅ User authenticated:", data.user.email)
+          if (process.env.NODE_ENV === 'development') {
+            console.log("✅ User authenticated:", data.user.email)
+          }
           setUser(data.user)
         } else {
-          console.log("❌ Auth check failed:", data.error)
+          if (process.env.NODE_ENV === 'development') {
+            console.log("❌ Auth check failed:", data.error)
+          }
           setUser(null)
         }
       } else {
-        console.log("❌ Auth check response not ok:", response.status)
+        if (process.env.NODE_ENV === 'development') {
+          console.log("❌ Auth check response not ok:", response.status)
+        }
         setUser(null)
       }
-    } catch (error) {
-      console.error("❌ Auth check error:", error)
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.error("❌ Auth check timeout")
+      } else {
+        console.error("❌ Auth check error:", error)
+      }
       setUser(null)
     } finally {
       setLoading(false)
