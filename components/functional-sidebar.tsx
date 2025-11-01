@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, memo, lazy, Suspense } from "react"
 import {
-  ChevronDown, ChevronRight, FileText, Play, BookOpen, Users, Loader2, AlertCircle,
-  GraduationCap, ClipboardList, BarChart3, PenTool, FlaskConical, Library, Star, Share2
+  ChevronDown, ChevronRight, FileText, Play, BookOpen, Loader2, AlertCircle,
+  GraduationCap, ClipboardList, BarChart3, PenTool, FlaskConical, Library
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -14,8 +14,6 @@ import { supabase } from "@/lib/supabase"
 import type { Database } from "@/lib/supabase"
 import { ProfessionalTopicTitle } from "@/components/ui/professional-topic-title"
 import { useIsMobile } from "@/components/ui/use-mobile"
-import { ShareButton } from "@/components/share-button"
-import { generateShareUrl } from "@/lib/share-utils"
 import React from "react"
 
 type Semester = Database["public"]["Tables"]["semesters"]["Row"]
@@ -183,7 +181,7 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
     }
   }
 
-  const fetchCourseData = async (courseId: string) => {
+  const fetchCourseData = useCallback(async (courseId: string) => {
     if (courseData[courseId] && !courseData[courseId].isLoading) return
 
     // Set loading state
@@ -201,37 +199,28 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
     try {
       // Use optimized single query to fetch all course data
       const data = await getCachedData(`course-data-${courseId}`, async () => {
-        // Fetch all data in parallel
-        const [topicsResult, studyToolsResult] = await Promise.all([
-          supabase
-            .from("topics")
-            .select(`
-              *,
-              slides(*),
-              videos(*)
-            `)
-            .eq("course_id", courseId)
-            .order("order_index", { ascending: true }),
-          supabase.from("study_tools").select("*").eq("course_id", courseId),
-        ])
+        // Fetch only topics first (most important data)
+        const topicsResult = await supabase
+          .from("topics")
+          .select("id, title, order_index, course_id")
+          .eq("course_id", courseId)
+          .order("order_index", { ascending: true })
 
         if (topicsResult.error) throw topicsResult.error
-        if (studyToolsResult.error) throw studyToolsResult.error
 
-        // Organize slides and videos by topic
-        const slides = {}
-        const videos = {}
+        // Fetch study tools in parallel (less priority)
+        const studyToolsPromise = supabase
+          .from("study_tools")
+          .select("id, title, type, content_url, description, course_id")
+          .eq("course_id", courseId)
 
-        topicsResult.data?.forEach((topic) => {
-          slides[topic.id] = (topic.slides || []).sort((a, b) => a.order_index - b.order_index)
-          videos[topic.id] = (topic.videos || []).sort((a, b) => a.order_index - b.order_index)
-        })
+        const studyToolsResult = await studyToolsPromise
 
         return {
           topics: topicsResult.data || [],
           studyTools: studyToolsResult.data || [],
-          slides,
-          videos,
+          slides: {},
+          videos: {},
         }
       })
 
@@ -244,7 +233,6 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
       }))
     } catch (err) {
       console.error("Error fetching course data:", err)
-      setError("Failed to load course content")
       setCourseData((prev) => ({
         ...prev,
         [courseId]: {
@@ -256,7 +244,7 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
         },
       }))
     }
-  }
+  }, [courseData])
 
   // Optimized toggle functions with debouncing
   const toggleCourse = useCallback((courseId: string) => {
@@ -297,17 +285,65 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
     })
   }, [])
 
-  const toggleTopicItem = useCallback((topicId: string) => {
+  // Lazy load topic content (slides and videos) only when expanded
+  const fetchTopicContent = useCallback(async (courseId: string, topicId: string) => {
+    const currentCourseData = courseData[courseId]
+    if (!currentCourseData || currentCourseData.slides[topicId] || currentCourseData.videos[topicId]) return
+
+    try {
+      const cacheKey = `topic-content-${topicId}`
+      const data = await getCachedData(cacheKey, async () => {
+        const [slidesResult, videosResult] = await Promise.all([
+          supabase
+            .from("slides")
+            .select("id, title, google_drive_url, order_index, topic_id")
+            .eq("topic_id", topicId)
+            .order("order_index", { ascending: true }),
+          supabase
+            .from("videos")
+            .select("id, title, youtube_url, order_index, topic_id")
+            .eq("topic_id", topicId)
+            .order("order_index", { ascending: true }),
+        ])
+
+        return {
+          slides: slidesResult.data || [],
+          videos: videosResult.data || [],
+        }
+      })
+
+      setCourseData((prev) => ({
+        ...prev,
+        [courseId]: {
+          ...prev[courseId],
+          slides: {
+            ...prev[courseId].slides,
+            [topicId]: data.slides,
+          },
+          videos: {
+            ...prev[courseId].videos,
+            [topicId]: data.videos,
+          },
+        },
+      }))
+    } catch (err) {
+      console.error("Error fetching topic content:", err)
+    }
+  }, [courseData])
+
+  const toggleTopicItem = useCallback((topicId: string, courseId: string) => {
     setExpandedTopicItems((prev) => {
       const newSet = new Set()
       // If the clicked topic is already expanded, close it (empty set)
       // If it's not expanded, open only this topic (set with only this topic)
       if (!prev.has(topicId)) {
         newSet.add(topicId)
+        // Lazy load content when expanding
+        fetchTopicContent(courseId, topicId)
       }
       return newSet
     })
-  }, [])
+  }, [fetchTopicContent])
 
   // Content selection handlers
   const handleContentClick = useCallback(
@@ -386,11 +422,17 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
   if (isLoading) {
     return (
       <div className="h-full flex flex-col bg-background">
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading courses...</p>
-          </div>
+        {/* Skeleton Loader for better perceived performance */}
+        <div className={`${isMobile ? 'px-4 py-3' : 'p-4'} border-b border-border/30`}>
+          <div className="h-11 bg-muted/50 rounded-lg animate-pulse"></div>
+        </div>
+        <div className={`${isMobile ? 'px-4 py-3' : 'p-4'} space-y-3`}>
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-card rounded-lg border border-border/20 p-3 animate-pulse">
+              <div className="h-4 bg-muted/50 rounded w-3/4 mb-2"></div>
+              <div className="h-3 bg-muted/30 rounded w-1/2"></div>
+            </div>
+          ))}
         </div>
       </div>
     )
@@ -603,7 +645,7 @@ const CourseItem = React.memo(
     onToggleCourse: (id: string) => void
     onToggleStudyTools: (id: string) => void
     onToggleTopics: (id: string) => void
-    onToggleTopicItem: (id: string) => void
+    onToggleTopicItem: (topicId: string, courseId: string) => void
     onContentClick: (
       type: any,
       title: string,
@@ -820,7 +862,7 @@ const CourseItem = React.memo(
                                 ? 'bg-primary/10 border border-primary/20 shadow-sm'
                                 : 'hover:bg-accent/70'
                             }`}
-                            onClick={() => !isScrolling && onToggleTopicItem(topic.id)}
+                            onClick={() => !isScrolling && onToggleTopicItem(topic.id, course.id)}
                           >
                             <div className="flex items-start gap-2.5 w-full min-w-0">
                               {expandedTopicItems.has(topic.id) ? (
