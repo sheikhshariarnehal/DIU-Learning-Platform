@@ -1,76 +1,140 @@
 "use client"
 
 import { Header } from "@/components/header"
+import { ExternalLink, Github, Linkedin, Mail, Globe } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export default function ContributorPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Contributors</h1>
-          <p className="text-muted-foreground">
-            Meet the dedicated team behind the DIU Learning Platform development and content creation.
-          </p>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <div className="p-6 border rounded-lg bg-card">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
-                <span className="font-semibold text-primary">DR</span>
-              </div>
-              <div>
-                <h3 className="font-semibold">Dr. Mohammad Rahman</h3>
-                <p className="text-sm text-muted-foreground">Project Lead</p>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Leading the platform architecture and database design for the DIU Learning Platform.
+      <main className="container mx-auto px-4 py-12 md:py-16">
+        <div className="max-w-4xl mx-auto">
+          {/* Header Section */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+              Founder & Developer
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              Meet the creator behind the DIU Learning Platform
             </p>
           </div>
 
-          <div className="p-6 border rounded-lg bg-card">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
-                <span className="font-semibold text-primary">FA</span>
+          {/* Profile Card */}
+          <div className="bg-card border border-border rounded-2xl shadow-lg overflow-hidden">
+            <div className="relative h-32 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/5"></div>
+            
+            <div className="px-6 md:px-8 pb-8">
+              {/* Avatar */}
+              <div className="relative -mt-16 mb-6">
+                <div className="w-32 h-32 rounded-2xl bg-background border-4 border-background shadow-xl overflow-hidden">
+                  <img 
+                    src="https://nehal.app/assets/images/profile2.webp"
+                    alt="Sheikh Shariar Nehal"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold">Fatima Ahmed</h3>
-                <p className="text-sm text-muted-foreground">Frontend Developer</p>
+
+              {/* Profile Info */}
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-3xl font-bold text-foreground mb-2">
+                    Sheikh Shariar Nehal
+                  </h2>
+                  <p className="text-xl text-primary font-semibold mb-4">
+                    Founder & Full Stack Developer
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed text-lg">
+                    Creator of the DIU CSE Learning Platform. Passionate about building educational 
+                    technology that empowers students and enhances the learning experience. 
+                    Specializing in full-stack development, UI/UX design, and scalable web applications.
+                  </p>
+                </div>
+
+                {/* Links */}
+                <div className="flex flex-wrap gap-3 pt-4">
+                  <Button
+                    variant="default"
+                    className="gap-2"
+                    onClick={() => window.open('https://www.nehal.app', '_blank')}
+                  >
+                    <Globe className="h-4 w-4" />
+                    Portfolio
+                    <ExternalLink className="h-3 w-3" />
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => window.open('https://github.com/sheikhshariarnehal', '_blank')}
+                  >
+                    <Github className="h-4 w-4" />
+                    GitHub
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => window.open('https://linkedin.com/in/sheikhshariarnehal', '_blank')}
+                  >
+                    <Linkedin className="h-4 w-4" />
+                    LinkedIn
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => window.location.href = 'mailto:nehaldiu@gmail.com'}
+                  >
+                    <Mail className="h-4 w-4" />
+                    Contact
+                  </Button>
+                </div>
+
+                {/* Tech Stack */}
+                <div className="pt-6 border-t border-border">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                    Tech Stack
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Supabase', 'PostgreSQL', 'Node.js'].map((tech) => (
+                      <span
+                        key={tech}
+                        className="px-3 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-lg border border-primary/20"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-4 pt-6 border-t border-border">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-foreground mb-1">2024</div>
+                    <div className="text-sm text-muted-foreground">Founded</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-foreground mb-1">220+</div>
+                    <div className="text-sm text-muted-foreground">Students</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-foreground mb-1">24/7</div>
+                    <div className="text-sm text-muted-foreground">Available</div>
+                  </div>
+                </div>
               </div>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Responsible for UI/UX design and React component development.
-            </p>
           </div>
 
-          <div className="p-6 border rounded-lg bg-card">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
-                <span className="font-semibold text-primary">KH</span>
-              </div>
-              <div>
-                <h3 className="font-semibold">Karim Hassan</h3>
-                <p className="text-sm text-muted-foreground">Backend Developer</p>
-              </div>
+          {/* Additional Info */}
+          <div className="mt-8 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-muted/50 rounded-full text-sm text-muted-foreground">
+              <span>💡</span>
+              <span>Open to collaboration and feature suggestions</span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Handles API development and database optimization.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-12 text-center">
-          <div className="max-w-md mx-auto p-6 border rounded-lg bg-card">
-            <h2 className="text-lg font-semibold mb-2">Want to Contribute?</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Join our team and help improve the DIU Learning Platform for all students.
-            </p>
-            <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-              Get Involved
-            </button>
           </div>
         </div>
       </main>
