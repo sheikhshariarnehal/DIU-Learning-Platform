@@ -812,38 +812,52 @@ const CourseItem = React.memo(
                       const topicVideos = courseData.videos[topic.id] || []
 
                       return (
-                        <div key={topic.id}>
+                        <div key={topic.id} className="min-w-0">
                           <Button
                             variant="ghost"
-                            className={`w-full justify-start text-left ${isMobile ? 'p-2 min-h-[44px]' : 'p-3'} h-auto min-w-0 sidebar-item-professional touch-manipulation ${
+                            className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[44px]' : 'px-3 py-2.5'} h-auto min-w-0 sidebar-item-professional touch-manipulation rounded-md ${
                               expandedTopicItems.has(topic.id)
                                 ? 'bg-primary/10 border border-primary/20 shadow-sm'
-                                : 'hover:bg-accent'
+                                : 'hover:bg-accent/70'
                             }`}
                             onClick={() => !isScrolling && onToggleTopicItem(topic.id)}
                           >
-                            <div className="flex items-center gap-2 w-full min-w-0">
+                            <div className="flex items-start gap-2.5 w-full min-w-0">
                               {expandedTopicItems.has(topic.id) ? (
-                                <ChevronDown className={`${isMobile ? 'h-4 w-4' : 'h-3 w-3'} text-muted-foreground flex-shrink-0`} />
+                                <ChevronDown className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} text-muted-foreground flex-shrink-0 mt-0.5`} />
                               ) : (
-                                <ChevronRight className={`${isMobile ? 'h-4 w-4' : 'h-3 w-3'} text-muted-foreground flex-shrink-0`} />
+                                <ChevronRight className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} text-muted-foreground flex-shrink-0 mt-0.5`} />
                               )}
-                              <div className="flex-1 min-w-0">
+                              <div className="flex-1 min-w-0 break-words">
                                 <ProfessionalTopicTitle
                                   index={index}
                                   title={topic.title}
                                   maxLength={isMobile ? 45 : 50}
                                   variant={isMobile ? "compact" : "default"}
-                                  className={expandedTopicItems.has(topic.id) ? "text-primary font-semibold" : "text-foreground"}
+                                  className={`${expandedTopicItems.has(topic.id) ? "text-primary font-semibold" : "text-foreground"} break-words leading-relaxed`}
                                 />
                               </div>
-
-
+                              {(topicSlides.length > 0 || topicVideos.length > 0) && (
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground/70 flex-shrink-0">
+                                  {topicVideos.length > 0 && (
+                                    <span className="flex items-center gap-0.5">
+                                      <Play className="h-2.5 w-2.5" />
+                                      {topicVideos.length}
+                                    </span>
+                                  )}
+                                  {topicSlides.length > 0 && (
+                                    <span className="flex items-center gap-0.5">
+                                      <FileText className="h-2.5 w-2.5" />
+                                      {topicSlides.length}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </Button>
 
                           {expandedTopicItems.has(topic.id) && (
-                            <div className={`${isMobile ? 'ml-4' : 'ml-6'} space-y-1 topic-content-enter-active mt-2`}>
+                            <div className={`${isMobile ? 'ml-4' : 'ml-6'} space-y-1.5 topic-content-enter-active mt-2 min-w-0`}>
                               {/* Videos */}
                               {topicVideos.map((video: Video) => {
                                 const isSelected = selectedContentId === video.id
@@ -851,9 +865,9 @@ const CourseItem = React.memo(
                                   <Button
                                     key={video.id}
                                     variant="ghost"
-                                    className={`w-full justify-start text-left ${isMobile ? 'p-2 min-h-[36px]' : 'p-1.5'} h-auto rounded group transition-colors touch-manipulation ${
+                                    className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[40px]' : 'px-2 py-2'} h-auto rounded-md group transition-colors touch-manipulation min-w-0 ${
                                       isSelected
-                                        ? "bg-primary/10 text-primary"
+                                        ? "bg-primary/10 text-primary border border-primary/20"
                                         : "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
                                     }`}
                                     onClick={() =>
@@ -867,11 +881,16 @@ const CourseItem = React.memo(
                                       )
                                     }
                                   >
-                                    <div className="flex items-center gap-2 w-full">
-                                      <Play className={`h-3 w-3 flex-shrink-0 ${isSelected ? "text-red-500" : "text-red-400"}`} />
-                                      <span className={`text-sm truncate ${
-                                        isSelected ? "font-medium" : ""
-                                      }`}>
+                                    <div className="flex items-start gap-2.5 w-full min-w-0">
+                                      <Play className={`h-3.5 w-3.5 flex-shrink-0 mt-0.5 ${isSelected ? "text-red-500" : "text-red-400"}`} />
+                                      <span className={`text-xs ${isMobile ? 'text-sm' : 'text-xs'} leading-relaxed break-words min-w-0 flex-1 ${
+                                        isSelected ? "font-medium text-foreground" : ""
+                                      }`}
+                                      style={{ 
+                                        wordBreak: 'break-word',
+                                        overflowWrap: 'anywhere',
+                                        hyphens: 'auto'
+                                      }}>
                                         {video.title}
                                       </span>
                                     </div>
@@ -886,9 +905,9 @@ const CourseItem = React.memo(
                                   <Button
                                     key={slide.id}
                                     variant="ghost"
-                                    className={`w-full justify-start text-left ${isMobile ? 'p-2 min-h-[36px]' : 'p-1.5'} h-auto rounded group transition-colors touch-manipulation ${
+                                    className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[40px]' : 'px-2 py-2'} h-auto rounded-md group transition-colors touch-manipulation min-w-0 ${
                                       isSelected
-                                        ? "bg-primary/10 text-primary"
+                                        ? "bg-primary/10 text-primary border border-primary/20"
                                         : "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
                                     }`}
                                     onClick={() =>
@@ -902,11 +921,16 @@ const CourseItem = React.memo(
                                       )
                                     }
                                   >
-                                    <div className="flex items-center gap-2 w-full">
-                                      <FileText className={`h-3 w-3 flex-shrink-0 ${isSelected ? "text-blue-500" : "text-blue-400"}`} />
-                                      <span className={`text-sm truncate ${
-                                        isSelected ? "font-medium" : ""
-                                      }`}>
+                                    <div className="flex items-start gap-2.5 w-full min-w-0">
+                                      <FileText className={`h-3.5 w-3.5 flex-shrink-0 mt-0.5 ${isSelected ? "text-blue-500" : "text-blue-400"}`} />
+                                      <span className={`text-xs ${isMobile ? 'text-sm' : 'text-xs'} leading-relaxed break-words min-w-0 flex-1 ${
+                                        isSelected ? "font-medium text-foreground" : ""
+                                      }`}
+                                      style={{ 
+                                        wordBreak: 'break-word',
+                                        overflowWrap: 'anywhere',
+                                        hyphens: 'auto'
+                                      }}>
                                         {slide.title}
                                       </span>
                                     </div>
@@ -915,7 +939,7 @@ const CourseItem = React.memo(
                               })}
 
                               {topicSlides.length === 0 && topicVideos.length === 0 && (
-                                <div className="text-sm text-muted-foreground py-4 text-center">
+                                <div className="text-xs text-muted-foreground py-4 text-center italic">
                                   No content available for this topic
                                 </div>
                               )}

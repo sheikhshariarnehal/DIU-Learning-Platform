@@ -271,6 +271,8 @@
   transition: all 0.15s ease-in-out;
   border-radius: 0.5rem;
   position: relative;
+  min-width: 0; /* Allow flex children to shrink */
+  overflow: hidden; /* Prevent overflow */
 }
 
 .sidebar-item-professional:hover {
@@ -280,6 +282,17 @@
 
 .sidebar-item-professional:hover .topic-title-professional {
   color: rgb(59 130 246);
+}
+
+/* Better text handling in sidebar items */
+.sidebar-item-professional .flex {
+  min-width: 0;
+}
+
+.sidebar-item-professional span {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 /* Expanded topic styling */
@@ -298,6 +311,8 @@
 /* Topic content animation */
 .topic-content-enter-active {
   animation: slideDown 0.3s ease-out forwards;
+  min-width: 0; /* Allow flex children to shrink */
+  overflow: visible; /* Allow content to wrap */
 }
 
 @keyframes slideDown {
@@ -309,8 +324,27 @@
   to {
     opacity: 1;
     transform: translateY(0);
-    max-height: 500px;
+    max-height: 1000px; /* Increased to accommodate wrapped content */
   }
+}
+
+/* Content item wrapping and responsiveness */
+.topic-content-enter-active > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.topic-content-enter-active button {
+  white-space: normal; /* Allow text wrapping in buttons */
+  text-align: left;
+  min-height: fit-content;
+}
+
+.topic-content-enter-active button span {
+  display: block;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
 }
 
 /* Enhanced topic item styling */
@@ -814,5 +848,86 @@
   
   .print-break-after {
     page-break-after: always;
+  }
+}
+
+/* Mobile-specific sidebar content fixes */
+@media (max-width: 768px) {
+  .topic-content-enter-active {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .topic-content-enter-active button {
+    width: 100%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    min-height: 40px;
+    align-items: flex-start;
+  }
+
+  .topic-content-enter-active button > div {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .topic-content-enter-active button span {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    max-width: 100%;
+    overflow: visible;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .sidebar-item-professional {
+    width: 100%;
+    overflow: visible;
+  }
+
+  .sidebar-item-professional button {
+    width: 100%;
+    overflow: visible;
+    align-items: flex-start;
+  }
+
+  .sidebar-item-professional button > div {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* Tablet and larger screens - optimized alignment */
+@media (min-width: 769px) {
+  .topic-content-enter-active button {
+    padding: 0.5rem;
+  }
+
+  .topic-content-enter-active button span {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+}
+
+/* Small mobile devices - extra compact */
+@media (max-width: 480px) {
+  .topic-content-enter-active {
+    margin-left: 0.75rem;
+  }
+
+  .topic-content-enter-active button {
+    padding: 0.5rem 0.375rem;
+    min-height: 36px;
+  }
+
+  .topic-content-enter-active button span {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  .sidebar-item-professional button {
+    padding: 0.5rem 0.375rem;
   }
 }
