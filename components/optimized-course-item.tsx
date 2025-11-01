@@ -1,10 +1,11 @@
 "use client"
 
 import { memo, useState, useCallback } from "react"
-import { ChevronDown, ChevronRight, FileText, Play, Loader2 } from "lucide-react"
+import { ChevronDown, ChevronRight, FileText, Play, Loader2, BookOpen, Star, User, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useIsMobile } from "@/components/ui/use-mobile"
+import { Skeleton } from "@/components/ui/skeleton"
 
 // Smart text truncation utility for professional display
 const smartTruncate = (text: string, maxLength: number = 45): string => {
@@ -41,13 +42,29 @@ const formatTopicTitle = (index: number, title: string, maxLength: number = 38):
 
   return `${prefix}${smartTruncate(title, availableLength)}`
 }
-import type { Database } from "@/lib/supabase"
 
-type Course = Database["public"]["Tables"]["courses"]["Row"]
-type Topic = Database["public"]["Tables"]["topics"]["Row"]
-type Slide = Database["public"]["Tables"]["slides"]["Row"]
-type Video = Database["public"]["Tables"]["videos"]["Row"]
-type StudyTool = Database["public"]["Tables"]["study_tools"]["Row"]
+interface Course {
+  id: string
+  title: string
+  course_code: string
+  teacher_name: string
+  is_highlighted: boolean
+  [key: string]: any
+}
+
+interface Video {
+  id: string
+  title: string
+  video_url: string
+  [key: string]: any
+}
+
+interface Slide {
+  id: string
+  title: string
+  content_url: string
+  [key: string]: any
+}
 
 interface OptimizedCourseItemProps {
   course: Course
@@ -59,6 +76,23 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
   const [isExpanded, setIsExpanded] = useState(false)
   const [courseData, setCourseData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [prefetchStarted, setPrefetchStarted] = useState(false)
+
+  // Prefetch on hover/focus with debounce
+  const prefetchCourseData = useCallback(async () => {
+    if (courseData || isLoading || prefetchStarted) return
+    
+    setPrefetchStarted(true)
+    
+    // Start loading immediately but don't show loading state yet
+    try {
+      const response = await fetch(`/api/courses/${course.id}/topics`)
+      const data = await response.json()
+      setCourseData(data)
+    } catch (error) {
+      console.error("Failed to prefetch course data:", error)
+    }
+  }, [course.id, courseData, isLoading, prefetchStarted])
 
   const fetchCourseData = useCallback(async () => {
     if (courseData || isLoading) return
@@ -77,21 +111,42 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
   }, [course.id, courseData, isLoading])
 
   const handleToggle = useCallback(() => {
+    // Optimistic UI: expand immediately
     setIsExpanded((prev) => {
       const newExpanded = !prev
-      if (newExpanded && !courseData) {
-        fetchCourseData()
+      if (newExpanded && !courseData && !isLoading) {
+        // Fetch data after state update for smoother animation
+        setTimeout(() => fetchCourseData(), 0)
       }
       return newExpanded
     })
-  }, [courseData, fetchCourseData])
+  }, [courseData, isLoading, fetchCourseData])
+
+  // Prefetch on hover (for desktop)
+  const handleMouseEnter = useCallback(() => {
+    if (!isExpanded) {
+      prefetchCourseData()
+    }
+  }, [isExpanded, prefetchCourseData])
+
+  // Prefetch on focus (for keyboard navigation)
+  const handleFocus = useCallback(() => {
+    if (!isExpanded) {
+      prefetchCourseData()
+    }
+  }, [isExpanded, prefetchCourseData])
 
   return (
-    <div className="space-y-1">
+    <div 
+      className="space-y-1"
+      onMouseEnter={handleMouseEnter}
+      onFocus={handleFocus}
+    >
       {/* Course Header */}
       <div className={`
-        group relative overflow-hidden rounded-xl border transition-all duration-300 ease-out cursor-pointer
-        hover:shadow-lg hover:-translate-y-1
+        group relative overflow-hidden rounded-xl border transition-all duration-200 ease-out cursor-pointer
+        will-change-transform
+        hover:shadow-lg hover:-translate-y-0.5
         ${course.is_highlighted
           ? `border-l-4 border-l-blue-500 dark:border-l-blue-400
              bg-gradient-to-br from-blue-50/50 to-indigo-50/30 dark:from-blue-950/20 dark:to-indigo-950/10
@@ -110,6 +165,7 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
             variant="ghost"
             className="w-full justify-start text-left p-0 h-auto hover:bg-transparent touch-manipulation"
             onClick={handleToggle}
+            tabIndex={0}
           >
             <div className="flex items-start gap-4 w-full">
               {/* Course Icon */}
@@ -233,30 +289,51 @@ export const OptimizedCourseItem = memo(({ course, onContentSelect, selectedCont
       </div>
 
       {/* Course Content */}
-      {isExpanded && courseData && (
-        <div className="mt-4 px-4 sm:px-6 pb-4 space-y-3 animate-in slide-in-from-top-2 duration-300">
-          {courseData.map((topic: any, index: number) => (
-            <div
-              key={topic.id}
-              className="p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors cursor-pointer touch-manipulation"
-              onClick={() => onContentSelect?.(topic)}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <BookOpen className="h-5 w-5 text-primary" />
+      {isExpanded && (
+        <div className="mt-4 px-4 sm:px-6 pb-4 space-y-3 animate-in slide-in-from-top-2 duration-200">
+          {isLoading && !courseData ? (
+            // Skeleton loading state
+            <>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                    <Skeleton className="w-4 h-4 shrink-0" />
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm sm:text-base truncate text-foreground">
-                    {topic.title}
-                  </p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    {topic.slides?.length || 0} slides • {topic.videos?.length || 0} videos
-                  </p>
+              ))}
+            </>
+          ) : courseData ? (
+            // Actual content
+            <>
+              {courseData.map((topic: any, index: number) => (
+                <div
+                  key={topic.id}
+                  className="p-4 rounded-lg border bg-card hover:bg-muted/50 transition-all duration-150 cursor-pointer touch-manipulation transform hover:scale-[1.01]"
+                  onClick={() => onContentSelect?.(topic)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 transition-colors">
+                      <BookOpen className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm sm:text-base truncate text-foreground">
+                        {topic.title}
+                      </p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {topic.slides?.length || 0} slides • {topic.videos?.length || 0} videos
+                      </p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 transition-transform group-hover:translate-x-0.5" />
+                  </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-              </div>
-            </div>
-          ))}
+              ))}
+            </>
+          ) : null}
         </div>
       )}
     </div>

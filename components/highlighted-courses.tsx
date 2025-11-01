@@ -38,7 +38,16 @@ export function HighlightedCourses({ onCourseSelect, className = "" }: Highlight
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchHighlightedCourses()
+    // Use requestIdleCallback for non-critical data loading
+    const loadData = () => {
+      fetchHighlightedCourses()
+    }
+    
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(loadData, { timeout: 1000 })
+    } else {
+      setTimeout(loadData, 100)
+    }
   }, [])
 
   const fetchHighlightedCourses = async () => {
@@ -46,7 +55,11 @@ export function HighlightedCourses({ onCourseSelect, className = "" }: Highlight
       setIsLoading(true)
       setError(null)
 
-      const response = await fetch('/api/courses/highlighted')
+      const response = await fetch('/api/courses/highlighted', {
+        // Add cache control for better performance
+        next: { revalidate: 300 } // 5 minutes cache
+      } as any)
+      
       if (!response.ok) {
         throw new Error('Failed to fetch highlighted courses')
       }
@@ -121,10 +134,20 @@ export function HighlightedCourses({ onCourseSelect, className = "" }: Highlight
                 className="group cursor-pointer relative overflow-hidden
                   border-l-4 border-l-blue-500 dark:border-l-blue-400
                   bg-gradient-to-br from-blue-50/50 to-indigo-50/30 dark:from-blue-950/20 dark:to-indigo-950/10
-                  shadow-sm hover:shadow-lg hover:-translate-y-1
+                  shadow-sm hover:shadow-lg hover:-translate-y-0.5
                   hover:border-gray-300 dark:hover:border-gray-600
-                  transition-all duration-300 ease-out"
+                  transition-all duration-200 ease-out
+                  will-change-transform
+                  active:scale-[0.98]"
                 onClick={() => onCourseSelect?.(course.id)}
+                tabIndex={0}
+                role="button"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onCourseSelect?.(course.id)
+                  }
+                }}
               >
                 <CardContent className="p-0 relative">
                   <div className="p-6">
