@@ -84,7 +84,7 @@ export function Header({ className }: HeaderProps) {
               className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity group"
             >
               {/* Logo Icon */}
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/10 border border-primary/20">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/10 border border-primary/20">
                 <img
                   src="/images/diu-logo.png"
                   alt="StudyHub DIU"
@@ -103,12 +103,12 @@ export function Header({ className }: HeaderProps) {
                 />
               </div>
               
-              {/* Brand Text - Hidden on mobile, visible from sm breakpoint */}
-              <div className="hidden sm:flex flex-col">
-                <span className="font-semibold text-sm sm:text-base leading-none text-foreground">
+              {/* Brand Text - Always visible */}
+              <div className="flex flex-col">
+                <span className="font-semibold text-xs sm:text-base leading-none text-foreground">
                   StudyHub DIU
                 </span>
-                <span className="text-[9px] sm:text-[10px] text-muted-foreground font-normal uppercase tracking-wider leading-none mt-1">
+                <span className="text-[8px] sm:text-[10px] text-muted-foreground font-normal uppercase tracking-wider leading-none mt-0.5 sm:mt-1">
                   Learning Platform
                 </span>
               </div>
@@ -155,69 +155,6 @@ export function Header({ className }: HeaderProps) {
                 <Moon className="h-4 w-4" />
               )}
             </Button>
-
-            {/* Notifications Dropdown */}
-            <div className="relative" ref={notificationRef}>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-10 h-10 rounded-xl hover:bg-accent/60 transition-all duration-200 relative hover:scale-105"
-                onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                title="Notifications"
-              >
-                <Bell className="h-4 w-4" />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 h-4 w-4 bg-destructive rounded-full text-[10px] font-bold flex items-center justify-center text-white shadow-md animate-pulse">
-                    {unreadCount}
-                  </span>
-                )}
-              </Button>
-
-              {/* Notifications Dropdown */}
-              {isNotificationOpen && (
-                <div className="absolute right-0 mt-3 w-80 bg-background border border-border/50 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="p-4 border-b border-border/50 bg-gradient-to-br from-primary/5 to-transparent">
-                    <h3 className="font-semibold text-base">Notifications</h3>
-                    {unreadCount > 0 && (
-                      <p className="text-xs text-muted-foreground mt-1">{unreadCount} unread</p>
-                    )}
-                  </div>
-                  <div className="max-h-96 overflow-y-auto">
-                    {notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={cn(
-                          "p-4 hover:bg-accent/50 cursor-pointer border-b border-border/50 last:border-0 transition-colors",
-                          notification.unread && "bg-primary/5"
-                        )}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-foreground truncate">
-                              {notification.title}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                              {notification.message}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-1.5">
-                              {notification.time}
-                            </p>
-                          </div>
-                          {notification.unread && (
-                            <div className="w-2 h-2 rounded-full bg-primary mt-1 flex-shrink-0" />
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="p-3 border-t border-border/50 bg-gradient-to-br from-primary/5 to-transparent">
-                    <button className="text-sm text-primary hover:text-primary/80 font-medium w-full text-center transition-colors">
-                      View all notifications
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
 
             {/* Profile Dropdown */}
             <div className="relative hidden sm:block" ref={profileRef}>
