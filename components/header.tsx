@@ -81,10 +81,10 @@ export function Header({ className }: HeaderProps) {
           <div className="flex items-center">
             <button 
               onClick={() => handleNavigation("/")}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity group"
+              className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity group"
             >
               {/* Logo Icon */}
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/10 border border-primary/20">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/10 border border-primary/20">
                 <img
                   src="/images/diu-logo.png"
                   alt="StudyHub DIU"
@@ -103,12 +103,12 @@ export function Header({ className }: HeaderProps) {
                 />
               </div>
               
-              {/* Brand Text */}
-              <div className="flex flex-col">
-                <span className="font-semibold text-base leading-none text-foreground">
+              {/* Brand Text - Hidden on mobile, visible from sm breakpoint */}
+              <div className="hidden sm:flex flex-col">
+                <span className="font-semibold text-sm sm:text-base leading-none text-foreground">
                   StudyHub DIU
                 </span>
-                <span className="text-[10px] text-muted-foreground font-normal uppercase tracking-wider leading-none mt-1">
+                <span className="text-[9px] sm:text-[10px] text-muted-foreground font-normal uppercase tracking-wider leading-none mt-1">
                   Learning Platform
                 </span>
               </div>
