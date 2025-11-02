@@ -151,10 +151,7 @@ export default function HomePage() {
             const shareUrl = generateSimpleShareUrl(parsedUrl.type, parsedUrl.id)
             updateUrlWithoutNavigation(shareUrl)
 
-            toast({
-              title: "Content Loaded",
-              description: `Now viewing: ${content.title}`,
-            })
+            // Removed toast notification - no popup when content loads
           } else {
             console.error("API Error:", response.status, response.statusText)
             const errorData = await response.text()
@@ -328,10 +325,7 @@ export default function HomePage() {
 
       console.log("URL updated successfully")
 
-      toast({
-        title: "Content Loaded",
-        description: `Now viewing: ${content.title}`,
-      })
+      // Removed toast notification - no popup when content loads
     } catch (error) {
       console.error("Error loading content:", error)
       trackError("Content loading failed", {
