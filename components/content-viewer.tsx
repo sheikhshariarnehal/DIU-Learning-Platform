@@ -392,14 +392,21 @@ export const ContentViewer = memo(function ContentViewer({ content, isLoading = 
       }
 
       if (videoId) {
-        // Return proper embed URL with necessary parameters
-        return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}&rel=0&modestbranding=1`
+        // Return proper embed URL with parameters to keep users in the app
+        // rel=0: Only show related videos from the same channel
+        // modestbranding=1: Minimize YouTube branding
+        // fs=1: Allow fullscreen (but within the iframe)
+        // disablekb=0: Enable keyboard controls
+        // iv_load_policy=3: Disable video annotations
+        // enablejsapi=1: Enable JavaScript API for control
+        return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}&rel=0&modestbranding=1&fs=1&disablekb=0&iv_load_policy=3`
       }
 
       // If it's already an embed URL, ensure it has proper parameters
       if (url.includes("youtube.com/embed/")) {
         const baseUrl = url.split("?")[0]
-        return `${baseUrl}?enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}&rel=0&modestbranding=1`
+        const videoIdMatch = baseUrl.split("embed/")[1]
+        return `https://www.youtube.com/embed/${videoIdMatch}?enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}&rel=0&modestbranding=1&fs=1&disablekb=0&iv_load_policy=3`
       }
     } else if (type === "slide" || type === "document" || type === "study-tool") {
       // Handle Google Drive URLs for documents, slides, and study tools
@@ -918,6 +925,7 @@ export const ContentViewer = memo(function ContentViewer({ content, isLoading = 
               ${isMobile ? 'touch-manipulation' : ''}
             `}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
             allowFullScreen
             title={content.title}
             onLoad={handleIframeLoad}
