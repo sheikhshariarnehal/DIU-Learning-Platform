@@ -1,5 +1,8 @@
 "use client"
 
+// Force dynamic rendering for admin routes - prevent caching
+export const dynamic = 'force-dynamic'
+
 import React, { useEffect, useState } from "react"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
 import { AdminHeader } from "@/components/admin/admin-header"

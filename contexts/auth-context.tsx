@@ -43,6 +43,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         method: "GET",
         credentials: "include",
         signal: controller.signal,
+        cache: 'no-store', // Prevent caching
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
       })
 
       clearTimeout(timeoutId)
@@ -94,6 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           "Content-Type": "application/json",
         },
         credentials: "include",
+        cache: 'no-store', // Prevent caching
         body: JSON.stringify({ email, password }),
       })
 
@@ -103,6 +108,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.success) {
         console.log("✅ AuthContext login successful")
         setUser(data.user)
+        // Force page reload to clear any cached state
+        await checkAuth()
         return { success: true }
       } else {
         console.log("❌ AuthContext login failed:", data.error)

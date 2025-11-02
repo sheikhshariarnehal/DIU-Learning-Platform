@@ -4,6 +4,10 @@ import jwt from "jsonwebtoken"
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production"
 
+// Disable caching for this route - critical for auth
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET(request: NextRequest) {
   try {
     const token = request.cookies.get("admin_token")?.value
@@ -77,10 +81,17 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       user: adminUser
     })
+
+    // Add cache control headers to prevent caching
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+
+    return response
 
   } catch (error) {
     console.error("Session validation error:", error)

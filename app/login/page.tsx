@@ -20,11 +20,15 @@ export default function LoginPage() {
         const response = await fetch("/api/auth/me", {
           method: "GET",
           credentials: "include",
+          cache: 'no-store', // Prevent caching
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
         })
         if (response.ok) {
           const data = await response.json()
           if (data.success) {
-            router.push("/admin")
+            window.location.href = "/admin" // Force full page reload
           }
         }
       } catch (error) {
@@ -65,11 +69,14 @@ export default function LoginPage() {
         console.log("✅ Login successful, redirecting to admin...")
 
         // Force a small delay to ensure cookie is set
-        await new Promise(resolve => setTimeout(resolve, 300))
+        await new Promise(resolve => setTimeout(resolve, 500))
 
-        // Use window.location instead of router.push for more reliable redirect
+        // Use window.location for full page reload to clear cache
         console.log("🔄 Redirecting to admin dashboard...")
         window.location.href = "/admin"
+        
+        // Alternative: Force hard reload if needed
+        // window.location.replace("/admin")
       } else {
         console.log("❌ Login failed:", data.error)
         setError(data.error || "Login failed")
