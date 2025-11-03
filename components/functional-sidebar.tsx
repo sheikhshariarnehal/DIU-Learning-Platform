@@ -119,14 +119,9 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
   
   // Reset auto-expand ref when selectedContentId changes
   useEffect(() => {
-    if (selectedContentId !== hasAutoExpandedRef.current) {
-      // Don't reset immediately, let the current expansion complete
-      const timeoutId = setTimeout(() => {
-        if (selectedContentId && selectedContentId !== hasAutoExpandedRef.current) {
-          hasAutoExpandedRef.current = null
-        }
-      }, 100)
-      return () => clearTimeout(timeoutId)
+    // Only reset if content actually changed to something different (not just mounted)
+    if (selectedContentId && selectedContentId !== hasAutoExpandedRef.current && hasAutoExpandedRef.current !== null) {
+      hasAutoExpandedRef.current = null
     }
   }, [selectedContentId])
 
@@ -173,7 +168,7 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
         // Wait for all courses to start loading
         await Promise.all(loadPromises)
         
-        // Minimal wait for state to settle (reduced from 500ms to 150ms)
+        // Minimal wait for state to settle
         await new Promise(resolve => setTimeout(resolve, 150))
 
         // Now search through all courses to find the selected content
@@ -266,16 +261,17 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
           }
         }
 
-        // Mark that we've attempted to expand for this content
+        // Mark that we've successfully expanded for this content
         if (hasExpanded) {
           hasAutoExpandedRef.current = selectedContentId
         }
       } catch (error) {
         console.error('Error expanding sidebar for selected content:', error)
+        // Don't mark ref on error so it can be retried
       }
     }
 
-    // Reduced initial delay from 500ms to 100ms for faster response
+    // Small delay to ensure DOM is ready
     const timeoutId = setTimeout(() => {
       expandSidebarForSelectedContent()
     }, 100)
