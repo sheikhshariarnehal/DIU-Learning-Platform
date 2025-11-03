@@ -530,34 +530,23 @@ export default function HomePage() {
                       </div>
 
                       {/* Action Buttons - Desktop */}
-                      <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleDownload}
-                          className="flex-1 sm:flex-none text-xs sm:text-sm h-8 sm:h-9 touch-manipulation min-w-0"
-                          disabled={isLoading}
-                        >
-                          <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
-                          <span className="hidden xs:inline truncate">
-                            {selectedContent.type === "video" ? "Watch" : "Download"}
-                          </span>
-                          <span className="xs:hidden">
-                            {selectedContent.type === "video" ? "▶" : "Download"}
-                          </span>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleFullscreen}
-                          className="flex-1 sm:flex-none text-xs sm:text-sm h-8 sm:h-9 touch-manipulation"
-                          disabled={isLoading}
-                        >
-                          <Maximize className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                          <span className="hidden sm:inline">Fullscreen</span>
-                          <span className="sm:hidden">Full</span>
-                        </Button>
-                      </div>
+                      {/* For videos: no buttons shown */}
+                      {/* For files (slides/documents): only download button */}
+                      {selectedContent.type !== "video" && (
+                        <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleDownload}
+                            className="flex-1 sm:flex-none text-xs sm:text-sm h-8 sm:h-9 touch-manipulation min-w-0"
+                            disabled={isLoading}
+                          >
+                            <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
+                            <span className="hidden xs:inline truncate">Download</span>
+                            <span className="xs:hidden">Download</span>
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </>
