@@ -145,138 +145,111 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
 
   // Auto-expand sidebar when content is selected (on page load/refresh)
   useEffect(() => {
+    if (!selectedContentId || courses.length === 0) return
+    if (hasAutoExpandedRef.current === selectedContentId) return
+
+    let timeoutId: NodeJS.Timeout
+    let isCancelled = false
+
     const expandSidebarForSelectedContent = async () => {
-      if (!selectedContentId || courses.length === 0) return
-
-      // Prevent running if we've already expanded for this content
-      if (hasAutoExpandedRef.current === selectedContentId) {
-        return
-      }
-
-      // Prevent running multiple times
-      let hasExpanded = false
-
       try {
-        // First, ensure all courses have their data loaded
-        const loadPromises = courses.map(async (course) => {
-          const courseId = (course as any).id
-          if (!courseData[courseId] || courseData[courseId].isLoading) {
-            await fetchCourseData(courseId)
-          }
-        })
-        
-        // Wait for all courses to start loading
-        await Promise.all(loadPromises)
-        
-        // Minimal wait for state to settle
-        await new Promise(resolve => setTimeout(resolve, 150))
+        // Load all course data in parallel
+        await Promise.all(
+          courses.map(async (course) => {
+            const courseId = (course as any).id
+            if (!courseData[courseId] || courseData[courseId].isLoading) {
+              await fetchCourseData(courseId)
+            }
+          })
+        )
 
-        // Now search through all courses to find the selected content
+        if (isCancelled) return
+
+        // Brief wait for state to settle
+        await new Promise(resolve => setTimeout(resolve, 100))
+
+        if (isCancelled) return
+
+        // Search for content and expand
         for (const course of courses) {
-          if (hasExpanded) break
-
           const courseId = (course as any).id
-          const currentCourseData = courseData[courseId]
+          const data = courseData[courseId]
           
-          if (!currentCourseData || currentCourseData.isLoading) {
-            continue
-          }
+          if (!data || data.isLoading) continue
 
-          const data = currentCourseData
-
-          // Check study tools first (simpler check)
-          const isStudyTool = data.studyTools?.some((tool: any) => tool.id === selectedContentId)
-          if (isStudyTool) {
-            setExpandedCourses(new Set([(course as any).id]))
-            setExpandedStudyTools(new Set([(course as any).id]))
-            hasExpanded = true
+          // Check study tools
+          if (data.studyTools?.some((tool: any) => tool.id === selectedContentId)) {
+            setExpandedCourses(new Set([courseId]))
+            setExpandedStudyTools(new Set([courseId]))
+            hasAutoExpandedRef.current = selectedContentId
             
-            // Scroll to selected item after expansion (reduced from 400ms to 200ms)
-            setTimeout(() => {
-              const selectedElement = document.querySelector(`[data-content-id="${selectedContentId}"]`)
-              if (selectedElement) {
-                selectedElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
-              }
-            }, 200)
-            break
+            requestAnimationFrame(() => {
+              const el = document.querySelector(`[data-content-id="${selectedContentId}"]`)
+              el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            })
+            return
           }
 
-          // Search through topics for videos/slides
+          // Check topics for videos/slides
           for (const topic of data.topics || []) {
-            if (hasExpanded) break
-
-            // First check if we need to load topic content
-            const topicVideos = data.videos?.[topic.id] || []
-            const topicSlides = data.slides?.[topic.id] || []
+            const videos = data.videos?.[topic.id] || []
+            const slides = data.slides?.[topic.id] || []
             
-            // If topic content isn't loaded yet, load it
-            if (topicVideos.length === 0 && topicSlides.length === 0) {
-              await fetchTopicContent((course as any).id, topic.id)
-              // Minimal wait for state to update (reduced from 100ms to 50ms)
+            // Load topic content if needed
+            if (videos.length === 0 && slides.length === 0) {
+              await fetchTopicContent(courseId, topic.id)
               await new Promise(resolve => setTimeout(resolve, 50))
               
-              // Get fresh data after loading
-              const freshData = courseData[(course as any).id]
-              if (freshData) {
-                const freshVideos = freshData.videos?.[topic.id] || []
-                const freshSlides = freshData.slides?.[topic.id] || []
+              if (isCancelled) return
+              
+              const freshData = courseData[courseId]
+              const freshVideos = freshData?.videos?.[topic.id] || []
+              const freshSlides = freshData?.slides?.[topic.id] || []
+              
+              if (freshVideos.some((v: any) => v.id === selectedContentId) ||
+                  freshSlides.some((s: any) => s.id === selectedContentId)) {
+                setExpandedCourses(new Set([courseId]))
+                setExpandedTopics(new Set([courseId]))
+                setExpandedTopicItems(new Set([topic.id]))
+                hasAutoExpandedRef.current = selectedContentId
                 
-                // Check in fresh data
-                if (freshVideos.some((v: any) => v.id === selectedContentId) ||
-                    freshSlides.some((s: any) => s.id === selectedContentId)) {
-                  setExpandedCourses(new Set([(course as any).id]))
-                  setExpandedTopics(new Set([(course as any).id]))
-                  setExpandedTopicItems(new Set([topic.id]))
-                  hasExpanded = true
-                  
-                  // Scroll to selected item after expansion (reduced from 500ms to 250ms)
-                  setTimeout(() => {
-                    const selectedElement = document.querySelector(`[data-content-id="${selectedContentId}"]`)
-                    if (selectedElement) {
-                      selectedElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                    }
-                  }, 250)
-                  break
-                }
+                requestAnimationFrame(() => {
+                  const el = document.querySelector(`[data-content-id="${selectedContentId}"]`)
+                  el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                })
+                return
               }
             } else {
-              // Content already loaded, check directly
-              if (topicVideos.some((v: any) => v.id === selectedContentId) ||
-                  topicSlides.some((s: any) => s.id === selectedContentId)) {
-                setExpandedCourses(new Set([(course as any).id]))
-                setExpandedTopics(new Set([(course as any).id]))
+              // Check loaded content
+              if (videos.some((v: any) => v.id === selectedContentId) ||
+                  slides.some((s: any) => s.id === selectedContentId)) {
+                setExpandedCourses(new Set([courseId]))
+                setExpandedTopics(new Set([courseId]))
                 setExpandedTopicItems(new Set([topic.id]))
-                hasExpanded = true
+                hasAutoExpandedRef.current = selectedContentId
                 
-                // Scroll to selected item after expansion (reduced from 500ms to 250ms)
-                setTimeout(() => {
-                  const selectedElement = document.querySelector(`[data-content-id="${selectedContentId}"]`)
-                  if (selectedElement) {
-                    selectedElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                  }
-                }, 250)
-                break
+                requestAnimationFrame(() => {
+                  const el = document.querySelector(`[data-content-id="${selectedContentId}"]`)
+                  el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                })
+                return
               }
             }
           }
         }
-
-        // Mark that we've successfully expanded for this content
-        if (hasExpanded) {
-          hasAutoExpandedRef.current = selectedContentId
-        }
       } catch (error) {
-        console.error('Error expanding sidebar for selected content:', error)
-        // Don't mark ref on error so it can be retried
+        console.error('Error expanding sidebar:', error)
       }
     }
 
-    // Small delay to ensure DOM is ready
-    const timeoutId = setTimeout(() => {
+    timeoutId = setTimeout(() => {
       expandSidebarForSelectedContent()
-    }, 100)
+    }, 50)
 
-    return () => clearTimeout(timeoutId)
+    return () => {
+      isCancelled = true
+      clearTimeout(timeoutId)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedContentId, courses, courseData])
 
