@@ -246,20 +246,30 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
     }
   }, [courseData])
 
-  // Optimized toggle functions with debouncing
+  // Optimized toggle functions - Only one course can be open at a time
   const toggleCourse = useCallback((courseId: string) => {
     setExpandedCourses((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(courseId)) {
-        newSet.delete(courseId)
+      const newSet = new Set()
+      
+      // If clicking on already expanded course, collapse it
+      if (prev.has(courseId)) {
+        // Close everything
+        setExpandedTopics(new Set())
+        setExpandedTopicItems(new Set())
+        setExpandedStudyTools(new Set())
       } else {
+        // Close all other courses and open only this one
         newSet.add(courseId)
+        // Reset all nested expansions when switching courses
+        setExpandedTopics(new Set())
+        setExpandedTopicItems(new Set())
+        setExpandedStudyTools(new Set())
         // Only fetch data when expanding
         setTimeout(() => fetchCourseData(courseId), 0)
       }
       return newSet
     })
-  }, [])
+  }, [fetchCourseData])
 
   const toggleStudyTools = useCallback((courseId: string) => {
     setExpandedStudyTools((prev) => {
@@ -568,7 +578,7 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
       {/* Course List */}
       <ScrollArea className={`flex-1 ${isMobile ? 'mobile-scroll-container' : ''}`}>
         <div
-          className={`${isMobile ? 'px-4 py-3 space-y-2' : 'p-4 space-y-3'}`}
+          className={`${isMobile ? 'px-4 py-3 space-y-2' : 'px-3 py-2.5 space-y-2'}`}
           onTouchStart={(e) => {
             if (isMobile) {
               setTouchStartY(e.touches[0].clientY)
@@ -676,117 +686,118 @@ const CourseItem = React.memo(
     isScrolling?: boolean
   }) => {
     return (
-      <div className={`${isMobile ? 'space-y-2' : 'space-y-2'}`}>
-        {/* Course Header - Simple Mobile Design */}
-        <div className={`${isMobile ? 'bg-card rounded-lg border border-border/20' : 'bg-card rounded-lg hover:bg-accent/50 transition-colors border border-border'}`}>
-          <div className={`p-3 rounded-lg ${course.is_highlighted ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' : ''}`}>
-          <Button
-            variant="ghost"
-            className={`w-full justify-start text-left p-0 h-auto hover:bg-transparent ${isMobile ? 'min-h-[48px]' : ''}`}
-            onClick={() => !isScrolling && onToggleCourse(course.id)}
-          >
-            <div className="flex items-start gap-3 w-full">
-              {/* Chevron Icon */}
-              <div className="flex-shrink-0 mt-1">
-                {expandedCourses.has(course.id) ? (
-                  <ChevronDown className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-muted-foreground`} />
-                ) : (
-                  <ChevronRight className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-muted-foreground`} />
-                )}
-              </div>
+      <div className={`${isMobile ? 'space-y-2' : 'space-y-1.5'}`}>
+        {/* Professional Course Card */}
+        <div className={`group relative ${isMobile ? 'bg-card rounded-xl border border-border/30 shadow-sm' : 'bg-card rounded-xl hover:shadow-md transition-all duration-200 border border-border/40 hover:border-primary/30'} ${
+          expandedCourses.has(course.id) ? 'ring-2 ring-primary/10' : ''
+        }`}>
+          <div className={`${isMobile ? 'p-3' : 'p-3'} rounded-xl ${
+            course.is_highlighted 
+              ? 'bg-gradient-to-br from-amber-50/80 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-800/10 border-l-4 border-amber-400 dark:border-amber-600' 
+              : ''
+          }`}>
+            <Button
+              variant="ghost"
+              className={`w-full justify-start text-left p-0 h-auto hover:bg-transparent ${isMobile ? 'min-h-[48px]' : ''}`}
+              onClick={() => !isScrolling && onToggleCourse(course.id)}
+            >
+              <div className={`flex items-start w-full ${isMobile ? 'gap-3' : 'gap-2.5'}`}>
+                {/* Enhanced Chevron Icon */}
+                <div className={`flex-shrink-0 ${isMobile ? 'mt-1' : 'mt-0.5'}`}>
+                  {expandedCourses.has(course.id) ? (
+                    <div className="p-0.5 rounded-md bg-primary/10 transition-colors">
+                      <ChevronDown className={`${isMobile ? 'h-4 w-4' : 'h-4 w-4'} text-primary`} />
+                    </div>
+                  ) : (
+                    <div className="p-0.5 rounded-md bg-muted/50 group-hover:bg-primary/10 transition-colors">
+                      <ChevronRight className={`${isMobile ? 'h-4 w-4' : 'h-4 w-4'} text-muted-foreground group-hover:text-primary transition-colors`} />
+                    </div>
+                  )}
+                </div>
 
-              {/* Course Content */}
-              <div className="flex-1 min-w-0">
-                {isMobile ? (
-                  /* Mobile Layout - Simple and Clean */
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-medium text-sm text-foreground leading-tight flex-1">
-                        {course.title}
-                      </h4>
-                      {course.is_highlighted && (
-                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-muted-foreground font-medium">
-                        {course.course_code}
-                      </span>
-                      <span className="text-xs text-muted-foreground/60">•</span>
-                      <span className="text-xs text-muted-foreground truncate">
-                        {course.teacher_name}
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  /* Desktop Layout */
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <div className="font-medium text-sm text-foreground truncate flex-1">
-                        {course.title}
+                {/* Course Content */}
+                <div className="flex-1 min-w-0">
+                  {isMobile ? (
+                    /* Mobile Layout - Clean & Professional */
+                    <div>
+                      <div className="flex items-start gap-2 mb-1.5">
+                        <h4 className="font-semibold text-sm text-foreground leading-tight flex-1 line-clamp-2">
+                          {course.title}
+                        </h4>
+                        {course.is_highlighted && (
+                          <div className="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 bg-amber-500/20 rounded-md">
+                            <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></div>
+                            <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400">Featured</span>
+                          </div>
+                        )}
                       </div>
-                      {course.is_highlighted && (
-                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                      )}
-                    </div>
-                    {!compactMode && (
-                      <>
-                        <div className="text-xs text-muted-foreground">({course.course_code})</div>
-                        <div className="text-xs text-muted-foreground">{course.teacher_name}</div>
-                      </>
-                    )}
-
-                    {courseData && !courseData.isLoading && !compactMode && (
-                      <div className="flex gap-1 mt-2">
-                        <Badge variant="secondary" className="text-xs bg-secondary text-secondary-foreground">
-                          {courseData.topics.length} Topics
-                        </Badge>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground ml-2">
-                          {Object.values(courseData.videos).flat().length > 0 && (
-                            <span>{Object.values(courseData.videos).flat().length} Video{Object.values(courseData.videos).flat().length > 1 ? 's' : ''}</span>
-                          )}
-                          {Object.values(courseData.videos).flat().length > 0 && Object.values(courseData.slides).flat().length > 0 && (
-                            <span className="text-muted-foreground/60">•</span>
-                          )}
-                          {Object.values(courseData.slides).flat().length > 0 && (
-                            <span>{Object.values(courseData.slides).flat().length} Slide{Object.values(courseData.slides).flat().length > 1 ? 's' : ''}</span>
-                          )}
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-primary font-semibold px-2 py-0.5 bg-primary/10 rounded-md">
+                          {course.course_code}
+                        </span>
+                        <span className="text-xs text-muted-foreground/60">•</span>
+                        <span className="text-xs text-muted-foreground truncate font-medium">
+                          {course.teacher_name}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                )}
+                    </div>
+                  ) : (
+                    /* Desktop Layout - Professional & Compact */
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-semibold text-sm text-foreground line-clamp-1 flex-1">
+                          {course.title}
+                        </h4>
+                        {course.is_highlighted && (
+                          <div className="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 bg-amber-500/20 rounded-md">
+                            <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></div>
+                            <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400">Featured</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-primary font-semibold px-2 py-0.5 bg-primary/10 rounded-md">
+                          {course.course_code}
+                        </span>
+                        <span className="text-xs text-muted-foreground/60">•</span>
+                        <span className="text-xs text-muted-foreground font-medium line-clamp-1 flex-1">
+                          {course.teacher_name}
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
-                {courseData?.isLoading && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Loading content...</span>
-                  </div>
-                )}
+                  {courseData?.isLoading && (
+                    <div className="flex items-center gap-2 mt-2 px-2 py-1.5 bg-muted/30 rounded-md">
+                      <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                      <span className="text-xs text-muted-foreground font-medium">Loading content...</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </Button>
+            </Button>
           </div>
         </div>
 
-        {/* Course Content */}
+        {/* Course Content with Smooth Animation */}
         {expandedCourses.has(course.id) && courseData && !courseData.isLoading && (
-          <div className={`${isMobile ? 'ml-4 space-y-2' : 'ml-4 space-y-2'}`}>
+          <div className={`${isMobile ? 'ml-4 space-y-1.5' : 'ml-3 space-y-1'} course-expand-enter`}>
             {/* Study Tools Section */}
             {courseData.studyTools.length > 0 && (
               <div>
                 <Button
                   variant="ghost"
-                  className={`w-full justify-start text-left ${isMobile ? 'p-2 h-auto hover:bg-accent/30 rounded-md' : 'p-2 h-auto hover:bg-accent rounded-md'}`}
+                  className={`w-full justify-start text-left ${isMobile ? 'p-2 h-auto hover:bg-accent/30 rounded-md' : 'px-2 py-1.5 h-auto hover:bg-accent rounded-md'}`}
                   onClick={() => onToggleStudyTools(course.id)}
                 >
                   <div className="flex items-center gap-2">
                     {expandedStudyTools.has(course.id) ? (
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                     ) : (
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
                     )}
-                    <BookOpen className="h-4 w-4 text-primary" />
+                    <BookOpen className="h-3.5 w-3.5 text-primary" />
                     <span className="text-sm text-foreground flex-1">
                       Study Resources
                     </span>
@@ -797,7 +808,7 @@ const CourseItem = React.memo(
                 </Button>
 
                 {expandedStudyTools.has(course.id) && (
-                  <div className="ml-6 space-y-1">
+                  <div className="ml-5 space-y-0.5 mt-0.5">
                     {courseData.studyTools.map((tool: StudyTool) => {
                       const isSelected = selectedContentId === tool.id
                       return (
@@ -843,16 +854,16 @@ const CourseItem = React.memo(
               <div className="min-w-0">
                 <Button
                   variant="ghost"
-                  className={`w-full justify-start text-left ${isMobile ? 'p-2 h-auto hover:bg-accent/30 rounded-md' : 'p-2 h-auto hover:bg-accent rounded-md'} touch-manipulation`}
+                  className={`w-full justify-start text-left ${isMobile ? 'p-2 h-auto hover:bg-accent/30 rounded-md' : 'px-2 py-1.5 h-auto hover:bg-accent rounded-md'} touch-manipulation`}
                   onClick={() => !isScrolling && onToggleTopics(course.id)}
                 >
                   <div className="flex items-center gap-2">
                     {expandedTopics.has(course.id) ? (
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                     ) : (
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
                     )}
-                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <FileText className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-sm text-foreground flex-1">Topics</span>
                     <span className="text-xs text-muted-foreground">
                       {courseData.topics.length}
@@ -861,69 +872,66 @@ const CourseItem = React.memo(
                 </Button>
 
                 {expandedTopics.has(course.id) && (
-                  <div className="ml-6 space-y-1 min-w-0">
+                  <div className={`${isMobile ? 'ml-3 space-y-1' : 'ml-3 space-y-0.5'} mt-1 min-w-0 border-l border-border/30 pl-2 topic-list-expand`}>
                     {courseData.topics.map((topic: Topic, index: number) => {
                       const topicSlides = courseData.slides[topic.id] || []
                       const topicVideos = courseData.videos[topic.id] || []
+                      const hasContent = topicSlides.length > 0 || topicVideos.length > 0
 
                       return (
-                        <div key={topic.id} className="min-w-0">
+                        <div key={topic.id} className="min-w-0 relative">
+                          {/* Enhanced Professional Topic Item */}
                           <Button
                             variant="ghost"
-                            className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[44px]' : 'px-3 py-2.5'} h-auto min-w-0 sidebar-item-professional touch-manipulation rounded-md ${
+                            className={`w-full justify-start text-left ${isMobile ? 'px-3 py-2.5 min-h-[44px]' : 'px-2.5 py-2'} h-auto min-w-0 rounded-lg transition-all duration-300 ease-out sidebar-item-professional ${
                               expandedTopicItems.has(topic.id)
-                                ? 'bg-primary/10 border border-primary/20 shadow-sm'
-                                : 'hover:bg-accent/70'
+                                ? 'bg-gradient-to-r from-primary/12 to-primary/8 text-primary border-l-[3px] border-primary shadow-sm ring-1 ring-primary/10'
+                                : 'hover:bg-accent/70 border-l-[3px] border-transparent hover:border-primary/40 hover:shadow-sm'
                             }`}
                             onClick={() => !isScrolling && onToggleTopicItem(topic.id, course.id)}
                           >
-                            <div className="flex items-start gap-2.5 w-full min-w-0">
-                              {expandedTopicItems.has(topic.id) ? (
-                                <ChevronDown className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} text-muted-foreground flex-shrink-0 mt-0.5`} />
-                              ) : (
-                                <ChevronRight className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} text-muted-foreground flex-shrink-0 mt-0.5`} />
-                              )}
-                              <div className="flex-1 min-w-0 break-words">
-                                <ProfessionalTopicTitle
-                                  index={index}
-                                  title={topic.title}
-                                  maxLength={isMobile ? 45 : 50}
-                                  variant={isMobile ? "compact" : "default"}
-                                  className={`${expandedTopicItems.has(topic.id) ? "text-primary font-semibold" : "text-foreground"} break-words leading-relaxed`}
-                                />
+                            <div className="flex items-center gap-2.5 w-full min-w-0">
+                              {/* Enhanced Chevron with Smooth Rotation */}
+                              <div className={`transition-transform duration-300 ease-out ${
+                                expandedTopicItems.has(topic.id) ? 'rotate-90' : 'rotate-0'
+                              }`}>
+                                <ChevronRight className={`h-4 w-4 flex-shrink-0 transition-colors duration-200 ${
+                                  expandedTopicItems.has(topic.id) ? 'text-primary' : 'text-muted-foreground'
+                                }`} />
                               </div>
-                              {(topicSlides.length > 0 || topicVideos.length > 0) && (
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground/70 flex-shrink-0">
-                                  {topicVideos.length > 0 && (
-                                    <span className="flex items-center gap-0.5">
-                                      <Play className="h-2.5 w-2.5" />
-                                      {topicVideos.length}
-                                    </span>
-                                  )}
-                                  {topicSlides.length > 0 && (
-                                    <span className="flex items-center gap-0.5">
-                                      <FileText className="h-2.5 w-2.5" />
-                                      {topicSlides.length}
-                                    </span>
-                                  )}
+
+                              {/* Enhanced Topic Title with Number Badge */}
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <div className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold transition-colors ${
+                                  expandedTopicItems.has(topic.id) 
+                                    ? "bg-primary text-primary-foreground" 
+                                    : "bg-muted text-muted-foreground"
+                                }`}>
+                                  {index + 1}
                                 </div>
-                              )}
+                                <span className={`text-xs font-medium break-words line-clamp-2 min-w-0 flex-1 transition-all ${
+                                  expandedTopicItems.has(topic.id) ? "text-primary font-semibold" : "text-foreground"
+                                }`}>
+                                  {topic.title}
+                                </span>
+                              </div>
                             </div>
                           </Button>
 
+                          {/* Enhanced Professional Content Items */}
                           {expandedTopicItems.has(topic.id) && (
-                            <div className={`${isMobile ? 'ml-4' : 'ml-6'} space-y-1.5 topic-content-enter-active mt-2 min-w-0`}>
-                              {/* Videos */}
+                            <div className={`${isMobile ? 'ml-5 mr-1' : 'ml-6 mr-0.5'} space-y-0.5 mt-1.5 mb-1 min-w-0 border-l border-border/20 pl-2 topic-content-expand`}>
+                              {/* Videos - Enhanced Professional Style */}
                               {topicVideos.map((video: Video) => {
                                 const isSelected = selectedContentId === video.id
                                 return (
                                   <Button
                                     key={video.id}
                                     variant="ghost"
-                                    className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[40px]' : 'px-2 py-2'} h-auto rounded-md group transition-colors touch-manipulation min-w-0 ${
+                                    className={`w-full justify-start text-left ${isMobile ? 'px-2.5 py-2.5 min-h-[40px]' : 'px-2.5 py-2'} h-auto rounded-lg min-w-0 transition-all duration-200 content-item group ${
                                       isSelected
-                                        ? "bg-primary/10 text-primary border border-primary/20"
-                                        : "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
+                                        ? "bg-gradient-to-r from-red-500/12 to-red-500/8 border-l-[3px] border-red-500 shadow-sm ring-1 ring-red-500/10"
+                                        : "hover:bg-accent/70 border-l-[3px] border-transparent hover:border-red-500/50 hover:shadow-sm"
                                     }`}
                                     onClick={() =>
                                       !isScrolling && onContentClick(
@@ -936,34 +944,38 @@ const CourseItem = React.memo(
                                       )
                                     }
                                   >
-                                    <div className="flex items-start gap-2.5 w-full min-w-0">
-                                      <Play className={`h-3.5 w-3.5 flex-shrink-0 mt-0.5 ${isSelected ? "text-red-500" : "text-red-400"}`} />
-                                      <span className={`text-xs ${isMobile ? 'text-sm' : 'text-xs'} leading-relaxed break-words min-w-0 flex-1 ${
-                                        isSelected ? "font-medium text-foreground" : ""
-                                      }`}
-                                      style={{ 
-                                        wordBreak: 'break-word',
-                                        overflowWrap: 'anywhere',
-                                        hyphens: 'auto'
-                                      }}>
+                                    <div className="flex items-center gap-2.5 w-full min-w-0">
+                                      <div className={`p-1 rounded-md transition-colors ${
+                                        isSelected ? "bg-red-500/20" : "bg-red-500/10 group-hover:bg-red-500/15"
+                                      }`}>
+                                        <Play className={`h-3.5 w-3.5 flex-shrink-0 transition-colors ${
+                                          isSelected ? "text-red-600 dark:text-red-400" : "text-red-500"
+                                        }`} />
+                                      </div>
+                                      <span className={`text-xs leading-relaxed break-words min-w-0 flex-1 line-clamp-2 transition-all ${
+                                        isSelected ? "font-semibold text-foreground" : "text-muted-foreground font-medium group-hover:text-foreground"
+                                      }`}>
                                         {video.title}
                                       </span>
+                                      {isSelected && (
+                                        <div className="flex-shrink-0 w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                                      )}
                                     </div>
                                   </Button>
                                 )
                               })}
 
-                              {/* Slides */}
+                              {/* Slides - Enhanced Professional Style */}
                               {topicSlides.map((slide: Slide) => {
                                 const isSelected = selectedContentId === slide.id
                                 return (
                                   <Button
                                     key={slide.id}
                                     variant="ghost"
-                                    className={`w-full justify-start text-left ${isMobile ? 'px-2 py-2.5 min-h-[40px]' : 'px-2 py-2'} h-auto rounded-md group transition-colors touch-manipulation min-w-0 ${
+                                    className={`w-full justify-start text-left ${isMobile ? 'px-2.5 py-2.5 min-h-[40px]' : 'px-2.5 py-2'} h-auto rounded-lg min-w-0 transition-all duration-200 content-item group ${
                                       isSelected
-                                        ? "bg-primary/10 text-primary border border-primary/20"
-                                        : "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
+                                        ? "bg-gradient-to-r from-blue-500/12 to-blue-500/8 border-l-[3px] border-blue-500 shadow-sm ring-1 ring-blue-500/10"
+                                        : "hover:bg-accent/70 border-l-[3px] border-transparent hover:border-blue-500/50 hover:shadow-sm"
                                     }`}
                                     onClick={() =>
                                       !isScrolling && onContentClick(
@@ -976,26 +988,36 @@ const CourseItem = React.memo(
                                       )
                                     }
                                   >
-                                    <div className="flex items-start gap-2.5 w-full min-w-0">
-                                      <FileText className={`h-3.5 w-3.5 flex-shrink-0 mt-0.5 ${isSelected ? "text-blue-500" : "text-blue-400"}`} />
-                                      <span className={`text-xs ${isMobile ? 'text-sm' : 'text-xs'} leading-relaxed break-words min-w-0 flex-1 ${
-                                        isSelected ? "font-medium text-foreground" : ""
-                                      }`}
-                                      style={{ 
-                                        wordBreak: 'break-word',
-                                        overflowWrap: 'anywhere',
-                                        hyphens: 'auto'
-                                      }}>
+                                    <div className="flex items-center gap-2.5 w-full min-w-0">
+                                      <div className={`p-1 rounded-md transition-colors ${
+                                        isSelected ? "bg-blue-500/20" : "bg-blue-500/10 group-hover:bg-blue-500/15"
+                                      }`}>
+                                        <FileText className={`h-3.5 w-3.5 flex-shrink-0 transition-colors ${
+                                          isSelected ? "text-blue-600 dark:text-blue-400" : "text-blue-500"
+                                        }`} />
+                                      </div>
+                                      <span className={`text-xs leading-relaxed break-words min-w-0 flex-1 line-clamp-2 transition-all ${
+                                        isSelected ? "font-semibold text-foreground" : "text-muted-foreground font-medium group-hover:text-foreground"
+                                      }`}>
                                         {slide.title}
                                       </span>
+                                      {isSelected && (
+                                        <div className="flex-shrink-0 w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                                      )}
                                     </div>
                                   </Button>
                                 )
                               })}
 
+                              {/* Enhanced Empty State */}
                               {topicSlides.length === 0 && topicVideos.length === 0 && (
-                                <div className="text-xs text-muted-foreground py-4 text-center italic">
-                                  No content available for this topic
+                                <div className="text-center py-5 px-3">
+                                  <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-muted/50 mb-2">
+                                    <FileText className="h-4 w-4 text-muted-foreground/50" />
+                                  </div>
+                                  <div className="text-xs text-muted-foreground/70 font-medium">
+                                    No content available
+                                  </div>
                                 </div>
                               )}
                             </div>
