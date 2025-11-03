@@ -114,6 +114,22 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
   // Course data cache with loading states
   const [courseData, setCourseData] = useState({})
 
+  // Track if we've tried to auto-expand for current content
+  const hasAutoExpandedRef = React.useRef<string | null>(null)
+  
+  // Reset auto-expand ref when selectedContentId changes
+  useEffect(() => {
+    if (selectedContentId !== hasAutoExpandedRef.current) {
+      // Don't reset immediately, let the current expansion complete
+      const timeoutId = setTimeout(() => {
+        if (selectedContentId && selectedContentId !== hasAutoExpandedRef.current) {
+          hasAutoExpandedRef.current = null
+        }
+      }, 100)
+      return () => clearTimeout(timeoutId)
+    }
+  }, [selectedContentId])
+
   // Mobile-specific state and functionality
   const isMobile = useIsMobile()
   const [touchStartY, setTouchStartY] = useState(null)
@@ -131,6 +147,142 @@ export function FunctionalSidebar({ onContentSelect, selectedContentId }: Functi
       fetchCourses(selectedSemester)
     }
   }, [selectedSemester])
+
+  // Auto-expand sidebar when content is selected (on page load/refresh)
+  useEffect(() => {
+    const expandSidebarForSelectedContent = async () => {
+      if (!selectedContentId || courses.length === 0) return
+
+      // Prevent running if we've already expanded for this content
+      if (hasAutoExpandedRef.current === selectedContentId) {
+        return
+      }
+
+      // Prevent running multiple times
+      let hasExpanded = false
+
+      try {
+        // First, ensure all courses have their data loaded
+        const loadPromises = courses.map(async (course) => {
+          const courseId = (course as any).id
+          if (!courseData[courseId] || courseData[courseId].isLoading) {
+            await fetchCourseData(courseId)
+          }
+        })
+        
+        // Wait for all courses to start loading
+        await Promise.all(loadPromises)
+        
+        // Minimal wait for state to settle (reduced from 500ms to 150ms)
+        await new Promise(resolve => setTimeout(resolve, 150))
+
+        // Now search through all courses to find the selected content
+        for (const course of courses) {
+          if (hasExpanded) break
+
+          const courseId = (course as any).id
+          const currentCourseData = courseData[courseId]
+          
+          if (!currentCourseData || currentCourseData.isLoading) {
+            continue
+          }
+
+          const data = currentCourseData
+
+          // Check study tools first (simpler check)
+          const isStudyTool = data.studyTools?.some((tool: any) => tool.id === selectedContentId)
+          if (isStudyTool) {
+            setExpandedCourses(new Set([(course as any).id]))
+            setExpandedStudyTools(new Set([(course as any).id]))
+            hasExpanded = true
+            
+            // Scroll to selected item after expansion (reduced from 400ms to 200ms)
+            setTimeout(() => {
+              const selectedElement = document.querySelector(`[data-content-id="${selectedContentId}"]`)
+              if (selectedElement) {
+                selectedElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              }
+            }, 200)
+            break
+          }
+
+          // Search through topics for videos/slides
+          for (const topic of data.topics || []) {
+            if (hasExpanded) break
+
+            // First check if we need to load topic content
+            const topicVideos = data.videos?.[topic.id] || []
+            const topicSlides = data.slides?.[topic.id] || []
+            
+            // If topic content isn't loaded yet, load it
+            if (topicVideos.length === 0 && topicSlides.length === 0) {
+              await fetchTopicContent((course as any).id, topic.id)
+              // Minimal wait for state to update (reduced from 100ms to 50ms)
+              await new Promise(resolve => setTimeout(resolve, 50))
+              
+              // Get fresh data after loading
+              const freshData = courseData[(course as any).id]
+              if (freshData) {
+                const freshVideos = freshData.videos?.[topic.id] || []
+                const freshSlides = freshData.slides?.[topic.id] || []
+                
+                // Check in fresh data
+                if (freshVideos.some((v: any) => v.id === selectedContentId) ||
+                    freshSlides.some((s: any) => s.id === selectedContentId)) {
+                  setExpandedCourses(new Set([(course as any).id]))
+                  setExpandedTopics(new Set([(course as any).id]))
+                  setExpandedTopicItems(new Set([topic.id]))
+                  hasExpanded = true
+                  
+                  // Scroll to selected item after expansion (reduced from 500ms to 250ms)
+                  setTimeout(() => {
+                    const selectedElement = document.querySelector(`[data-content-id="${selectedContentId}"]`)
+                    if (selectedElement) {
+                      selectedElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    }
+                  }, 250)
+                  break
+                }
+              }
+            } else {
+              // Content already loaded, check directly
+              if (topicVideos.some((v: any) => v.id === selectedContentId) ||
+                  topicSlides.some((s: any) => s.id === selectedContentId)) {
+                setExpandedCourses(new Set([(course as any).id]))
+                setExpandedTopics(new Set([(course as any).id]))
+                setExpandedTopicItems(new Set([topic.id]))
+                hasExpanded = true
+                
+                // Scroll to selected item after expansion (reduced from 500ms to 250ms)
+                setTimeout(() => {
+                  const selectedElement = document.querySelector(`[data-content-id="${selectedContentId}"]`)
+                  if (selectedElement) {
+                    selectedElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                  }
+                }, 250)
+                break
+              }
+            }
+          }
+        }
+
+        // Mark that we've attempted to expand for this content
+        if (hasExpanded) {
+          hasAutoExpandedRef.current = selectedContentId
+        }
+      } catch (error) {
+        console.error('Error expanding sidebar for selected content:', error)
+      }
+    }
+
+    // Reduced initial delay from 500ms to 100ms for faster response
+    const timeoutId = setTimeout(() => {
+      expandSidebarForSelectedContent()
+    }, 100)
+
+    return () => clearTimeout(timeoutId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedContentId, courses, courseData])
 
   const fetchSemesters = async () => {
     try {
@@ -930,6 +1082,7 @@ const CourseItem = React.memo(
                                   <Button
                                     key={video.id}
                                     variant="ghost"
+                                    data-content-id={video.id}
                                     className={`w-full justify-start text-left ${isMobile ? 'px-2.5 py-2.5 min-h-[40px]' : 'px-2.5 py-2'} h-auto rounded-lg min-w-0 transition-all duration-200 content-item group ${
                                       isSelected
                                         ? "bg-gradient-to-r from-red-50/50 to-red-50/30 dark:from-red-500/15 dark:to-red-500/10 border-l-[3px] border-red-500 shadow-sm"
@@ -980,6 +1133,7 @@ const CourseItem = React.memo(
                                   <Button
                                     key={slide.id}
                                     variant="ghost"
+                                    data-content-id={slide.id}
                                     className={`w-full justify-start text-left ${isMobile ? 'px-2.5 py-2.5 min-h-[40px]' : 'px-2.5 py-2'} h-auto rounded-lg min-w-0 transition-all duration-200 content-item group ${
                                       isSelected
                                         ? "bg-gradient-to-r from-blue-50/50 to-blue-50/30 dark:from-blue-500/15 dark:to-blue-500/10 border-l-[3px] border-blue-500 shadow-sm"
