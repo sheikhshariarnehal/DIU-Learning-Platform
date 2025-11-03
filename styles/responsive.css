@@ -266,19 +266,16 @@
   color: rgb(59 130 246); /* blue-500 */
 }
 
-/* Professional clean sidebar styling with GPU acceleration */
+/* Clean professional sidebar styling */
 .sidebar-item-professional {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 0;
   position: relative;
-  will-change: transform, background-color;
-  backface-visibility: hidden;
-  transform: translateZ(0);
 }
 
-/* Professional hover with subtle lift */
+/* Subtle hover effect */
 .sidebar-item-professional:hover {
-  transform: translateX(2px) translateZ(0);
+  transform: translateX(1px);
 }
 
 /* Active state feedback */
@@ -286,22 +283,16 @@
   transform: scale(0.99);
 }
 
-/* Course card smooth expansion animation */
+/* Course content expansion animation */
 .course-expand-enter {
-  animation: courseExpand 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  overflow: hidden;
-}
-
-.course-expand-exit {
-  animation: courseCollapse 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  overflow: hidden;
+  animation: courseExpand 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes courseExpand {
   from {
     opacity: 0;
     max-height: 0;
-    transform: translateY(-10px);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
@@ -310,51 +301,34 @@
   }
 }
 
-@keyframes courseCollapse {
-  from {
-    opacity: 1;
-    max-height: 2000px;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    max-height: 0;
-    transform: translateY(-10px);
-  }
-}
-
-/* Optimized smooth topic list animation */
+/* Optimized topic list animation */
 .topic-list-expand {
-  animation: topicListExpand 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  transform-origin: top;
-  will-change: opacity, max-height, transform;
+  animation: topicListExpand 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes topicListExpand {
   from {
     opacity: 0;
     max-height: 0;
-    transform: scaleY(0.95) translateY(-10px);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
     max-height: 3000px;
-    transform: scaleY(1) translateY(0);
+    transform: translateY(0);
   }
 }
 
-/* Optimized smooth topic content animation */
+/* Optimized topic content animation */
 .topic-content-expand {
-  animation: topicContentExpand 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  transform-origin: top;
-  will-change: opacity, max-height, transform;
+  animation: topicContentExpand 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes topicContentExpand {
   from {
     opacity: 0;
     max-height: 0;
-    transform: translateY(-8px);
+    transform: translateY(-6px);
   }
   to {
     opacity: 1;
@@ -383,46 +357,44 @@
   }
 }
 
-/* Stagger animation for smooth topic items reveal */
+/* Stagger animation for topic items */
 .topic-list-expand > * {
-  animation: topicItemFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: topicItemFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   opacity: 0;
 }
 
-.topic-list-expand > *:nth-child(1) { animation-delay: 0.05s; }
-.topic-list-expand > *:nth-child(2) { animation-delay: 0.08s; }
-.topic-list-expand > *:nth-child(3) { animation-delay: 0.11s; }
-.topic-list-expand > *:nth-child(4) { animation-delay: 0.14s; }
-.topic-list-expand > *:nth-child(5) { animation-delay: 0.17s; }
-.topic-list-expand > *:nth-child(n+6) { animation-delay: 0.2s; }
+.topic-list-expand > *:nth-child(1) { animation-delay: 0.03s; }
+.topic-list-expand > *:nth-child(2) { animation-delay: 0.06s; }
+.topic-list-expand > *:nth-child(3) { animation-delay: 0.09s; }
+.topic-list-expand > *:nth-child(4) { animation-delay: 0.12s; }
+.topic-list-expand > *:nth-child(n+5) { animation-delay: 0.15s; }
 
 @keyframes topicItemFadeIn {
   from {
     opacity: 0;
-    transform: translateX(-8px) translateY(4px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
-    transform: translateX(0) translateY(0);
+    transform: translateY(0);
   }
 }
 
 /* Stagger animation for content items */
 .topic-content-expand > * {
-  animation: contentItemFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: contentItemFadeIn 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   opacity: 0;
 }
 
-.topic-content-expand > *:nth-child(1) { animation-delay: 0.03s; }
-.topic-content-expand > *:nth-child(2) { animation-delay: 0.06s; }
-.topic-content-expand > *:nth-child(3) { animation-delay: 0.09s; }
-.topic-content-expand > *:nth-child(4) { animation-delay: 0.12s; }
-.topic-content-expand > *:nth-child(n+5) { animation-delay: 0.15s; }
+.topic-content-expand > *:nth-child(1) { animation-delay: 0.02s; }
+.topic-content-expand > *:nth-child(2) { animation-delay: 0.04s; }
+.topic-content-expand > *:nth-child(3) { animation-delay: 0.06s; }
+.topic-content-expand > *:nth-child(n+4) { animation-delay: 0.08s; }
 
 @keyframes contentItemFadeIn {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(3px);
   }
   to {
     opacity: 1;
@@ -529,24 +501,23 @@ button[aria-expanded="true"] svg {
   border-bottom: 1px solid rgba(59, 130, 246, 0.1);
 }
 
-/* Professional content item styling with GPU acceleration */
+/* Clean content item styling */
 .content-item {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  will-change: transform, background-color;
-  backface-visibility: hidden;
-  transform: translateZ(0);
 }
 
 /* Smooth hover effect */
 .content-item:hover {
-  transform: translateX(3px) translateZ(0);
+  transform: translateX(2px);
 }
 
-/* Professional active state */
+/* Active state */
 .content-item:active {
-  transform: scale(0.98) translateZ(0);
+  transform: scale(0.99);
 }
+
+
 
 /* Simple clean topic styling */
 .sidebar-item-professional {
