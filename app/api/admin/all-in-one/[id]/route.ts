@@ -9,7 +9,8 @@ interface SemesterData {
   has_final: boolean
   start_date?: string
   end_date?: string
-  credits?: number
+  default_credits?: number
+  is_active?: boolean
 }
 
 interface CourseData {
@@ -108,17 +109,20 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
             return {
               id: topic.id,
-              title: topic.title,
+              title: topic.title || "",
               description: topic.description || "",
+              order_index: topic.order_index || 0,
               slides: (slidesResult.data || []).map(slide => ({
                 id: slide.id,
-                title: slide.title,
-                url: slide.google_drive_url
+                title: slide.title || "",
+                url: slide.google_drive_url || "",
+                description: slide.description || ""
               })),
               videos: (videosResult.data || []).map(video => ({
                 id: video.id,
-                title: video.title,
-                url: video.youtube_url
+                title: video.title || "",
+                url: video.youtube_url || "",
+                description: video.description || ""
               }))
             }
           })
@@ -135,21 +139,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
         return {
           id: course.id,
-          title: course.title,
-          course_code: course.course_code,
-          teacher_name: course.teacher_name,
-          teacher_email: course.teacher_email,
-          credits: course.credits,
-          description: course.description,
+          title: course.title || "",
+          course_code: course.course_code || "",
+          teacher_name: course.teacher_name || "",
+          teacher_email: course.teacher_email || "",
+          credits: course.credits || 3,
+          description: course.description || "",
           is_highlighted: course.is_highlighted || false,
           topics: topicsWithContent,
           studyTools: (studyTools || []).map(tool => ({
             id: tool.id,
-            title: tool.title,
-            type: tool.type,
-            content_url: tool.content_url || null,
-            exam_type: tool.exam_type,
-            description: tool.description || null
+            title: tool.title || "",
+            type: tool.type || "previous_questions",
+            content_url: tool.content_url || "",
+            exam_type: tool.exam_type || "both",
+            description: tool.description || ""
           }))
         }
       })
@@ -157,11 +161,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const result: AllInOneData = {
       semester: {
-        title: semester.title,
+        title: semester.title || "",
         description: semester.description || "",
-        section: semester.section,
-        has_midterm: semester.has_midterm,
-        has_final: semester.has_final
+        section: semester.section || "",
+        has_midterm: semester.has_midterm || false,
+        has_final: semester.has_final || false,
+        start_date: semester.start_date || "",
+        end_date: semester.end_date || "",
+        default_credits: semester.default_credits || 3,
+        is_active: semester.is_active || false
       },
       courses: coursesWithContent
     }

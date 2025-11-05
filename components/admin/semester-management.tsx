@@ -14,8 +14,26 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { toast } from "sonner"
 import { generateDemoSemester } from "@/utils/semester-demo-data"
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import {
   Search,
   Plus,
@@ -42,7 +60,8 @@ import {
   Play,
   Link,
   Upload,
-  Star
+  Star,
+  GripVertical
 } from "lucide-react"
 
 // Enhanced interfaces for semester management
@@ -108,6 +127,240 @@ type SortField = 'title' | 'section' | 'created_at' | 'updated_at' | 'courses_co
 type SortOrder = 'asc' | 'desc'
 type ViewMode = 'list' | 'create' | 'edit'
 
+// Sortable Topic Component for drag and drop
+interface SortableTopicProps {
+  topic: TopicData
+  topicIndex: number
+  courseIndex: number
+  expandedTopic: { courseIndex: number; topicIndex: number } | null
+  setExpandedTopic: (value: { courseIndex: number; topicIndex: number } | null) => void
+  removeTopic: (courseIndex: number, topicIndex: number) => void
+  updateTopic: (courseIndex: number, topicIndex: number, field: keyof TopicData, value: any) => void
+  addSlide: (courseIndex: number, topicIndex: number) => void
+  removeSlide: (courseIndex: number, topicIndex: number, slideIndex: number) => void
+  updateSlide: (courseIndex: number, topicIndex: number, slideIndex: number, field: string, value: string) => void
+  addVideo: (courseIndex: number, topicIndex: number) => void
+  removeVideo: (courseIndex: number, topicIndex: number, videoIndex: number) => void
+  updateVideo: (courseIndex: number, topicIndex: number, videoIndex: number, field: string, value: string) => void
+}
+
+function SortableTopic({
+  topic,
+  topicIndex,
+  courseIndex,
+  expandedTopic,
+  setExpandedTopic,
+  removeTopic,
+  updateTopic,
+  addSlide,
+  removeSlide,
+  updateSlide,
+  addVideo,
+  removeVideo,
+  updateVideo,
+}: SortableTopicProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: `topic-${courseIndex}-${topicIndex}` })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  const isExpanded = expandedTopic?.courseIndex === courseIndex && expandedTopic?.topicIndex === topicIndex
+
+  return (
+    <Card
+      ref={setNodeRef}
+      style={style}
+      className={`border-l-2 border-l-purple-400 ${isDragging ? 'shadow-lg z-50' : ''}`}
+    >
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div
+                  {...attributes}
+                  {...listeners}
+                  className="cursor-grab active:cursor-grabbing p-1 hover:bg-accent rounded transition-colors"
+                >
+                  <GripVertical className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="left">
+                <p className="text-xs">Hold and drag to reorder topics</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <div
+            className="flex items-center gap-2 cursor-pointer flex-1"
+            onClick={() => setExpandedTopic(
+              isExpanded ? null : { courseIndex, topicIndex }
+            )}
+          >
+            <Badge variant="secondary" className="text-xs">Topic {topicIndex + 1}</Badge>
+            <span className="text-sm font-medium">
+              {topic.title || `Topic ${topicIndex + 1}`}
+            </span>
+            <div className="ml-auto">
+              {isExpanded ? (
+                <X className="h-3 w-3" />
+              ) : (
+                <Plus className="h-3 w-3" />
+              )}
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => removeTopic(courseIndex, topicIndex)}
+            className="text-destructive hover:text-destructive h-6 w-6 p-0"
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
+      </CardHeader>
+      {isExpanded && (
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Topic Title *</Label>
+              <Input
+                placeholder="e.g., Introduction to IoT"
+                value={topic.title}
+                onChange={(e) => updateTopic(courseIndex, topicIndex, "title", e.target.value)}
+                className="h-9"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Order Index</Label>
+              <Input
+                type="number"
+                min="0"
+                value={topic.order_index || 0}
+                onChange={(e) => updateTopic(courseIndex, topicIndex, "order_index", parseInt(e.target.value) || 0)}
+                className="h-9"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Description</Label>
+            <Textarea
+              placeholder="Describe this topic..."
+              value={topic.description}
+              onChange={(e) => updateTopic(courseIndex, topicIndex, "description", e.target.value)}
+              rows={2}
+              className="resize-none"
+            />
+          </div>
+
+          {/* Slides Section */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h6 className="text-sm font-medium">Slides ({topic.slides.length})</h6>
+              <Button
+                onClick={() => addSlide(courseIndex, topicIndex)}
+                size="sm"
+                variant="outline"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Add Slide
+              </Button>
+            </div>
+            {topic.slides.map((slide, slideIndex) => (
+              <div key={slideIndex} className="grid gap-2 md:grid-cols-3 p-3 border rounded-lg">
+                <Input
+                  placeholder="Slide title"
+                  value={slide.title}
+                  onChange={(e) => updateSlide(courseIndex, topicIndex, slideIndex, "title", e.target.value)}
+                  className="h-8"
+                />
+                <Input
+                  placeholder="Google Drive/Docs URL"
+                  value={slide.url}
+                  onChange={(e) => updateSlide(courseIndex, topicIndex, slideIndex, "url", e.target.value)}
+                  className="h-8"
+                />
+                <div className="flex gap-1">
+                  <Input
+                    placeholder="Description"
+                    value={slide.description || ""}
+                    onChange={(e) => updateSlide(courseIndex, topicIndex, slideIndex, "description", e.target.value)}
+                    className="h-8 flex-1"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeSlide(courseIndex, topicIndex, slideIndex)}
+                    className="text-destructive hover:text-destructive h-8 w-8 p-0"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Videos Section */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h6 className="text-sm font-medium">Videos ({topic.videos.length})</h6>
+              <Button
+                onClick={() => addVideo(courseIndex, topicIndex)}
+                size="sm"
+                variant="outline"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Add Video
+              </Button>
+            </div>
+            {topic.videos.map((video, videoIndex) => (
+              <div key={videoIndex} className="grid gap-2 md:grid-cols-3 p-3 border rounded-lg">
+                <Input
+                  placeholder="Video title"
+                  value={video.title}
+                  onChange={(e) => updateVideo(courseIndex, topicIndex, videoIndex, "title", e.target.value)}
+                  className="h-8"
+                />
+                <Input
+                  placeholder="YouTube/Video URL"
+                  value={video.url}
+                  onChange={(e) => updateVideo(courseIndex, topicIndex, videoIndex, "url", e.target.value)}
+                  className="h-8"
+                />
+                <div className="flex gap-1">
+                  <Input
+                    placeholder="Description"
+                    value={video.description || ""}
+                    onChange={(e) => updateVideo(courseIndex, topicIndex, videoIndex, "description", e.target.value)}
+                    className="h-8 flex-1"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeVideo(courseIndex, topicIndex, videoIndex)}
+                    className="text-destructive hover:text-destructive h-8 w-8 p-0"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      )}
+    </Card>
+  )
+}
+
 export function SemesterManagement() {
   const router = useRouter()
 
@@ -143,6 +396,77 @@ export function SemesterManagement() {
     },
     courses: []
   })
+
+  // Drag and Drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px movement required before drag starts
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  // Handle drag end for topics reordering
+  const handleTopicDragEnd = useCallback((event: DragEndEvent, courseIndex: number) => {
+    const { active, over } = event
+
+    if (!over || active.id === over.id) {
+      return
+    }
+
+    setFormData(prev => {
+      const course = prev.courses[courseIndex]
+      const oldIndex = course.topics.findIndex(
+        (_, i) => `topic-${courseIndex}-${i}` === active.id
+      )
+      const newIndex = course.topics.findIndex(
+        (_, i) => `topic-${courseIndex}-${i}` === over.id
+      )
+
+      if (oldIndex === -1 || newIndex === -1) {
+        return prev
+      }
+
+      const newTopics = arrayMove(course.topics, oldIndex, newIndex)
+      
+      // Update order_index for all topics
+      const topicsWithUpdatedOrder = newTopics.map((topic, index) => ({
+        ...topic,
+        order_index: index
+      }))
+
+      const newCourses = prev.courses.map((c, i) =>
+        i === courseIndex
+          ? { ...c, topics: topicsWithUpdatedOrder }
+          : c
+      )
+
+      toast.success("Topic order updated")
+      return { ...prev, courses: newCourses }
+    })
+
+    // Update expanded topic index if needed
+    if (expandedTopic?.courseIndex === courseIndex) {
+      const course = formData.courses[courseIndex]
+      const oldIndex = course.topics.findIndex(
+        (_, i) => `topic-${courseIndex}-${i}` === active.id
+      )
+      const newIndex = course.topics.findIndex(
+        (_, i) => `topic-${courseIndex}-${i}` === over.id
+      )
+      
+      if (expandedTopic.topicIndex === oldIndex) {
+        setExpandedTopic({ courseIndex, topicIndex: newIndex })
+      } else if (oldIndex < expandedTopic.topicIndex && newIndex >= expandedTopic.topicIndex) {
+        setExpandedTopic({ courseIndex, topicIndex: expandedTopic.topicIndex - 1 })
+      } else if (oldIndex > expandedTopic.topicIndex && newIndex <= expandedTopic.topicIndex) {
+        setExpandedTopic({ courseIndex, topicIndex: expandedTopic.topicIndex + 1 })
+      }
+    }
+  }, [formData.courses, expandedTopic])
 
   // Load semesters data
   const loadSemesters = useCallback(async () => {
@@ -355,7 +679,7 @@ export function SemesterManagement() {
       // Update the local state
       setSemesters(prev => prev.map(semester => ({
         ...semester,
-        courses: semester.courses?.map(course =>
+        courses: (semester as any).courses?.map((course: any) =>
           course.id === courseId
             ? { ...course, is_highlighted: result.data.is_highlighted }
             : course
@@ -1316,9 +1640,13 @@ export function SemesterManagement() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <Plus className="h-5 w-5" />
                   Create New Semester
+                  <Badge variant="outline" className="text-xs bg-purple-50 border-purple-200 text-purple-700">
+                    <GripVertical className="h-3 w-3 mr-1" />
+                    Drag to Reorder Topics
+                  </Badge>
                 </div>
                 <Button
                   onClick={loadDemoData}
@@ -1647,179 +1975,52 @@ export function SemesterManagement() {
                                 </Button>
                               </div>
 
+                              {course.topics.length > 1 && (
+                                <div className="flex items-center gap-2 p-3 bg-purple-50 border border-purple-200 rounded-lg text-sm text-purple-800">
+                                  <GripVertical className="h-4 w-4 flex-shrink-0" />
+                                  <span className="text-xs">
+                                    <strong>Tip:</strong> Click and hold the grip icon (⋮⋮) to drag topics and change their order. Changes are saved when you click "Save Semester".
+                                  </span>
+                                </div>
+                              )}
+
                               {course.topics.length === 0 ? (
                                 <div className="text-center py-4 border border-dashed rounded-lg">
                                   <FileText className="h-6 w-6 mx-auto mb-2 text-muted-foreground opacity-50" />
                                   <p className="text-sm text-muted-foreground">No topics added yet</p>
                                 </div>
                               ) : (
-                                <div className="space-y-2">
-                                  {course.topics.map((topic, topicIndex) => (
-                                    <Card key={topicIndex} className="border-l-2 border-l-purple-400">
-                                      <CardHeader className="pb-2">
-                                        <div className="flex items-center justify-between">
-                                          <div
-                                            className="flex items-center gap-2 cursor-pointer flex-1"
-                                            onClick={() => setExpandedTopic(
-                                              expandedTopic?.courseIndex === index && expandedTopic?.topicIndex === topicIndex
-                                                ? null
-                                                : { courseIndex: index, topicIndex }
-                                            )}
-                                          >
-                                            <Badge variant="secondary" className="text-xs">Topic {topicIndex + 1}</Badge>
-                                            <span className="text-sm font-medium">
-                                              {topic.title || `Topic ${topicIndex + 1}`}
-                                            </span>
-                                            <div className="ml-auto">
-                                              {expandedTopic?.courseIndex === index && expandedTopic?.topicIndex === topicIndex ? (
-                                                <X className="h-3 w-3" />
-                                              ) : (
-                                                <Plus className="h-3 w-3" />
-                                              )}
-                                            </div>
-                                          </div>
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => removeTopic(index, topicIndex)}
-                                            className="text-destructive hover:text-destructive h-6 w-6 p-0"
-                                          >
-                                            <Trash2 className="h-3 w-3" />
-                                          </Button>
-                                        </div>
-                                      </CardHeader>
-                                      {expandedTopic?.courseIndex === index && expandedTopic?.topicIndex === topicIndex && (
-                                        <CardContent className="space-y-4">
-                                          <div className="grid gap-4 md:grid-cols-2">
-                                            <div className="space-y-2">
-                                              <Label className="text-sm font-medium">Topic Title *</Label>
-                                              <Input
-                                                placeholder="e.g., Introduction to IoT"
-                                                value={topic.title}
-                                                onChange={(e) => updateTopic(index, topicIndex, "title", e.target.value)}
-                                                className="h-9"
-                                              />
-                                            </div>
-                                            <div className="space-y-2">
-                                              <Label className="text-sm font-medium">Order Index</Label>
-                                              <Input
-                                                type="number"
-                                                min="0"
-                                                value={topic.order_index || 0}
-                                                onChange={(e) => updateTopic(index, topicIndex, "order_index", parseInt(e.target.value) || 0)}
-                                                className="h-9"
-                                              />
-                                            </div>
-                                          </div>
-                                          <div className="space-y-2">
-                                            <Label className="text-sm font-medium">Description</Label>
-                                            <Textarea
-                                              placeholder="Describe this topic..."
-                                              value={topic.description}
-                                              onChange={(e) => updateTopic(index, topicIndex, "description", e.target.value)}
-                                              rows={2}
-                                              className="resize-none"
-                                            />
-                                          </div>
-
-                                          {/* Slides Section */}
-                                          <div className="space-y-3">
-                                            <div className="flex items-center justify-between">
-                                              <h6 className="text-sm font-medium">Slides ({topic.slides.length})</h6>
-                                              <Button
-                                                onClick={() => addSlide(index, topicIndex)}
-                                                size="sm"
-                                                variant="outline"
-                                              >
-                                                <Plus className="h-3 w-3 mr-1" />
-                                                Add Slide
-                                              </Button>
-                                            </div>
-                                            {topic.slides.map((slide, slideIndex) => (
-                                              <div key={slideIndex} className="grid gap-2 md:grid-cols-3 p-3 border rounded-lg">
-                                                <Input
-                                                  placeholder="Slide title"
-                                                  value={slide.title}
-                                                  onChange={(e) => updateSlide(index, topicIndex, slideIndex, "title", e.target.value)}
-                                                  className="h-8"
-                                                />
-                                                <Input
-                                                  placeholder="Google Drive/Docs URL"
-                                                  value={slide.url}
-                                                  onChange={(e) => updateSlide(index, topicIndex, slideIndex, "url", e.target.value)}
-                                                  className="h-8"
-                                                />
-                                                <div className="flex gap-1">
-                                                  <Input
-                                                    placeholder="Description"
-                                                    value={slide.description || ""}
-                                                    onChange={(e) => updateSlide(index, topicIndex, slideIndex, "description", e.target.value)}
-                                                    className="h-8 flex-1"
-                                                  />
-                                                  <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => removeSlide(index, topicIndex, slideIndex)}
-                                                    className="text-destructive hover:text-destructive h-8 w-8 p-0"
-                                                  >
-                                                    <Trash2 className="h-3 w-3" />
-                                                  </Button>
-                                                </div>
-                                              </div>
-                                            ))}
-                                          </div>
-
-                                          {/* Videos Section */}
-                                          <div className="space-y-3">
-                                            <div className="flex items-center justify-between">
-                                              <h6 className="text-sm font-medium">Videos ({topic.videos.length})</h6>
-                                              <Button
-                                                onClick={() => addVideo(index, topicIndex)}
-                                                size="sm"
-                                                variant="outline"
-                                              >
-                                                <Plus className="h-3 w-3 mr-1" />
-                                                Add Video
-                                              </Button>
-                                            </div>
-                                            {topic.videos.map((video, videoIndex) => (
-                                              <div key={videoIndex} className="grid gap-2 md:grid-cols-3 p-3 border rounded-lg">
-                                                <Input
-                                                  placeholder="Video title"
-                                                  value={video.title}
-                                                  onChange={(e) => updateVideo(index, topicIndex, videoIndex, "title", e.target.value)}
-                                                  className="h-8"
-                                                />
-                                                <Input
-                                                  placeholder="YouTube/Video URL"
-                                                  value={video.url}
-                                                  onChange={(e) => updateVideo(index, topicIndex, videoIndex, "url", e.target.value)}
-                                                  className="h-8"
-                                                />
-                                                <div className="flex gap-1">
-                                                  <Input
-                                                    placeholder="Description"
-                                                    value={video.description || ""}
-                                                    onChange={(e) => updateVideo(index, topicIndex, videoIndex, "description", e.target.value)}
-                                                    className="h-8 flex-1"
-                                                  />
-                                                  <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => removeVideo(index, topicIndex, videoIndex)}
-                                                    className="text-destructive hover:text-destructive h-8 w-8 p-0"
-                                                  >
-                                                    <Trash2 className="h-3 w-3" />
-                                                  </Button>
-                                                </div>
-                                              </div>
-                                            ))}
-                                          </div>
-                                        </CardContent>
-                                      )}
-                                    </Card>
-                                  ))}
-                                </div>
+                                <DndContext
+                                  sensors={sensors}
+                                  collisionDetection={closestCenter}
+                                  onDragEnd={(event) => handleTopicDragEnd(event, index)}
+                                >
+                                  <SortableContext
+                                    items={course.topics.map((_, topicIndex) => `topic-${index}-${topicIndex}`)}
+                                    strategy={verticalListSortingStrategy}
+                                  >
+                                    <div className="space-y-2">
+                                      {course.topics.map((topic, topicIndex) => (
+                                        <SortableTopic
+                                          key={`topic-${index}-${topicIndex}`}
+                                          topic={topic}
+                                          topicIndex={topicIndex}
+                                          courseIndex={index}
+                                          expandedTopic={expandedTopic}
+                                          setExpandedTopic={setExpandedTopic}
+                                          removeTopic={removeTopic}
+                                          updateTopic={updateTopic}
+                                          addSlide={addSlide}
+                                          removeSlide={removeSlide}
+                                          updateSlide={updateSlide}
+                                          addVideo={addVideo}
+                                          removeVideo={removeVideo}
+                                          updateVideo={updateVideo}
+                                        />
+                                      ))}
+                                    </div>
+                                  </SortableContext>
+                                </DndContext>
                               )}
                             </div>
 
@@ -2011,9 +2212,13 @@ export function SemesterManagement() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <Edit3 className="h-5 w-5" />
                   Edit Semester: {formData.semester.title}
+                  <Badge variant="outline" className="text-xs bg-purple-50 border-purple-200 text-purple-700">
+                    <GripVertical className="h-3 w-3 mr-1" />
+                    Drag to Reorder Topics
+                  </Badge>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -2037,7 +2242,7 @@ export function SemesterManagement() {
                 </div>
               </CardTitle>
               <CardDescription>
-                Modify semester details and structure. Use "Enhanced Editor" for advanced features.
+                Modify semester details and structure. Use "Enhanced Editor" for advanced features. Topics can be reordered by dragging.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">

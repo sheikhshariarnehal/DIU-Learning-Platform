@@ -23,6 +23,7 @@ import {
   Sparkles,
   GitCompare,
   TestTube,
+  Layers,
 } from "lucide-react"
 
 import { type AdminUser } from "@/contexts/auth-context"
@@ -33,9 +34,10 @@ interface AdminSidebarProps {
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: Home },
-  { name: "Create Semester", href: "/admin/semester-management", icon: GraduationCap, badge: "New" },
+  { name: "Bulk Creator", href: "/admin/bulk-creator", icon: Layers, badge: "Pro" },
+  { name: "Create Semester", href: "/admin/semester-management", icon: GraduationCap },
   { name: "All-in-One Creator", href: "/admin/all-in-one", icon: Zap },
-  { name: "Enhanced Creator", href: "/admin/enhanced-creator", icon: Sparkles, badge: "Enhanced" },
+  { name: "Enhanced Creator", href: "/admin/enhanced-creator", icon: Sparkles },
   { name: "Semesters", href: "/admin/semesters", icon: Calendar },
   { name: "Courses", href: "/admin/courses", icon: BookOpen },
   { name: "Topics", href: "/admin/topics", icon: FileText },
