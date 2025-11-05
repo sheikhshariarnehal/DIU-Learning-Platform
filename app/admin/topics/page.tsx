@@ -9,11 +9,7 @@ import { Plus } from "lucide-react"
 export default function TopicsPage() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Topics</h2>
-          <p className="text-muted-foreground">Manage all topics across courses and their content</p>
-        </div>
+      <div className="flex items-center justify-end">
         <CreateTopicFromListDialog>
           <Button>
             <Plus className="mr-2 h-4 w-4" />

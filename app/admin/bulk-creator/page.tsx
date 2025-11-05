@@ -205,28 +205,8 @@ export default function BulkCreatorPage() {
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-6 max-w-[1600px] mx-auto">
-      {/* Header */}
+      {/* Stats Cards */}
       <div className="flex flex-col gap-5 mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Bulk Creator
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Create and manage complete semesters with courses, topics, and materials in one place
-            </p>
-          </div>
-          <Button
-            onClick={() => router.push('/admin/bulk-creator/create')}
-            size="default"
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Create New Semester
-          </Button>
-        </div>
-
-        {/* Stats Cards */}
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-4">
@@ -328,13 +308,12 @@ export default function BulkCreatorPage() {
                 Inactive ({stats.inactive})
               </Button>
               <Button
-                variant="outline"
-                onClick={loadSemesters}
+                onClick={() => router.push('/admin/bulk-creator/create')}
                 size="sm"
-                className="flex-1 sm:flex-none h-10"
+                className="flex-1 sm:flex-none h-10 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               >
-                <RefreshCw className="h-4 w-4 sm:mr-1" />
-                <span className="hidden sm:inline">Refresh</span>
+                <Plus className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Create New Semester</span>
               </Button>
             </div>
           </div>

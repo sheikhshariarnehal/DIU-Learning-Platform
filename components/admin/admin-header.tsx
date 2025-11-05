@@ -11,17 +11,55 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useTheme } from "next-themes"
 import { useAuth, type AdminUser } from "@/contexts/auth-context"
-import { Bell, Settings, User, Moon, Sun, LogOut } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { Settings, User, Moon, Sun, LogOut } from "lucide-react"
+import { useRouter, usePathname } from "next/navigation"
 
 interface AdminHeaderProps {
   user: AdminUser
+}
+
+const getPageTitle = (pathname: string): string => {
+  // Remove trailing slash
+  const path = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname
+  
+  // Map routes to titles
+  const routeTitles: Record<string, string> = {
+    '/admin': 'Dashboard',
+    '/admin/bulk-creator': 'Bulk Creator',
+    '/admin/semester-management': 'Create Semester',
+    '/admin/semesters': 'Semesters',
+    '/admin/courses': 'Courses',
+    '/admin/topics': 'Topics',
+    '/admin/content': 'Content',
+    '/admin/study-tools': 'Study Tools',
+    '/admin/analytics': 'Analytics',
+    '/admin/users': 'Users',
+    '/admin/settings': 'Settings',
+  }
+  
+  // Check for exact match first
+  if (routeTitles[path]) {
+    return routeTitles[path]
+  }
+  
+  // Check for partial matches (for dynamic routes)
+  for (const [route, title] of Object.entries(routeTitles)) {
+    if (path.startsWith(route)) {
+      return title
+    }
+  }
+  
+  // Default fallback
+  return 'Admin Dashboard'
 }
 
 export function AdminHeader({ user }: AdminHeaderProps) {
   const { theme, setTheme } = useTheme()
   const { logout } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
+  
+  const pageTitle = getPageTitle(pathname)
 
   const handleLogout = async () => {
     await logout()
@@ -32,7 +70,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
     <header className="bg-card border-b border-border px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold text-foreground">Admin Dashboard</h1>
+          <h1 className="text-2xl font-semibold text-foreground">{pageTitle}</h1>
         </div>
 
         <div className="flex items-center gap-4">
@@ -41,14 +79,6 @@ export function AdminHeader({ user }: AdminHeaderProps) {
             <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             <span className="sr-only">Toggle theme</span>
-          </Button>
-
-          {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-4 w-4" />
-            <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full text-xs flex items-center justify-center text-destructive-foreground">
-              3
-            </span>
           </Button>
 
           {/* User menu */}

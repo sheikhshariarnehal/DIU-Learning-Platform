@@ -16,11 +16,7 @@ export default function StudyToolsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Study Tools</h2>
-          <p className="text-muted-foreground">Manage exam materials, notes, and study resources across all courses</p>
-        </div>
+      <div className="flex items-center justify-end">
         <CreateStudyToolFromListDialog onSuccess={handleRefresh}>
           <Button>
             <Plus className="mr-2 h-4 w-4" />

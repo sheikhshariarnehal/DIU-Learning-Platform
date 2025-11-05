@@ -9,11 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 export default function SemestersPage() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Semesters</h2>
-          <p className="text-muted-foreground">Manage academic semesters and their courses</p>
-        </div>
+      <div className="flex items-center justify-end">
         <CreateSemesterDialog>
           <Button>
             <Plus className="mr-2 h-4 w-4" />

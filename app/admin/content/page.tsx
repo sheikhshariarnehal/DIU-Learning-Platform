@@ -137,11 +137,7 @@ export default function ContentPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Content Management</h1>
-          <p className="text-muted-foreground">Manage slides and videos across all courses</p>
-        </div>
+      <div className="flex justify-end items-center">
         <div className="flex gap-2">
           <CreateContentDialog
             open={createDialogOpen}
